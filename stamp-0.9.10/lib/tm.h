@@ -572,6 +572,22 @@
 #define TM_BEGIN_RO() TM_BEGIN()
 #define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break;
 #define TM_RESTART() __transaction.abort()
+
+GenericSTM<uint32_t> stm4;
+GenericSTM<void*> stm_ptr;
+
+#  define TM_SHARED_READ(var)           (stm4.transRead(TM_ARG &var))
+#  define TM_SHARED_READ_P(var)         (stm_ptr.transRead(TM_ARG &var))
+#  define TM_SHARED_READ_F(var)         (stm4.transRead(TM_ARG &var))
+
+#  define TM_SHARED_WRITE(var, val)     ({stm4.transWrite(TM_ARG &var); var;})
+#  define TM_SHARED_WRITE_P(var, val)   ({stm_ptr.transWrite(TM_ARG &var); var;})
+#  define TM_SHARED_WRITE_F(var, val)   ({stm4.transWrite(TM_ARG &var); var;})
+
+#  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
+#  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
+#  define TM_LOCAL_WRITE_F(var, val)    ({var = val; var;})
+
 //TODO: RCU for TM_THREAD_ENTER and the like??
 
 #endif /* STO */
