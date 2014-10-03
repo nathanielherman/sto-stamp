@@ -1,0 +1,3 @@
+[submodule "stamp-0.9.10/lib/sto"]
+	path = stamp-0.9.10/lib/sto
+	url = git@github.com:nathanielherman/sto.git
