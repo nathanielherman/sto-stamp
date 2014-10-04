@@ -1,0 +1,58 @@
+# ==============================================================================
+#
+# Makefile.stm
+#
+# ==============================================================================
+
+
+# ==============================================================================
+# Variables
+# ==============================================================================
+
+CFLAGS   += -DSTO#-DSTM -I$(STM)
+CPPFLAGS := $(CFLAGS)
+#LDFLAGS  += -L$(STM)
+#LIBS     += -ltl2
+
+
+# ==============================================================================
+# Rules
+# ==============================================================================
+
+.PHONY: default
+default: $(PROG)
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+
+KVTREES = ../lib/sto/masstree-beta/query_masstree.o \
+	../lib/sto/masstree-beta/value_string.o ../lib/sto/masstree-beta/value_array.o ../lib/sto/masstree-beta/value_versioned_array.o \
+	../lib/sto/masstree-beta/string_slice.o
+
+MASSTREE_OBJS = ../lib/sto/masstree-beta/kvio.o ../lib/sto/masstree-beta/misc.o ../lib/sto/masstree-beta/checkpoint.o $(KVTREES) ../lib/sto/masstree-beta/libjson.a
+
+$(MASSTREE_OBJS): masstree ;
+
+.PHONY: masstree
+masstree: ../lib/sto/masstree-beta/config.status
+	$(MAKE) -C ../lib/sto/masstree-beta
+
+../lib/sto/masstree-beta/configure ../lib/sto/masstree-beta/config.h.in: ../lib/sto/masstree-beta/configure.ac
+	cd ../lib/sto/masstree-beta && autoreconf -i && touch config.h.in
+
+../lib/sto/masstree-beta/config.status: ../lib/sto/masstree-beta/configure
+	cd ../lib/sto/masstree-beta && ./configure @ac_configure_args@
+
+$(PROG): $(OBJS) $(MASSTREE_OBJS)
+	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
+
+
+include ../common/Makefile.common
+
+
+# ==============================================================================
+#
+# End of Makefile.stm
+#
+# ==============================================================================
