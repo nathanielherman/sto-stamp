@@ -489,12 +489,13 @@
 #    define P_MALLOC(size)              malloc(size)
 #    define P_FREE(ptr)                 free(ptr)
 #    define TM_MALLOC(size)             malloc(size)
-#    define TM_FREE(ptr)                free(ptr)
+#    define TM_FREE(ptr)                /*free(ptr)*/
 
 #  endif /* !SIMULATOR */
 
 #  define TM_BEGIN()                    /* nothing */
 #  define TM_BEGIN_RO()                 /* nothing */
+
 #  define TM_END()                      /* nothing */
 #  define TM_RESTART()                  assert(0)
 
@@ -563,6 +564,12 @@
 
 #ifdef STO
 
+#include "sto/GenericSTM.hh"
+#include "sto/Transaction.hh"
+
+extern GenericSTM<uint32_t> stm4;
+extern GenericSTM<void*> stm_ptr;
+
 #define TM_ARG                        __transaction, 
 #define TM_ARG_ALONE                  __transaction
 #define TM_ARGDECL                    Transaction& TM_ARG
@@ -570,19 +577,16 @@
 #define TM_CALLABLE                   /* nothing */
 #define TM_BEGIN()                    while (1) { try { Transaction __transaction;
 #define TM_BEGIN_RO() TM_BEGIN()
-#define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break;
+#define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
 #define TM_RESTART() __transaction.abort()
 
-GenericSTM<uint32_t> stm4;
-GenericSTM<void*> stm_ptr;
-
-#  define TM_SHARED_READ(var)           (stm4.transRead(TM_ARG &var))
+#  define TM_SHARED_READ(var)           ({ auto ret = var; if (sizeof(var)==4) { ret = stm4.transRead(TM_ARG (unsigned*)&var); } else { ret = stm_ptr.transRead(TM_ARG (long*)&var); } ret; })
 #  define TM_SHARED_READ_P(var)         (stm_ptr.transRead(TM_ARG &var))
 #  define TM_SHARED_READ_F(var)         (stm4.transRead(TM_ARG &var))
 
-#  define TM_SHARED_WRITE(var, val)     ({stm4.transWrite(TM_ARG &var); var;})
-#  define TM_SHARED_WRITE_P(var, val)   ({stm_ptr.transWrite(TM_ARG &var); var;})
-#  define TM_SHARED_WRITE_F(var, val)   ({stm4.transWrite(TM_ARG &var); var;})
+#  define TM_SHARED_WRITE(var, val)     ({ if (sizeof(var)==4) { stm4.transWrite(TM_ARG (unsigned*)&var, (unsigned)(uintptr_t)val); } else { stm_ptr.transWrite(TM_ARG (long*)&var, (long)val); } var; })
+#  define TM_SHARED_WRITE_P(var, val)   ({stm_ptr.transWrite(TM_ARG &var, val); var;})
+#  define TM_SHARED_WRITE_F(var, val)   ({stm4.transWrite(TM_ARG &var, val); var;})
 
 #  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
 #  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})

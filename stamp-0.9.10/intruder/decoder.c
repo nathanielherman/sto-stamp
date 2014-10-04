@@ -463,7 +463,7 @@ char*
 decoder_getComplete (decoder_t* decoderPtr, long* decodedFlowIdPtr)
 {
     char* data;
-    decoded_t* decodedPtr = queue_pop(decoderPtr->decodedQueuePtr);
+    decoded_t* decodedPtr = (decoded_t*)queue_pop(decoderPtr->decodedQueuePtr);
 
     if (decodedPtr) {
         *decodedFlowIdPtr = decodedPtr->flowId;
@@ -487,7 +487,7 @@ char*
 TMdecoder_getComplete (TM_ARGDECL  decoder_t* decoderPtr, long* decodedFlowIdPtr)
 {
     char* data;
-    decoded_t* decodedPtr = TMQUEUE_POP(decoderPtr->decodedQueuePtr);
+    decoded_t* decodedPtr = (decoded_t*)TMQUEUE_POP(decoderPtr->decodedQueuePtr);
 
     if (decodedPtr) {
         *decodedFlowIdPtr = decodedPtr->flowId;

@@ -73,6 +73,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#define typeof __typeof__
 
 #ifdef SIMULATOR
 #  undef MAX

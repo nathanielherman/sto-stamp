@@ -6,6 +6,7 @@
 
 
 #ifdef MAP_USE_TREE
+#include "sto/MassTrans.hh"
 // masstree
 #define MAP_T MassTrans<void*>
 #define MAP_ALLOC(hash, cmp) (new MAP_T())

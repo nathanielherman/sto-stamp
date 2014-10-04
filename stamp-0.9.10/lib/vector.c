@@ -76,6 +76,16 @@
 #include "utility.h"
 #include "vector.h"
 
+// HAX HAX HAX
+#include "sto/GenericSTM.hh"
+#include "sto/Transaction.hh"
+GenericSTM<uint32_t> stm4;
+GenericSTM<void*> stm_ptr;
+threadinfo_t Transaction::tinfo[MAX_THREADS];
+__thread int Transaction::threadid;
+unsigned Transaction::global_epoch;
+std::function<void(unsigned)> Transaction::epoch_advance_callback;
+
 
 /* =============================================================================
  * vector_alloc

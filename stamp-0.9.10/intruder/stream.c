@@ -281,7 +281,7 @@ stream_generate (stream_t* streamPtr,
 char*
 stream_getPacket (stream_t* streamPtr)
 {
-    return queue_pop(streamPtr->packetQueuePtr);
+  return (char*)queue_pop(streamPtr->packetQueuePtr);
 }
 
 
