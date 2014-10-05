@@ -74,6 +74,22 @@
 #include "thread.h"
 #include "types.h"
 
+// HAX HAX HAX
+#include "sto/GenericSTM.hh"
+#include "sto/Transaction.hh"
+#include "sto/MassTrans.hh"
+GenericSTM __genstm;
+threadinfo_t Transaction::tinfo[MAX_THREADS];
+__thread int Transaction::threadid;
+unsigned Transaction::global_epoch;
+std::function<void(unsigned)> Transaction::epoch_advance_callback;
+
+kvepoch_t global_log_epoch = 0;
+volatile uint64_t globalepoch = 1;
+kvtimestamp_t initial_timestamp;
+volatile bool recovering = false;
+
+
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;
 static THREAD_BARRIER_T* global_barrierPtr      = NULL;
