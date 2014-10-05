@@ -76,22 +76,6 @@
 #include "utility.h"
 #include "vector.h"
 
-// HAX HAX HAX
-#include "sto/GenericSTM.hh"
-#include "sto/Transaction.hh"
-#include "sto/MassTrans.hh"
-GenericSTM __genstm;
-threadinfo_t Transaction::tinfo[MAX_THREADS];
-__thread int Transaction::threadid;
-unsigned Transaction::global_epoch;
-std::function<void(unsigned)> Transaction::epoch_advance_callback;
-
-kvepoch_t global_log_epoch = 0;
-volatile uint64_t globalepoch = 1;     // global epoch, updated by main thread regularly                                          
-kvtimestamp_t initial_timestamp;
-volatile bool recovering = false; // so don't add log entries, and free old value immediately     
-
-
 /* =============================================================================
  * vector_alloc
  * -- Returns NULL if failed
