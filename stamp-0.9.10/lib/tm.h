@@ -454,6 +454,48 @@
 #  endif /* !OTM */
 
 
+/*  ==========================================================================
+ *  STO
+ *  =========================================================================
+ */
+
+#elif defined(STO)
+
+#  define TM_ARG                        __transaction, 
+#  define TM_ARG_ALONE                  __transaction
+#  define TM_ARGDECL                    Transaction& TM_ARG
+#  define TM_ARGDECL_ALONE              Transaction& TM_ARG_ALONE
+#  define TM_CALLABLE                   /* nothing */
+#  define TM_BEGIN()                    while (1) { try { Transaction __transaction;
+#  define TM_BEGIN_RO() TM_BEGIN()
+#  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
+#  define TM_RESTART() __transaction.abort()
+
+#  define TM_STARTUP(numThread)         /* nothing */
+#  define TM_SHUTDOWN()                 /* nothing */
+
+#  define TM_THREAD_ENTER()             /* nothing */
+#  define TM_THREAD_EXIT()              /* nothing */
+
+#  ifdef SIMULATOR
+
+#    include "thread.h"
+
+#    define P_MALLOC(size)              memory_get(thread_getId(), size)
+#    define P_FREE(ptr)                 /* TODO: thread local free is non-trivial */
+#    define TM_MALLOC(size)             memory_get(thread_getId(), size)
+#    define TM_FREE(ptr)                /* TODO: thread local free is non-trivial */
+
+#  else /* !SIMULATOR */
+
+#    define P_MALLOC(size)              malloc(size)
+#    define P_FREE(ptr)                 free(ptr)
+#    define TM_MALLOC(size)             malloc(size)
+#    define TM_FREE(ptr)                /*free(ptr)*/
+
+#  endif /* !SIMULATOR */
+
+
 /* =============================================================================
  * Sequential execution
  * =============================================================================
@@ -546,38 +588,12 @@
 
 #endif /* !OTM */
 
-#else /* !STM */
-
-#  define TM_SHARED_READ(var)           (var)
-#  define TM_SHARED_READ_P(var)         (var)
-#  define TM_SHARED_READ_F(var)         (var)
-
-#  define TM_SHARED_WRITE(var, val)     ({var = val; var;})
-#  define TM_SHARED_WRITE_P(var, val)   ({var = val; var;})
-#  define TM_SHARED_WRITE_F(var, val)   ({var = val; var;})
-
-#  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
-#  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
-#  define TM_LOCAL_WRITE_F(var, val)    ({var = val; var;})
-
-#endif /* !STM */
-
-#ifdef STO
+#elif defined(STO) /*  STO */
 
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"
 
 extern GenericSTM __genstm;
-
-#define TM_ARG                        __transaction, 
-#define TM_ARG_ALONE                  __transaction
-#define TM_ARGDECL                    Transaction& TM_ARG
-#define TM_ARGDECL_ALONE              Transaction& TM_ARG_ALONE
-#define TM_CALLABLE                   /* nothing */
-#define TM_BEGIN()                    while (1) { try { Transaction __transaction;
-#define TM_BEGIN_RO() TM_BEGIN()
-#define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
-#define TM_RESTART() __transaction.abort()
 
 #  define TM_SHARED_READ(var)           (__genstm.transRead(TM_ARG &var))
 #  define TM_SHARED_READ_P(var)         (__genstm.transRead(TM_ARG &var))
@@ -593,8 +609,21 @@ extern GenericSTM __genstm;
 
 //TODO: RCU for TM_THREAD_ENTER and the like??
 
-#endif /* STO */
+#else /* !STO */
 
+#  define TM_SHARED_READ(var)           (var)
+#  define TM_SHARED_READ_P(var)         (var)
+#  define TM_SHARED_READ_F(var)         (var)
+
+#  define TM_SHARED_WRITE(var, val)     ({var = val; var;})
+#  define TM_SHARED_WRITE_P(var, val)   ({var = val; var;})
+#  define TM_SHARED_WRITE_F(var, val)   ({var = val; var;})
+
+#  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
+#  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
+#  define TM_LOCAL_WRITE_F(var, val)    ({var = val; var;})
+
+#endif /* !STO */
 
 #endif /* TM_H */
 
