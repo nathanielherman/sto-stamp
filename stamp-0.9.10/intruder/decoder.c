@@ -73,7 +73,7 @@
 #include <string.h>
 #include "decoder.h"
 #include "error.h"
-#include "list.h"
+#include "list2.h"
 #include "map2.h"
 #include "packet.h"
 #include "queue.h"
