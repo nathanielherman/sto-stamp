@@ -98,7 +98,7 @@ decoder_free (decoder_t* decoderPtr);
  * decoder_process
  * =============================================================================
  */
-error_t
+stamp_error_t
 decoder_process (decoder_t* decoderPtr, char* bytes, long numByte);
 
 
@@ -106,7 +106,7 @@ decoder_process (decoder_t* decoderPtr, char* bytes, long numByte);
  * TMdecoder_process
  * =============================================================================
  */
-error_t
+stamp_error_t
 TMdecoder_process (TM_ARGDECL  decoder_t* decoderPtr, char* bytes, long numByte);
 
 
