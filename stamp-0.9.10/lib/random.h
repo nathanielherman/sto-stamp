@@ -85,7 +85,7 @@ extern "C" {
 
 typedef struct random {
     unsigned long (*rand)(unsigned long*, unsigned long*);
-    unsigned long mt[__N];
+    unsigned long mt[MT19937_N];
     unsigned long mti;
 } random_t;
 

@@ -132,15 +132,15 @@ extern "C" {
 
 
 /* Period parameters */
-#define __N 624
+#define MT19937_N 624
 #define M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 #if 0
-static unsigned long mt[__N]; /* the array for the state vector  */
-static long mti=__N+1; /* mti==N+1 means mt[N] is not initialized */
+static unsigned long mt[MT19937_N]; /* the array for the state vector  */
+static long mti=MT19937_N+1; /* mti==N+1 means mt[N] is not initialized */
 #endif
 
 /* initializes mt[N] with a seed */

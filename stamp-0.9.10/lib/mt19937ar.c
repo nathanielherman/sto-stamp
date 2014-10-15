@@ -124,7 +124,7 @@ void init_genrand(unsigned long mt[], unsigned long * mtiPtr, unsigned long s)
     unsigned long mti;
 
     mt[0]= s & 0xffffffffUL;
-    for (mti=1; mti<__N; mti++) {
+    for (mti=1; mti<MT19937_N; mti++) {
         mt[mti] =
           (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti);
         /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -147,25 +147,25 @@ void init_by_array(unsigned long mt[], unsigned long * mtiPtr, unsigned long ini
     long i, j, k;
     init_genrand(mt, mtiPtr, 19650218UL);
     i=1; j=0;
-    k = (__N>key_length ? __N : key_length);
+    k = (MT19937_N>key_length ? MT19937_N : key_length);
     for (; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1664525UL))
           + init_key[j] + j; /* non linear */
         mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
         i++; j++;
-        if (i>=__N) { mt[0] = mt[__N-1]; i=1; }
+        if (i>=MT19937_N) { mt[0] = mt[MT19937_N-1]; i=1; }
         if (j>=key_length) j=0;
     }
-    for (k=__N-1; k; k--) {
+    for (k=MT19937_N-1; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941UL))
           - i; /* non linear */
         mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
         i++;
-        if (i>=__N) { mt[0] = mt[__N-1]; i=1; }
+        if (i>=MT19937_N) { mt[0] = mt[MT19937_N-1]; i=1; }
     }
 
     mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */
-    (*mtiPtr) = __N + 1;
+    (*mtiPtr) = MT19937_N + 1;
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
@@ -177,22 +177,22 @@ unsigned long genrand_int32(unsigned long mt[], unsigned long * mtiPtr)
 
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
-    if (mti >= __N) { /* generate N words at one time */
+    if (mti >= MT19937_N) { /* generate N words at one time */
         long kk;
 
-        if (mti == __N+1)   /* if init_genrand() has not been called, */
+        if (mti == MT19937_N+1)   /* if init_genrand() has not been called, */
             init_genrand(mt, mtiPtr, 5489UL); /* a default initial seed is used */
 
-        for (kk=0;kk<__N-M;kk++) {
+        for (kk=0;kk<MT19937_N-M;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
             mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        for (;kk<__N-1;kk++) {
+        for (;kk<MT19937_N-1;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-            mt[kk] = mt[kk+(M-__N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+            mt[kk] = mt[kk+(M-MT19937_N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        y = (mt[__N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
-        mt[__N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        y = (mt[MT19937_N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
+        mt[MT19937_N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
 
         mti = 0;
     }
