@@ -19,8 +19,8 @@
 //hashtable
 #include "sto/Hashtable.hh"
 #define MAP_T Hashtable<void*, void*, 100000>
-#define TMMAP_CONTAINS(map, key) ({ void* val; map->transGet(TM_ARG key, val); })
-#define TMMAP_FIND(map, key) ({ void *val = NULL; map->transGet(TM_ARG key, val); val; })
+#define TMMAP_CONTAINS(map, key) ({ void* val; bool ret = map->transGet(TM_ARG key, val); TM_ARG_ALONE.check_reads(); ret; })
+#define TMMAP_FIND(map, key) ({ void *val = NULL; map->transGet(TM_ARG key, val); TM_ARG_ALONE.check_reads(); val; })
 #define TMMAP_INSERT(map, key, data) map->transInsert(TM_ARG key, data)
 #define TMMAP_REMOVE(map, key) ({ map->transDelete(TM_ARG key); })
 
