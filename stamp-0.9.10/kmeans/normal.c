@@ -94,6 +94,7 @@
 #include "timer.h"
 #include "tm.h"
 #include "util.h"
+#include "types.h"
 
 double global_time = 0.0;
 
@@ -104,12 +105,12 @@ typedef struct args {
     int     nclusters;
     int*    membership;
     float** clusters;
-    int**   new_centers_len;
-    float** new_centers;
+    Single<int>**   new_centers_len;
+    Single<float>** new_centers;
 } args_t;
 
-float global_delta;
-long global_i; /* index into task queue */
+Single<float> global_delta;
+Single<long> global_i; /* index into task queue */
 
 #define CHUNK 3
 
@@ -130,8 +131,8 @@ work (void* argPtr)
     int     nclusters       = args->nclusters;
     int*    membership      = args->membership;
     float** clusters        = args->clusters;
-    int**   new_centers_len = args->new_centers_len;
-    float** new_centers     = args->new_centers;
+    Single<int>**   new_centers_len = args->new_centers_len;
+    Single<float>** new_centers     = args->new_centers;
     float delta = 0.0;
     int index;
     int i;
@@ -166,12 +167,12 @@ work (void* argPtr)
 
             /* Update new cluster centers : sum of objects located within */
             TM_BEGIN();
-            TM_SHARED_WRITE(*new_centers_len[index],
-                            TM_SHARED_READ(*new_centers_len[index]) + 1);
+            TM_SINGLE_TRANS_WRITE(new_centers_len[index][0],
+                            TM_SINGLE_TRANS_READ(new_centers_len[index][0]) + 1);
             for (j = 0; j < nfeatures; j++) {
-                TM_SHARED_WRITE_F(
+                TM_SINGLE_TRANS_WRITE(
                     new_centers[index][j],
-                    (TM_SHARED_READ_F(new_centers[index][j]) + feature[i][j])
+                    (TM_SINGLE_TRANS_READ(new_centers[index][j]) + feature[i][j])
                 );
             }
             TM_END();
@@ -180,8 +181,8 @@ work (void* argPtr)
         /* Update task queue */
         if (start + CHUNK < npoints) {
             TM_BEGIN();
-            start = (int)TM_SHARED_READ(global_i);
-            TM_SHARED_WRITE(global_i, (start + CHUNK));
+            start = (int)TM_SINGLE_TRANS_READ(global_i);
+            TM_SINGLE_TRANS_WRITE(global_i, (start + CHUNK));
             TM_END();
         } else {
             break;
@@ -189,7 +190,7 @@ work (void* argPtr)
     }
 
     TM_BEGIN();
-    TM_SHARED_WRITE_F(global_delta, TM_SHARED_READ_F(global_delta) + delta);
+    TM_SINGLE_TRANS_WRITE(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
     TM_END();
 
     TM_THREAD_EXIT();
@@ -213,10 +214,10 @@ normal_exec (int       nthreads,
     int i;
     int j;
     int loop = 0;
-    int** new_centers_len; /* [nclusters]: no. of points in each cluster */
+    Single<int>** new_centers_len; /* [nclusters]: no. of points in each cluster */
     float delta;
     float** clusters;      /* out: [nclusters][nfeatures] */
-    float** new_centers;   /* [nclusters][nfeatures] */
+    Single<float>** new_centers;   /* [nclusters][nfeatures] */
     void* alloc_memory = NULL;
     args_t args;
     TIMER_T start;
@@ -248,16 +249,16 @@ normal_exec (int       nthreads,
      * Allocate clusters on different cache lines to reduce false sharing.
      */
     {
-        int cluster_size = sizeof(int) + sizeof(float) * nfeatures;
+        int cluster_size = sizeof(Single<int>) + sizeof(Single<float>) * nfeatures;
         const int cacheLineSize = 32;
         cluster_size += (cacheLineSize-1) - ((cluster_size-1) % cacheLineSize);
         alloc_memory = calloc(nclusters, cluster_size);
-        new_centers_len = (int**) malloc(nclusters * sizeof(int*));
-        new_centers = (float**) malloc(nclusters * sizeof(float*));
+        new_centers_len = (Single<int>**) malloc(nclusters * sizeof(Single<int>*));
+        new_centers = (Single<float>**) malloc(nclusters * sizeof(Single<float>*));
         assert(alloc_memory && new_centers && new_centers_len);
         for (i = 0; i < nclusters; i++) {
-            new_centers_len[i] = (int*)((char*)alloc_memory + cluster_size * i);
-            new_centers[i] = (float*)((char*)alloc_memory + cluster_size * i + sizeof(int));
+            new_centers_len[i] = (Single<int>*)((char*)alloc_memory + cluster_size * i);
+            new_centers[i] = (Single<float>*)((char*)alloc_memory + cluster_size * i + sizeof(Single<int>));
         }
     }
 
@@ -277,8 +278,8 @@ normal_exec (int       nthreads,
         args.new_centers_len = new_centers_len;
         args.new_centers     = new_centers;
 
-        global_i = nthreads * CHUNK;
-        global_delta = delta;
+        TM_SINGLE_SIMPLE_WRITE(global_i, nthreads * CHUNK);
+        TM_SINGLE_SIMPLE_WRITE(global_delta, delta);
 
 #ifdef OTM
 #pragma omp parallel
@@ -289,17 +290,17 @@ normal_exec (int       nthreads,
         thread_start(work, &args);
 #endif
 
-        delta = global_delta;
+        delta = TM_SINGLE_SIMPLE_READ(global_delta);
 
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
             for (j = 0; j < nfeatures; j++) {
                 if (new_centers_len[i] > 0) {
-                    clusters[i][j] = new_centers[i][j] / *new_centers_len[i];
+                    clusters[i][j] = TM_SINGLE_SIMPLE_READ(new_centers[i][j]) / TM_SINGLE_SIMPLE_READ(new_centers_len[i][0]);
                 }
-                new_centers[i][j] = 0.0;   /* set back to 0 */
+                TM_SINGLE_SIMPLE_WRITE(new_centers[i][j], 0.0);   /* set back to 0 */
             }
-            *new_centers_len[i] = 0;   /* set back to 0 */
+            TM_SINGLE_SIMPLE_WRITE(new_centers_len[i][0], 0);   /* set back to 0 */
         }
 
         delta /= npoints;
