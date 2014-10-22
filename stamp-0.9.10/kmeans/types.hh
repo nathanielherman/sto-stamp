@@ -10,16 +10,17 @@ template<class T> using Single = T;
 #endif
 
 #define TM_SINGLE_TRANS_INCR(var, val) TM_SINGLE_TRANS_WRITE(var, \
-		TM_SINGLE_TRANS_READ(var) + val)
+    TM_SINGLE_TRANS_READ(var) + val)
 
 template<class T>
 T* alloc_array(int N){
-	return new T[N];
+  T* alloc_memory = new T[N];
+  return alloc_memory;
 }
 
 template<class T>
 void free_array(T* ptr){
-	delete [] ptr;
+  delete [] ptr;
 }
 
 

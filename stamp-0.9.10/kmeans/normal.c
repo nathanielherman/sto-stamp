@@ -241,13 +241,17 @@ normal_exec (int       nthreads,
     }
 
     {
-				int i;
-				new_centers_len = alloc_array<Single<int>*>(nclusters);
-				new_centers = alloc_array<Single<float>*>(nclusters);
-				for(i = 0; i < nclusters; i++){
-					new_centers_len[i] = alloc_array<Single<int>>(1);
-					new_centers[i] = alloc_array<Single<float>>(nclusters);
-				}
+      int i, j;
+      new_centers_len = alloc_array<Single<int>*>(nclusters);
+      new_centers = alloc_array<Single<float>*>(nclusters);
+      for(i = 0; i < nclusters; i++){
+	new_centers_len[i] = alloc_array<Single<int>>(1);
+	new_centers[i] = alloc_array<Single<float>>(nclusters);
+	TM_SINGLE_SIMPLE_WRITE(new_centers_len[i][0], 0);
+	for(j = 0; j < nfeatures; j++){
+	  TM_SINGLE_SIMPLE_WRITE(new_centers[i][j], 0);
+	}
+      }
 
     }
 
@@ -280,21 +284,25 @@ normal_exec (int       nthreads,
 #endif
 
         delta = TM_SINGLE_SIMPLE_READ(global_delta);
+    	//printf("loop %d\n", loop);
 
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
             for (j = 0; j < nfeatures; j++) {
                 if (new_centers_len[i] > 0) {
                     clusters[i][j] = TM_SINGLE_SIMPLE_READ(new_centers[i][j]) / TM_SINGLE_SIMPLE_READ(new_centers_len[i][0]);
+		    //printf("%f %f\n", new_centers[i][j]);
                 }
                 TM_SINGLE_SIMPLE_WRITE(new_centers[i][j], 0.0);   /* set back to 0 */
             }
             TM_SINGLE_SIMPLE_WRITE(new_centers_len[i][0], 0);   /* set back to 0 */
+	    //printf("\n");
         }
 
         delta /= npoints;
 
     } while ((delta > threshold) && (loop++ < 500));
+    printf("delta %f\n", delta);
 
     GOTO_REAL();
 
