@@ -94,7 +94,7 @@
 #include "timer.h"
 #include "tm.h"
 #include "util.h"
-#include "types.h"
+#include "types.hh"
 
 double global_time = 0.0;
 
@@ -111,6 +111,7 @@ typedef struct args {
 
 Single<float> global_delta;
 Single<long> global_i; /* index into task queue */
+
 
 #define CHUNK 3
 
@@ -167,13 +168,9 @@ work (void* argPtr)
 
             /* Update new cluster centers : sum of objects located within */
             TM_BEGIN();
-            TM_SINGLE_TRANS_WRITE(new_centers_len[index][0],
-                            TM_SINGLE_TRANS_READ(new_centers_len[index][0]) + 1);
+            TM_SINGLE_TRANS_INCR(new_centers_len[index][0], 1);
             for (j = 0; j < nfeatures; j++) {
-                TM_SINGLE_TRANS_WRITE(
-                    new_centers[index][j],
-                    (TM_SINGLE_TRANS_READ(new_centers[index][j]) + feature[i][j])
-                );
+                TM_SINGLE_TRANS_INCR(new_centers[index][j], feature[i][j]);
             }
             TM_END();
         }
@@ -218,7 +215,6 @@ normal_exec (int       nthreads,
     float delta;
     float** clusters;      /* out: [nclusters][nfeatures] */
     Single<float>** new_centers;   /* [nclusters][nfeatures] */
-    void* alloc_memory = NULL;
     args_t args;
     TIMER_T start;
     TIMER_T stop;
@@ -244,22 +240,15 @@ normal_exec (int       nthreads,
         membership[i] = -1;
     }
 
-    /*
-     * Need to initialize new_centers_len and new_centers[0] to all 0.
-     * Allocate clusters on different cache lines to reduce false sharing.
-     */
     {
-        int cluster_size = sizeof(Single<int>) + sizeof(Single<float>) * nfeatures;
-        const int cacheLineSize = 32;
-        cluster_size += (cacheLineSize-1) - ((cluster_size-1) % cacheLineSize);
-        alloc_memory = calloc(nclusters, cluster_size);
-        new_centers_len = (Single<int>**) malloc(nclusters * sizeof(Single<int>*));
-        new_centers = (Single<float>**) malloc(nclusters * sizeof(Single<float>*));
-        assert(alloc_memory && new_centers && new_centers_len);
-        for (i = 0; i < nclusters; i++) {
-            new_centers_len[i] = (Single<int>*)((char*)alloc_memory + cluster_size * i);
-            new_centers[i] = (Single<float>*)((char*)alloc_memory + cluster_size * i + sizeof(Single<int>));
-        }
+				int i;
+				new_centers_len = alloc_array<Single<int>*>(nclusters);
+				new_centers = alloc_array<Single<float>*>(nclusters);
+				for(i = 0; i < nclusters; i++){
+					new_centers_len[i] = alloc_array<Single<int>>(1);
+					new_centers[i] = alloc_array<Single<float>>(nclusters);
+				}
+
     }
 
     TIMER_READ(start);
@@ -312,9 +301,13 @@ normal_exec (int       nthreads,
     TIMER_READ(stop);
     global_time += TIMER_DIFF_SECONDS(start, stop);
 
-    free(alloc_memory);
-    free(new_centers);
-    free(new_centers_len);
+	
+		for (i = 0; i < nclusters; i++){
+			free_array(new_centers[i]);
+			free_array(new_centers_len[i]);
+		}
+    free_array(new_centers);
+    free_array(new_centers_len);
 
     return clusters;
 }
