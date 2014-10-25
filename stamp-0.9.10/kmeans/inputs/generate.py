@@ -3,39 +3,42 @@
 import random
 import sys
 
-if len(sys.argv) != 4:
-    print "Usage: generate.py <rows> <dimensions> <centers>"
-    sys.exit(1)
+def generate(numRow, numDim, numCenter, output=sys.stdout):
+    random.seed(0)
+    if 0:
+        # uniform random
+        rows = []
+        for row in range(1, numRow+1):
+            print >> output, row,
+            for dim in range(numDim):
+                print >> output, random.random(),
+            print >> output
 
-numRow    = int(sys.argv[1])
-numDim    = int(sys.argv[2])
-numCenter = int(sys.argv[3])
+    else:
+        # clustered random using gaussian
+        centers = []
+        for i in range(numCenter):
+            center = []
+            for dim in range(numDim):
+                center.append(random.random())
+            centers.append(center)
+        sigma = (1. / numCenter) ** 3
+        for row in range(1, numRow+1):
+            center = random.choice(centers)
+            print >> output, row,
+            for dim in range(numDim):
+                noise = random.gauss(0, sigma)
+                print >> output, center[dim] + noise,
+            print >> output
 
-random.seed(0)
+if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        print "Usage: generate.py <rows> <dimensions> <centers>"
+        sys.exit(1)
 
-if 0:
-    # uniform random
-    rows = []
-    for row in range(1, numRow+1):
-        print row,
-        for dim in range(numDim):
-            print random.random(),
-        print
+    numRow    = int(sys.argv[1])
+    numDim    = int(sys.argv[2])
+    numCenter = int(sys.argv[3])
 
-else:
-    # clustered random using gaussian
-    centers = []
-    for i in range(numCenter):
-        center = []
-        for dim in range(numDim):
-            center.append(random.random())
-        centers.append(center)
-    sigma = (1. / numCenter) ** 3
-    for row in range(1, numRow+1):
-        center = random.choice(centers)
-        print row,
-        for dim in range(numDim):
-            noise = random.gauss(0, sigma)
-            print center[dim] + noise,
-        print
-    
+    generate(numRow, numDim, numCenter)
+

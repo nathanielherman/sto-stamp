@@ -78,6 +78,8 @@
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"
 #include "sto/MassTrans.hh"
+
+#ifdef STO
 GenericSTM __genstm;
 threadinfo_t Transaction::tinfo[MAX_THREADS];
 __thread int Transaction::threadid;
@@ -88,7 +90,7 @@ kvepoch_t global_log_epoch = 0;
 volatile uint64_t globalepoch = 1;
 kvtimestamp_t initial_timestamp;
 volatile bool recovering = false;
-
+#endif
 
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;
