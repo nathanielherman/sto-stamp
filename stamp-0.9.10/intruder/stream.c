@@ -75,7 +75,7 @@
 #include <string.h>
 #include "detector.h"
 #include "dictionary.h"
-#include "map2.h"
+#include "map.h"
 #include "packet.h"
 #include "queue.h"
 #include "random.h"

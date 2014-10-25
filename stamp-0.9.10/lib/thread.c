@@ -75,16 +75,24 @@
 #include "types.h"
 
 // HAX HAX HAX
+#ifdef STO
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"
 #include "sto/MassTrans.hh"
-
-#ifdef STO
+#include "tm.h"
+#include "list2.hh"
 GenericSTM __genstm;
 threadinfo_t Transaction::tinfo[MAX_THREADS];
 __thread int Transaction::threadid;
 unsigned Transaction::global_epoch;
 std::function<void(unsigned)> Transaction::epoch_advance_callback;
+
+void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
+  if (!it->valid())
+    *it = l->transIter(TM_ARG_ALONE);
+  else
+    it->transReset(TM_ARG_ALONE);
+}
 
 kvepoch_t global_log_epoch = 0;
 volatile uint64_t globalepoch = 1;

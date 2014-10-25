@@ -29,9 +29,4 @@ typedef typename list_t::ListIter list_iter_t;
 #define list_iter_next(it, list) __TRANS_WRAP(TMLIST_ITER_NEXT(it, list), void*)
 #define list_getSize(list) __TRANS_WRAP(TMLIST_GETSIZE(list), size_t)
 
-void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
-  if (!it->valid())
-    *it = l->transIter(TM_ARG_ALONE);
-  else
-    it->transReset(TM_ARG_ALONE);
-}
+void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
