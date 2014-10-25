@@ -74,7 +74,7 @@
 #include "decoder.h"
 #include "error.h"
 #include "list2.hh"
-#include "map.h"
+#include "map2.h"
 #include "packet.h"
 #include "queue.h"
 #include "tm.h"

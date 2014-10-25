@@ -75,6 +75,8 @@
 #include "error.h"
 #include "tm.h"
 
+#define assert(e) /**/
+
 typedef struct decoder decoder_t;
 
 

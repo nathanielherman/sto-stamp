@@ -7,15 +7,15 @@ typedef List<void*, false, long (*)(const void*, const void*)> list_t;
 
 typedef typename list_t::ListIter list_iter_t;
 
-#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); TM_ARG_ALONE.check_reads(); })
-#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); TM_ARG_ALONE.check_reads(); ret; })
-#define TMLIST_ITER_NEXT(it, list) ({ auto ret = *(it)->transNext(TM_ARG_ALONE); TM_ARG_ALONE.check_reads(); ret; })
+#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); /*TM_ARG_ALONE.check_reads();*/ })
+#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
+#define TMLIST_ITER_NEXT(it, list) ({ auto ret = *(it)->transNext(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_ALLOC(cmp) (new list_t(cmp))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
-#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); TM_ARG_ALONE.check_reads(); ret; })
+#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
-#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG data); TM_ARG_ALONE.check_reads(); ret ? *ret : NULL; })
-#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); TM_ARG_ALONE.check_reads(); ret; })
+#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret ? *ret : NULL; })
+#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_REMOVE(list, data) (list)->transRemove(TM_ARG data)
 
 #define list_alloc TMLIST_ALLOC
