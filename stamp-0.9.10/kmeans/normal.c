@@ -187,7 +187,7 @@ work (void* argPtr)
     }
 
     TM_BEGIN();
-    TM_SINGLE_TRANS_WRITE(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
+    TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
     TM_END();
 
     TM_THREAD_EXIT();
