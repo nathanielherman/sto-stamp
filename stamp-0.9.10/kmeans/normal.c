@@ -170,7 +170,7 @@ work (void* argPtr)
             TM_BEGIN();
             TM_SINGLE_TRANS_INCR(new_centers_len[index][0], 1);
             for (j = 0; j < nfeatures; j++) {
-                TM_SINGLE_TRANS_INCR(new_centers[index][j], feature[i][j]);
+                TM_SINGLE_TRANS_INCR_F(new_centers[index][j], feature[i][j]);
             }
             TM_END();
         }
@@ -187,7 +187,7 @@ work (void* argPtr)
     }
 
     TM_BEGIN();
-    TM_SINGLE_TRANS_WRITE(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
+    TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
     TM_END();
 
     TM_THREAD_EXIT();

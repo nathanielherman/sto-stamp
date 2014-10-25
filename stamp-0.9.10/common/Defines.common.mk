@@ -5,7 +5,7 @@
 # ==============================================================================
 
 
-CC       := g++ -stdlib=libc++ -std=c++11
+CC       := g++ -std=c++11
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += -O3
 CFLAGS   += -I$(LIB)
