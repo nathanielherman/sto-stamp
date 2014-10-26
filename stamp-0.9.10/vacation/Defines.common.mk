@@ -6,7 +6,7 @@
 
 
 CFLAGS += -DLIST_NO_DUPLICATES
-CFLAGS += -DMAP_USE_RBTREE
+CFLAGS += -DMAP_USE_HASHTABLE
 
 PROG := vacation
 
@@ -22,6 +22,7 @@ SRCS += \
 	$(LIB)/random.c \
 	$(LIB)/rbtree.c \
 	$(LIB)/thread.c \
+	$(LIB)/hashtable.c \
 #
 OBJS := ${SRCS:.c=.o}
 

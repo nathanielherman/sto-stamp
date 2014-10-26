@@ -54,11 +54,6 @@
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY STANFORD UNIVERSITY ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STANFORD UNIVERSITY BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
@@ -77,8 +72,6 @@
 #include <stdlib.h>
 #include "pair.h"
 #include "types.h"
-
-
 #if defined(MAP_USE_HASHTABLE)
 
 #  include "hashtable.h"
@@ -90,6 +83,10 @@
 #  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
 #  define MAP_INSERT(map, key, data)  hashtable_insert(map, (void*)(key), (void*)(data))
 #  define MAP_REMOVE(map, key)        hashtable_remove(map, (void*)(key))
+#  define TMMAP_CONTAINS(map, key)    TMhashtable_containsKey(TM_ARG  map, (void*)(key))
+#  define TMMAP_FIND(map, key)       TMhashtable_find(TM_ARG  map, (void*)(key))
+#  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  map, (void*)(key), (void*)(data))
+#  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  map, (void*)(key))
 
 #elif defined(MAP_USE_ATREE)
 
