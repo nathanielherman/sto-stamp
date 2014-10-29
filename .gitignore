@@ -6,4 +6,6 @@
 *.swp
 stamp-0.9.10/intruder/intruder
 stamp-0.9.10/kmeans/kmeans
+stamp-0.9.10/vacation/vacation
 /.deps
+tags
