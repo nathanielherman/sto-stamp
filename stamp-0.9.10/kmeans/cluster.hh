@@ -13,22 +13,23 @@ typedef __declspec(align(32)) struct _Cluster{
 } _Cluster;
 
 #ifdef D 
-class Cluster: public Single<_Cluster>{
+class Cluster: public Single<_Cluster*>{
 #else
 class Cluster{
-		private: _Cluster cluster;
+		private: _Cluster *cluster;
 #endif
 		public:
 			  void init_seq(int nfeatures){
 #ifdef D
-						_Cluster cluster;
+						_Cluster *cluster;
 #endif
-						cluster.nfeatures = nfeatures;
-						cluster.centers_len = 0;
-						cluster.centers = new float[nfeatures];
+						cluster = new _Cluster();
+						cluster->nfeatures = nfeatures;
+						cluster->centers_len = 0;
+						cluster->centers = (float*)malloc(sizeof(float)*nfeatures);
 						int j;
 						for (j = 0; j < nfeatures; j++){
-								cluster.centers[j] = 0;
+								cluster->centers[j] = 0.0;
 						}
 #ifdef D
 						s_.set_value(cluster);
@@ -37,36 +38,37 @@ class Cluster{
 
 				void trans_add_center(TM_ARGDECL float* feature){
 #ifdef D
-						_Cluster new_cluster = transRead(t);
+						_Cluster *cluster = transRead(TM_ARG_ALONE);
+						_Cluster new_cluster;
 						int j;
 						for (j = 0; j < new_cluster.nfeatures; j++){
-								new_cluster.centers[j] += feature[j];
+								new_cluster.centers[j] = cluster->centers[j] + feature[j];
 						}
-						new_cluster.centers_len += 1;
-						transWrite(t, new_cluster);
+						new_cluster.centers_len = cluster->centers_len + 1;
+						transWrite(TM_ARG &new_cluster);
 #else
 						int j;
-						for (j = 0; j < cluster.nfeatures; j++){
-								TM_SHARED_WRITE_F(cluster.centers[j],
-												TM_SHARED_READ_F(cluster.centers[j]) + feature[j]);
+						for (j = 0; j < cluster->nfeatures; j++){
+								TM_SHARED_WRITE_F(cluster->centers[j],
+												TM_SHARED_READ_F(cluster->centers[j]) + feature[j]);
 						}
-						TM_SHARED_WRITE(cluster.centers_len,
-										TM_SHARED_READ(cluster.centers_len) + 1);
+						TM_SHARED_WRITE(cluster->centers_len,
+										TM_SHARED_READ(cluster->centers_len) + 1);
 #endif
 				}
 
 				void reset_seq(float* center){
 #ifdef D
-						_Cluster cluster = s_.read_value();
+						_Cluster *cluster = s_.read_value();
 #endif
 						int j;
-						for (j = 0; j < cluster.nfeatures; j++){
-								if (cluster.centers_len > 0){
-										center[j] = cluster.centers[j]/cluster.centers_len;
+						for (j = 0; j < cluster->nfeatures; j++){
+								if (cluster->centers_len > 0){
+										center[j] = cluster->centers[j]/cluster->centers_len;
 								}
-								cluster.centers[j] = 0;
+								cluster->centers[j] = 0.0;
 						}
-						cluster.centers_len = 0;
+						cluster->centers_len = 0;
 #ifdef D
 						s_.set_value(cluster);
 #endif
@@ -74,7 +76,7 @@ class Cluster{
 
 				void free_seq(){
 #if !defined(D)
-						delete [] cluster.centers;
+						free(cluster->centers);
 #endif
 				}
 };
