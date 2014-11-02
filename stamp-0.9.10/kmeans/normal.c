@@ -94,7 +94,7 @@
 #include "timer.h"
 #include "tm.h"
 #include "util.h"
-#include "types.hh"
+#include "cluster.hh"
 
 double global_time = 0.0;
 
@@ -105,8 +105,7 @@ typedef struct args {
     int     nclusters;
     int*    membership;
     float** clusters;
-    Single<int>**   new_centers_len;
-    Single<float>** new_centers;
+		Cluster* new_clusters;
 } args_t;
 
 Single<float> global_delta;
@@ -132,12 +131,10 @@ work (void* argPtr)
     int     nclusters       = args->nclusters;
     int*    membership      = args->membership;
     float** clusters        = args->clusters;
-    Single<int>**   new_centers_len = args->new_centers_len;
-    Single<float>** new_centers     = args->new_centers;
+		Cluster* new_clusters = args->new_clusters;
     float delta = 0.0;
     int index;
     int i;
-    int j;
     int start;
     int stop;
     int myId;
@@ -167,12 +164,9 @@ work (void* argPtr)
             membership[i] = index;
 
             /* Update new cluster centers : sum of objects located within */
-            TM_BEGIN();
-            TM_SINGLE_TRANS_INCR(new_centers_len[index][0], 1);
-            for (j = 0; j < nfeatures; j++) {
-                TM_SINGLE_TRANS_INCR_F(new_centers[index][j], feature[i][j]);
-            }
-            TM_END();
+						TM_BEGIN();
+						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i]);
+						TM_END();
         }
 
         /* Update task queue */
@@ -187,7 +181,7 @@ work (void* argPtr)
     }
 
     TM_BEGIN();
-    TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ(global_delta) + delta);
+    TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ_F(global_delta) + delta);
     TM_END();
 
     TM_THREAD_EXIT();
@@ -211,10 +205,9 @@ normal_exec (int       nthreads,
     int i;
     int j;
     int loop = 0;
-    Single<int>** new_centers_len; /* [nclusters]: no. of points in each cluster */
     float delta;
     float** clusters;      /* out: [nclusters][nfeatures] */
-    Single<float>** new_centers;   /* [nclusters][nfeatures] */
+		Cluster* new_clusters;
     args_t args;
     TIMER_T start;
     TIMER_T stop;
@@ -240,20 +233,13 @@ normal_exec (int       nthreads,
         membership[i] = -1;
     }
 
-    {
-      int i, j;
-      new_centers_len = alloc_array<Single<int>*>(nclusters);
-      new_centers = alloc_array<Single<float>*>(nclusters);
-      for(i = 0; i < nclusters; i++){
-	new_centers_len[i] = alloc_array<Single<int>>(1);
-	new_centers[i] = alloc_array<Single<float>>(nclusters);
-	TM_SINGLE_SIMPLE_WRITE(new_centers_len[i][0], 0);
-	for(j = 0; j < nfeatures; j++){
-	  TM_SINGLE_SIMPLE_WRITE(new_centers[i][j], 0);
-	}
-      }
-
-    }
+		{
+				int i;
+				new_clusters = alloc_array<Cluster>(nclusters);
+				for (i = 0; i < nclusters; i++){
+						TM_CLUSTER_INIT(new_clusters[i], nfeatures);
+				}
+		}
 
     TIMER_READ(start);
 
@@ -268,8 +254,7 @@ normal_exec (int       nthreads,
         args.nclusters       = nclusters;
         args.membership      = membership;
         args.clusters        = clusters;
-        args.new_centers_len = new_centers_len;
-        args.new_centers     = new_centers;
+        args.new_clusters    = new_clusters;
 
         TM_SINGLE_SIMPLE_WRITE(global_i, nthreads * CHUNK);
         TM_SINGLE_SIMPLE_WRITE(global_delta, delta);
@@ -288,19 +273,12 @@ normal_exec (int       nthreads,
 
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
-            for (j = 0; j < nfeatures; j++) {
-                if (new_centers_len[i] > 0) {
-                    clusters[i][j] = TM_SINGLE_SIMPLE_READ(new_centers[i][j]) / TM_SINGLE_SIMPLE_READ(new_centers_len[i][0]);
-		    //printf("%f %f\n", new_centers[i][j]);
-                }
-                TM_SINGLE_SIMPLE_WRITE(new_centers[i][j], 0.0);   /* set back to 0 */
-            }
-            TM_SINGLE_SIMPLE_WRITE(new_centers_len[i][0], 0);   /* set back to 0 */
+						TM_CLUSTER_RESET(new_clusters[i], clusters[i]);
 	    //printf("\n");
         }
 
         delta /= npoints;
-
+			
     } while ((delta > threshold) && (loop++ < 500));
     printf("delta %f\n", delta);
 
@@ -311,11 +289,10 @@ normal_exec (int       nthreads,
 
 	
 		for (i = 0; i < nclusters; i++){
-			free_array(new_centers[i]);
-			free_array(new_centers_len[i]);
+			TM_CLUSTER_FREE(new_clusters[i]);
 		}
-    free_array(new_centers);
-    free_array(new_centers_len);
+
+    free_array(new_clusters);
 
     return clusters;
 }
