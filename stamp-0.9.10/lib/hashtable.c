@@ -302,6 +302,9 @@ TMallocBuckets (TM_ARGDECL
     return buckets;
 }
 
+ulong_t default_hash(const void* k) {
+  return (ulong_t)k;
+}
 
 /* =============================================================================
  * hashtable_alloc
@@ -333,6 +336,8 @@ hashtable_alloc (long initNumBucket,
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
+    if (!hash)
+      hash = default_hash;
     hashtablePtr->hash = hash;
     hashtablePtr->comparePairs = comparePairs;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
