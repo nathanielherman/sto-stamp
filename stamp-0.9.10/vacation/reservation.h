@@ -73,9 +73,16 @@
 #ifndef RESERVATION_H
 #define RESERVATION_H 1
 
+#if defined(STO) && !defined(GTM)
+#define reservation2
+#endif
 
 #include "tm.h"
 #include "types.h"
+#ifdef reservation2
+#include "single.h"
+#endif
+
 
 typedef enum reservation_type {
     RESERVATION_CAR,
@@ -85,9 +92,7 @@ typedef enum reservation_type {
 } reservation_type_t;
 
 typedef struct reservation_info {
-    reservation_type_t type;
-    long id;
-    long price; /* holds price at time reservation was made */
+    reservation_type_t type; long id; long price; /* holds price at time reservation was made */
 } reservation_info_t;
 
 typedef struct reservation {
@@ -96,9 +101,133 @@ typedef struct reservation {
     long numFree;
     long numTotal;
     long price;
-} reservation_t;
+} _reservation_t;
 
+#ifdef reservation2
+class reservation_t: public SingleElem<_reservation_t*>{
+		public:
+				reservation_t(_reservation_t* _reservationPtr){
+						write(_reservationPtr);
+				}
 
+				bool_t reservation_addToTotal(TM_ARGDECL long num){
+						_reservation_t* _reservationPtr = transRead(TM_ARG_ALONE);
+						if (_reservationPtr->numFree + num < 0){
+								return FALSE;
+						}
+
+						_reservation_t* _newReservationPtr = copy_reservation(_reservationPtr);
+
+						_newReservationPtr->numTotal += num;
+						_newReservationPtr->numFree += num;
+
+					  transWrite(TM_ARG _newReservationPtr);
+						checkReservation(TM_ARG_ALONE);
+						return TRUE;
+				}
+
+				bool_t reservation_make(TM_ARGDECL_ALONE){
+						_reservation_t* _reservationPtr = transRead(TM_ARG_ALONE);
+						long numFree = _reservationPtr->numFree;
+
+						if (numFree < 1) {
+								return FALSE;
+						}
+
+						_reservation_t* _newReservationPtr = copy_reservation(_reservationPtr);
+						_newReservationPtr->numFree--;
+						_newReservationPtr->numUsed++;
+
+						transWrite(TM_ARG _newReservationPtr);
+						checkReservation(TM_ARG_ALONE);
+						return TRUE;
+				}
+
+				bool_t reservation_cancel (TM_ARGDECL_ALONE){
+						_reservation_t* _reservationPtr = transRead(TM_ARG_ALONE);
+						long numUsed = _reservationPtr->numUsed;
+
+						if (numUsed < 1) {
+								return FALSE;
+						}
+
+						_reservation_t* _newReservationPtr = copy_reservation(_reservationPtr);
+						_newReservationPtr->numFree++;
+						_newReservationPtr->numUsed--;
+
+						transWrite(TM_ARG _newReservationPtr);
+						checkReservation(TM_ARG_ALONE);
+						return TRUE;
+				}
+
+				bool_t reservation_update_price (TM_ARGDECL double newPrice){
+						if (newPrice < 0) {
+								return FALSE;
+						}
+						
+						_reservation_t* _reservationPtr = transRead(TM_ARG_ALONE);
+						_reservation_t* _newReservationPtr = copy_reservation(_reservationPtr);
+						_newReservationPtr->price = newPrice;
+
+						transWrite(TM_ARG _newReservationPtr);
+						checkReservation(TM_ARG_ALONE);
+						return TRUE;
+				}
+		
+		private:
+				_reservation_t* copy_reservation( _reservation_t * _reservationPtr){
+						_reservation_t * _newReservationPtr = (_reservation_t *)malloc(sizeof(_reservation_t));
+						memcpy((void *)_newReservationPtr, (void *)_reservationPtr, sizeof(_reservation_t));
+						return _newReservationPtr;
+				}
+
+				inline void checkReservation (TM_ARGDECL_ALONE){
+						_reservation_t* _reservationPtr = transRead(TM_ARG_ALONE);
+
+						if(_reservationPtr->numUsed < 0 || 
+										_reservationPtr->numFree < 0 ||
+										_reservationPtr->numTotal < 0 ||
+										_reservationPtr->numUsed + _reservationPtr->numFree != _reservationPtr->numTotal ||
+										_reservationPtr->price < 0){
+								TM_RESTART();
+						}
+				}
+};
+
+/* alloc and free */
+#define TM_RESERVATION_ALLOC(_reservationPtr) new reservation_t(_reservationPtr)
+#define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr) 
+
+#define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
+		reservationPtr->transRead(TM_ARG_ALONE)->numTotal
+#define TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) \
+		reservationPtr->read()->numTotal
+#define TM_RESERVATION_SHARED_READ_USED(reservationPtr) \
+		reservationPtr->transRead(TM_ARG_ALONE)->numUsed
+#define TM_RESERVATION_SEQ_READ_USED(reservationPtr) \
+		reservationPtr->read()->numUsed
+#define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
+		reservationPtr->transRead(TM_ARG_ALONE)->numFree
+#define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \
+		reservationPtr->transRead(TM_ARG_ALONE)->price
+#else
+typedef _reservation_t reservation_t;
+#define TM_RESERVATION_ALLOC(_reservationPtr) _reservationPtr
+#define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr) 
+
+#define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
+		TM_SHARED_READ(reservationPtr->numTotal)
+#define TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) \
+		reservationPtr->numTotal
+#define TM_RESERVATION_SHARED_READ_USED(reservationPtr) \
+		TM_SHARED_READ(reservationPtr->numUsed)
+#define TM_RESERVATION_SEQ_READ_USED(reservationPtr) \
+		reservationPtr->numUsed
+#define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
+		TM_SHARED_READ(reservationPtr->numFree)
+#define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \
+		TM_SHARED_READ(reservationPtr->price)
+#endif
 /* =============================================================================
  * reservation_info_alloc
  * -- Returns NULL on failure
@@ -197,7 +326,7 @@ reservation_updatePrice_seq (reservation_t* reservationPtr, long newPrice);
  * =============================================================================
  */
 long
-reservation_compare (reservation_t* aPtr, reservation_t* bPtr);
+reservation_compare (_reservation_t* aPtr, _reservation_t* bPtr);
 
 
 /* =============================================================================
@@ -205,7 +334,7 @@ reservation_compare (reservation_t* aPtr, reservation_t* bPtr);
  * =============================================================================
  */
 ulong_t
-reservation_hash (reservation_t* reservationPtr);
+reservation_hash (_reservation_t* reservationPtr);
 
 
 /* =============================================================================
@@ -214,7 +343,6 @@ reservation_hash (reservation_t* reservationPtr);
  */
 void
 reservation_free (TM_ARGDECL  reservation_t* reservationPtr);
-
 
 #define RESERVATION_INFO_ALLOC(type, id, price) \
     reservation_info_alloc(TM_ARG  type, id, price)
@@ -233,7 +361,6 @@ reservation_free (TM_ARGDECL  reservation_t* reservationPtr);
     reservation_updatePrice(TM_ARG  r, price)
 #define RESERVATION_FREE(r) \
     reservation_free(TM_ARG  r)
-
 
 #endif /* RESERVATION_H */
 
