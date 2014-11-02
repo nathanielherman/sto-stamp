@@ -257,9 +257,10 @@ bool_t
 reservation_addToTotal_seq (reservation_t* reservationPtr, long num)
 {
 #ifdef reservation2
-		return reservationPtr->reservation_addToTotal_seq(num);
+		_reservation_t* _reservationPtr = reservationPtr->read();
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
+#endif
 
     long numFree = _reservationPtr->numFree;
     if (numFree + num < 0) {
@@ -307,9 +308,11 @@ bool_t
 reservation_make_seq (reservation_t* reservationPtr)
 {
 #ifdef reservation2
-		return reservationPtr->reservation_make_seq();
+		_reservation_t* _reservationPtr = reservationPtr->read();
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
+#endif
+ 
     
 		if (_reservationPtr->numFree < 1) {
         return FALSE;
@@ -357,9 +360,11 @@ bool_t
 reservation_cancel_seq (reservation_t* reservationPtr)
 {
 #ifdef reservation2
-		return reservationPtr->reservation_cancel_seq();
+		_reservation_t* _reservationPtr = reservationPtr->read();
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
+#endif
+ 
     
 		if (_reservationPtr->numUsed < 1) {
         return FALSE;
@@ -408,7 +413,11 @@ reservation_updatePrice_seq (reservation_t* reservationPtr, long newPrice)
         return FALSE;
     }
 
+#ifdef reservation2
+		_reservation_t *_reservationPtr = reservationPtr->read();
+#else
 		_reservation_t *_reservationPtr = reservationPtr;
+#endif
 		_reservationPtr->price = newPrice;
     checkReservation_seq(_reservationPtr);
 
