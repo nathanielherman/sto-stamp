@@ -269,7 +269,6 @@ normal_exec (int       nthreads,
 #endif
 
         delta = TM_SINGLE_SIMPLE_READ(global_delta);
-    	//printf("loop %d\n", loop);
 
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {

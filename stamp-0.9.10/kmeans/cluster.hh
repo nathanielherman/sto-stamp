@@ -25,10 +25,10 @@ class Cluster{
 #endif
 						cluster.nfeatures = nfeatures;
 						cluster.centers_len = 0;
-						cluster.centers = new float[nfeatures];
+						cluster.centers = (float*)malloc(sizeof(float)*nfeatures);
 						int j;
 						for (j = 0; j < nfeatures; j++){
-								cluster.centers[j] = 0;
+								cluster.centers[j] = 0.0;
 						}
 #ifdef D
 						s_.set_value(cluster);
@@ -64,7 +64,7 @@ class Cluster{
 								if (cluster.centers_len > 0){
 										center[j] = cluster.centers[j]/cluster.centers_len;
 								}
-								cluster.centers[j] = 0;
+								cluster.centers[j] = 0.0;
 						}
 						cluster.centers_len = 0;
 #ifdef D
@@ -74,7 +74,7 @@ class Cluster{
 
 				void free_seq(){
 #if !defined(D)
-						delete [] cluster.centers;
+						free(cluster.centers);
 #endif
 				}
 };
