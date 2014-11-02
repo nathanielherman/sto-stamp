@@ -105,10 +105,15 @@ addReservation (TM_ARGDECL  MAP_T* tablePtr, long id, long num, long price);
  * tableAlloc
  * =============================================================================
  */
+
+static ulong_t hash(const void* p){
+		return (ulong_t)p;
+}
+
 static MAP_T*
 tableAlloc ()
 {
-    return MAP_ALLOC(NULL, NULL);
+    return MAP_ALLOC(hash, NULL);
 }
 
 

@@ -76,7 +76,6 @@
 #include "list.h"
 #include "memory.h"
 #include "reservation.h"
-#include "tm.h"
 #include "types.h"
 
 
@@ -99,34 +98,34 @@ compareReservationInfo (const void* aPtr, const void* bPtr)
 customer_t*
 customer_alloc (TM_ARGDECL  long id)
 {
-    customer_t* customerPtr;
+    _customer_t* _customerPtr;
 
-    customerPtr = (customer_t*)TM_MALLOC(sizeof(customer_t));
-    assert(customerPtr != NULL);
+    _customerPtr = (_customer_t*)TM_MALLOC(sizeof(_customer_t));
+    assert(_customerPtr != NULL);
 
-    customerPtr->id = id;
+    _customerPtr->id = id;
 
-    customerPtr->reservationInfoListPtr = TMLIST_ALLOC(&compareReservationInfo);
-    assert(customerPtr->reservationInfoListPtr != NULL);
+    _customerPtr->reservationInfoListPtr = TMLIST_ALLOC(&compareReservationInfo);
+    assert(_customerPtr->reservationInfoListPtr != NULL);
 
-    return customerPtr;
+    return TM_CUSTOMER_SHARED_ALLOC(_customerPtr);
 }
 
 
 customer_t*
 customer_alloc_seq (long id)
 {
-    customer_t* customerPtr;
+    _customer_t* _customerPtr;
 
-    customerPtr = (customer_t*)malloc(sizeof(customer_t));
-    assert(customerPtr != NULL);
+    _customerPtr = (_customer_t*)malloc(sizeof(_customer_t));
+    assert(_customerPtr != NULL);
 
-    customerPtr->id = id;
+    _customerPtr->id = id;
 
-    customerPtr->reservationInfoListPtr = list_alloc(&compareReservationInfo);
-    assert(customerPtr->reservationInfoListPtr != NULL);
+    _customerPtr->reservationInfoListPtr = list_alloc(&compareReservationInfo);
+    assert(_customerPtr->reservationInfoListPtr != NULL);
 
-    return customerPtr;
+    return TM_CUSTOMER_SEQ_ALLOC(_customerPtr);
 }
 
 
@@ -136,7 +135,7 @@ customer_alloc_seq (long id)
  * =============================================================================
  */
 long
-customer_compare (customer_t* aPtr, customer_t* bPtr)
+customer_compare (_customer_t* aPtr, _customer_t* bPtr)
 {
     return (aPtr->id - bPtr->id);
 }
@@ -149,10 +148,9 @@ customer_compare (customer_t* aPtr, customer_t* bPtr)
 void
 customer_free (TM_ARGDECL  customer_t* customerPtr)
 {
-    list_t* reservationInfoListPtr =
-        (list_t*)TM_SHARED_READ(customerPtr->reservationInfoListPtr);
+    list_t* reservationInfoListPtr = TM_CUSTOMER_SHARED_READ_INFO(customerPtr);
     TMLIST_FREE(reservationInfoListPtr);
-    TM_FREE(customerPtr);
+		TM_CUSTOMER_FREE(customerPtr);
 }
 
 
@@ -171,8 +169,7 @@ customer_addReservationInfo (TM_ARGDECL
     reservationInfoPtr = RESERVATION_INFO_ALLOC(type, id, price);
     assert(reservationInfoPtr != NULL);
 
-    list_t* reservationInfoListPtr =
-        (list_t*)TM_SHARED_READ(customerPtr->reservationInfoListPtr);
+    list_t* reservationInfoListPtr = TM_CUSTOMER_SHARED_READ_INFO(customerPtr);
 
     return TMLIST_INSERT(reservationInfoListPtr, (void*)reservationInfoPtr);
 }
@@ -194,8 +191,7 @@ customer_removeReservationInfo (TM_ARGDECL
     findReservationInfo.id = id;
     /* price not used to compare reservation infos */
 
-    list_t* reservationInfoListPtr =
-        (list_t*)TM_SHARED_READ(customerPtr->reservationInfoListPtr);
+    list_t* reservationInfoListPtr = TM_CUSTOMER_SHARED_READ_INFO(customerPtr);
 
     reservation_info_t* reservationInfoPtr =
         (reservation_info_t*)TMLIST_FIND(reservationInfoListPtr,
@@ -227,8 +223,7 @@ customer_getBill (TM_ARGDECL  customer_t* customerPtr)
 {
     long bill = 0;
     list_iter_t it;
-    list_t* reservationInfoListPtr =
-        (list_t*)TM_SHARED_READ(customerPtr->reservationInfoListPtr);
+    list_t* reservationInfoListPtr = TM_CUSTOMER_SHARED_READ_INFO(customerPtr);
 
     TMLIST_ITER_RESET(&it, reservationInfoListPtr);
     while (TMLIST_ITER_HASNEXT(&it, reservationInfoListPtr)) {
