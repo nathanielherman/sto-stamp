@@ -77,16 +77,16 @@
 #  include "hashtable.h"
 
 #  define MAP_T                       hashtable_t
-#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1, hash, cmp, 2, 2)
+#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp, 2, 2)
 #  define MAP_FREE(map)               hashtable_free(map)
 #  define MAP_CONTAINS(map, key)      hashtable_containsKey(map, (void*)(key))
 #  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
 #  define MAP_INSERT(map, key, data)  hashtable_insert(map, (void*)(key), (void*)(data))
 #  define MAP_REMOVE(map, key)        hashtable_remove(map, (void*)(key))
-#  define TMMAP_CONTAINS(map, key)    TMhashtable_containsKey(TM_ARG  map, (void*)(key))
-#  define TMMAP_FIND(map, key)       TMhashtable_find(TM_ARG  map, (void*)(key))
-#  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  map, (void*)(key), (void*)(data))
-#  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  map, (void*)(key))
+#  define TMMAP_CONTAINS(map, key)    TMhashtable_containsKey(TM_ARG  (map), (void*)(key))
+#  define TMMAP_FIND(map, key)       TMhashtable_find(TM_ARG  (map), (void*)(key))
+#  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  (map), (void*)(key), (void*)(data))
+#  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  (map), (void*)(key))
 
 #elif defined(MAP_USE_ATREE)
 
