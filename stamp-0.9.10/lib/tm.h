@@ -472,7 +472,7 @@
 #  define TM_RESTART() __transaction.abort()
 
 #  define TM_STARTUP(numThread)         /* nothing */
-#  define TM_SHUTDOWN()                 /* nothing */
+#  define TM_SHUTDOWN()                 STO_SHUTDOWN()
 
 #  define TM_THREAD_ENTER()             /* nothing */
 #  define TM_THREAD_EXIT()              /* nothing */

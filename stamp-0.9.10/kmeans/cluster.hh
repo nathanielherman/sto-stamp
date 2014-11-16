@@ -23,6 +23,7 @@ class Cluster{
 #ifdef D
 						_Cluster *cluster;
 #endif
+						cluster = new _Cluster();
 						cluster->nfeatures = nfeatures;
 						cluster->centers_len = 0;
 						cluster->centers = (float*)malloc(sizeof(float)*nfeatures);

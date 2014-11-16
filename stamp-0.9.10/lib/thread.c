@@ -98,6 +98,25 @@ kvepoch_t global_log_epoch = 0;
 volatile uint64_t globalepoch = 1;
 kvtimestamp_t initial_timestamp;
 volatile bool recovering = false;
+
+#if PERF_LOGGING
+uint64_t total_n;
+uint64_t total_r, total_w;
+uint64_t total_searched;
+uint64_t total_aborts;
+uint64_t commit_time_aborts;
+#endif
+
+void reportPerf(){
+#if PERF_LOGGING
+		printf("STO System Shutdown:\n"
+						" read: %lld, write: %lld  searched: %lld\n"
+						" aborts: %lld commit time aborts: %lld \n",
+						total_r, total_w, total_searched, total_aborts, commit_time_aborts);
+#endif
+}
+#define STO_SHUTDOWN() reportPerf()
+
 #endif
 
 static THREAD_LOCAL_T    global_threadId;
