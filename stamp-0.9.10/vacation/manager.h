@@ -77,20 +77,14 @@
 #define map2
 #endif
 
-#include "reservation.h"
 #include "tm.h"
 #include "types.h"
-#ifdef map2
+#include "reservation.h"
+#ifdef reservation2
 #include "map2.h"
 #else
 #include "map.h"
 #endif
-
-/*
-extern __thread double lookup_time;
-extern __thread double reservation_make_time;
-extern __thread double reservation_total_time;
-*/
 
 typedef struct manager {
     MAP_T* carTablePtr;

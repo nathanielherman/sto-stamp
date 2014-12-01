@@ -80,7 +80,7 @@
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
-#ifdef list2
+#ifdef reservation2
 #include "list2.hh"
 #else
 #include "list.h"

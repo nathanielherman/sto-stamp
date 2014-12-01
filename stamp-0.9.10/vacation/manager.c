@@ -78,7 +78,6 @@
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
-#include "timer.h"
 
 /* =============================================================================
  * DECLARATION OF TM_CALLABLE FUNCTIONS
