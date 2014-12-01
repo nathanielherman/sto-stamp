@@ -76,7 +76,6 @@
 #if defined(STO) && !defined(GTM)
 #define reservation2
 #endif
-
 #include "tm.h"
 #include "types.h"
 #ifdef reservation2
@@ -172,6 +171,12 @@ class reservation_t: public SingleElem<_reservation_t*>{
 						transWrite(TM_ARG _newReservationPtr);
 						checkReservation(TM_ARG_ALONE);
 						return TRUE;
+				}
+				
+				void install(TransItem& item) {
+						memcpy(read(), item.template write_value<_reservation_t*>(), sizeof(_reservation_t));
+						free(item.template write_value<_reservation_t*>());
+						Versioning::inc_version(s_.version());
 				}
 		
 		private:

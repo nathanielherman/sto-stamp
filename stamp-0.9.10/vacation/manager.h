@@ -73,10 +73,18 @@
 #ifndef MANAGER_H
 #define MANAGER_H 1
 
+#if defined(STO) && !defined(GTM)
+#define map2
+#endif
 
-#include "map.h"
+#include "reservation.h"
 #include "tm.h"
 #include "types.h"
+#ifdef map2
+#include "map2.h"
+#else
+#include "map.h"
+#endif
 
 typedef struct manager {
     MAP_T* carTablePtr;

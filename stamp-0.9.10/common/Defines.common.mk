@@ -6,7 +6,7 @@
 
 
 #CC       := gcc 
-CC       := g++ -std=c++11
+CC       := g++ -std=gnu++11
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += -O3
 CFLAGS   += -I$(LIB)
