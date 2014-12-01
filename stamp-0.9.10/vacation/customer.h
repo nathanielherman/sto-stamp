@@ -1,4 +1,4 @@
-/* =============================================================================
+		/* =============================================================================
  *
  * customer.h
  * -- Representation of customer
@@ -80,7 +80,7 @@
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
-#ifdef reservation2
+#ifdef list2
 #include "list2.hh"
 #else
 #include "list.h"

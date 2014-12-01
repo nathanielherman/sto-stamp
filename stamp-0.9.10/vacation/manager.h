@@ -77,10 +77,10 @@
 #define map2
 #endif
 
+#include "reservation.h"
 #include "tm.h"
 #include "types.h"
-#include "reservation.h"
-#ifdef reservation2
+#ifdef map2
 #include "map2.h"
 #else
 #include "map.h"

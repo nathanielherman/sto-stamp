@@ -76,7 +76,6 @@
 #if defined(STO) && !defined(GTM)
 #define reservation2
 #endif
-
 #include "tm.h"
 #include "types.h"
 #ifdef reservation2
