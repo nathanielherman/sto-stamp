@@ -173,6 +173,12 @@ class reservation_t: public SingleElem<_reservation_t*>{
 						checkReservation(TM_ARG_ALONE);
 						return TRUE;
 				}
+				
+				void install(TransItem& item) {
+						memcpy(read(), item.template write_value<_reservation_t*>(), sizeof(_reservation_t));
+						free(item.template write_value<_reservation_t*>());
+						Versioning::inc_version(s_.version());
+				}
 		
 		private:
 				_reservation_t* copy_reservation( _reservation_t * _reservationPtr){

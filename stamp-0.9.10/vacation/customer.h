@@ -74,10 +74,14 @@
 #define CUSTOMER_H 1
 
 
-#include "list.h"
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
+#ifdef reservation2
+#include "list2.hh"
+#else
+#include "list.h"
+#endif
 
 typedef struct customer {
     long id;

@@ -73,12 +73,12 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "customer.h"
-#include "map.h"
 #include "pair.h"
 #include "manager.h"
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
+
 /* =============================================================================
  * DECLARATION OF TM_CALLABLE FUNCTIONS
  * =============================================================================
