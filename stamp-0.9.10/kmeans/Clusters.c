@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "Cluster.h"
+#include "Clusters.h"
 
 _Cluster *_alloc_cluster(int nfeatures){
 		uint64_t cluster_size = sizeof(_Cluster) + nfeatures * sizeof(float);
