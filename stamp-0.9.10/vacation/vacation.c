@@ -75,9 +75,7 @@
 #include <getopt.h>
 #include "client.h"
 #include "customer.h"
-#include "list.h"
 #include "manager.h"
-#include "map.h"
 #include "memory.h"
 #include "operation.h"
 #include "random.h"
@@ -87,6 +85,11 @@
 #include "tm.h"
 #include "types.h"
 #include "utility.h"
+#ifdef reservation2
+#include "map2.h"
+#else
+#include "map.h"
+#endif
 
 enum param_types {
     PARAM_CLIENTS      = (unsigned char)'c',

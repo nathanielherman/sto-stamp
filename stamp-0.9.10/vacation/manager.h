@@ -74,9 +74,14 @@
 #define MANAGER_H 1
 
 
-#include "map.h"
 #include "tm.h"
 #include "types.h"
+#include "reservation.h"
+#ifdef reservation2
+#include "map2.h"
+#else
+#include "map.h"
+#endif
 
 typedef struct manager {
     MAP_T* carTablePtr;

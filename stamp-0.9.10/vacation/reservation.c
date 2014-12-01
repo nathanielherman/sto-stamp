@@ -347,7 +347,6 @@ reservation_cancel (TM_ARGDECL  reservation_t* reservationPtr)
 		TM_SHARED_WRITE(reservationPtr->numFree, 
 						TM_SHARED_READ(reservationPtr->numFree)+1);
 
-		TM_RESERVATION_SHARED_UPDATE_USED_AND_FREE(reservationPtr, numUsed, numFree);
     CHECK_RESERVATION(reservationPtr);
 
     return TRUE;

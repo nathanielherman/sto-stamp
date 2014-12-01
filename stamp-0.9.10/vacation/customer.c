@@ -73,7 +73,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "customer.h"
-#include "list.h"
 #include "memory.h"
 #include "reservation.h"
 #include "types.h"
