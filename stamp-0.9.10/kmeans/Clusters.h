@@ -15,8 +15,22 @@ typedef struct _Cluster{
 		float* centers;
 } _Cluster;
 
+unsigned get_cluster_size(int nfeatures);
+
 #ifdef D 
-#define Cluster Single<_Cluster*>
+class Cluster: public Single<_Cluster*>{
+		public:
+				void install(TransItem& item) {
+						_Cluster* cluster_ptr = s_.read_value();
+						_Cluster* new_cluster_ptr = item.template write_value<_Cluster*>();
+						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
+					  cluster_ptr->centers = (float *)((char *)cluster_ptr + sizeof(_Cluster));
+						free(new_cluster_ptr);
+						Versioning::inc_version(s_.version());
+					//	printf("cluter len %d\n", s_.read_value()->centers_len);
+				}
+
+};
 #else
 #define Cluster _Cluster;
 #endif 

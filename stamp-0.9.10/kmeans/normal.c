@@ -276,7 +276,8 @@ normal_exec (int       nthreads,
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
 						TM_CLUSTER_RESET(new_clusters[i], clusters[i]);
-	    //printf("\n");
+						//printf("%f ", new_clusters[i]->read()->centers[0]);
+						//printf("\n");
         }
 
         delta /= npoints;

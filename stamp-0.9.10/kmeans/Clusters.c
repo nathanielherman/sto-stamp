@@ -1,9 +1,14 @@
 #include <stdlib.h>
 #include "Clusters.h"
 
-_Cluster *_alloc_cluster(int nfeatures){
-		uint64_t cluster_size = sizeof(_Cluster) + nfeatures * sizeof(float);
+unsigned get_cluster_size(int nfeatures){
+		unsigned cluster_size = sizeof(_Cluster) + nfeatures * sizeof(float);
 		cluster_size += (CACHE_LINE_SIZE - 1) - ((cluster_size - 1) % CACHE_LINE_SIZE);
+		return cluster_size;
+}
+
+_Cluster *_alloc_cluster(int nfeatures){
+		unsigned cluster_size = get_cluster_size(nfeatures);
 		_Cluster *c = (_Cluster *)malloc(cluster_size);
 		c->nfeatures = nfeatures;
 		c->centers_len = 0;
