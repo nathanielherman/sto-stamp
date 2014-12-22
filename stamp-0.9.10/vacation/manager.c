@@ -111,10 +111,14 @@ static ulong_t hash(const void* p){
 		return (ulong_t)p;
 }
 
+static long compareLong(const void *a, const void *b){
+		return *((const long*)a) - *((const long*)b);
+}
+
 static MAP_T*
 tableAlloc ()
 {
-    return MAP_ALLOC(hash, NULL);
+    return MAP_ALLOC(hash, compareLong);
 }
 
 
@@ -235,6 +239,7 @@ addReservation_seq (MAP_T* tablePtr, long id, long num, long price)
         status = MAP_INSERT(tablePtr, id, reservationPtr);
 				assert((reservation_t*)MAP_FIND(tablePtr, id));
         assert(status);
+				assert(MAP_FIND(tablePtr, id));
     } else {
         /* Update existing reservation */
         if (!reservation_addToTotal_seq(reservationPtr, num)) {
@@ -648,38 +653,37 @@ reserve (TM_ARGDECL
          MAP_T* tablePtr, MAP_T* customerTablePtr,
          long customerId, long id, reservation_type_t type)
 {
-		printf("reserve\n");
-		TIMER_T begin;
-		TIMER_T end;
-		TIMER_READ(begin);
+		//TIMER_T begin;
+		//TIMER_T end;
+ 	//TIMER_READ(begin);
     customer_t* customerPtr;
     reservation_t* reservationPtr;
 
-		TIMER_T start;
-		TIMER_T stop;
-		TIMER_READ(start);
+		//TIMER_T start;
+		//TIMER_T stop;
+		//TIMER_READ(start);
     customerPtr = (customer_t*)TMMAP_FIND(customerTablePtr, customerId);
-		TIMER_READ(stop);
-		lookup_time+=TIMER_DIFF_SECONDS(start, stop);
+		//TIMER_READ(stop);
+	  //lookup_time+=TIMER_DIFF_SECONDS(start, stop);
 
     if (customerPtr == NULL) {
         return FALSE;
     }
 
-		TIMER_READ(start);
+		//TIMER_READ(start);
     reservationPtr = (reservation_t*)TMMAP_FIND(tablePtr, id);
-		TIMER_READ(stop);
-		lookup_time+=TIMER_DIFF_SECONDS(start, stop);
+		//TIMER_READ(stop);
+		//lookup_time+=TIMER_DIFF_SECONDS(start, stop);
     if (reservationPtr == NULL) {
         return FALSE;
     }
 
-		TIMER_READ(start);
+		//TIMER_READ(start);
     if (!RESERVATION_MAKE(reservationPtr)) {
         return FALSE;
     }
-		TIMER_READ(stop);
-		reservation_make_time+=TIMER_DIFF_SECONDS(start, stop);
+		//TIMER_READ(stop);
+		//reservation_make_time+=TIMER_DIFF_SECONDS(start, stop);
 
     if (!CUSTOMER_ADD_RESERVATION_INFO(
             customerPtr,
@@ -694,8 +698,8 @@ reserve (TM_ARGDECL
         }
         return FALSE;
     }
-		TIMER_READ(end);
-		reservation_total_time+=TIMER_DIFF_SECONDS(begin, end);
+		//TIMER_READ(end);
+		//reservation_total_time+=TIMER_DIFF_SECONDS(begin, end);
 
     return TRUE;
 }
@@ -710,7 +714,6 @@ reserve (TM_ARGDECL
 bool_t
 manager_reserveCar (TM_ARGDECL  manager_t* managerPtr, long customerId, long carId)
 {
-		printf("reserve car\n");
     return reserve(TM_ARG
                    managerPtr->carTablePtr,
                    managerPtr->customerTablePtr,
