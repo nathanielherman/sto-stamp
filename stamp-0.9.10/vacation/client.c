@@ -311,16 +311,15 @@ client_run (void* argPtr)
 
     } /* for i */
 		 
-		//printf("thread %d lookup Time %0.6lf reservation make time %0.6lf total %0.6lf\n", myId, lookup_time, reservation_make_time, reservation_total_time);
+		printf("thread %d lookup Time %0.6lf reservation make time %0.6lf total %0.6lf\n",
+           myId, lookup_time, reservation_make_time, reservation_total_time);
 
     TM_THREAD_EXIT();
 }
 
-/*
 __thread double lookup_time=0;
 __thread double reservation_make_time=0;
 __thread double reservation_total_time=0;
-*/
 /* =============================================================================
  *
  * End of client.c
