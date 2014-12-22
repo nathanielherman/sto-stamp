@@ -257,10 +257,9 @@ bool_t
 reservation_addToTotal_seq (reservation_t* reservationPtr, long num)
 {
 #ifdef reservation2
-		_reservation_t* _reservationPtr = reservationPtr->read();
+		return reservationPtr->reservation_addToTotal_seq(num);
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
-#endif
 
     long numFree = _reservationPtr->numFree;
     if (numFree + num < 0) {
@@ -272,6 +271,7 @@ reservation_addToTotal_seq (reservation_t* reservationPtr, long num)
 
     checkReservation_seq(_reservationPtr);
     return TRUE;
+#endif
 }
 
 
@@ -307,11 +307,9 @@ bool_t
 reservation_make_seq (reservation_t* reservationPtr)
 {
 #ifdef reservation2
-		_reservation_t* _reservationPtr = reservationPtr->read();
+		return reservationPtr->reservation_make_seq();
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
-#endif
- 
     
 		if (_reservationPtr->numFree < 1) {
         return FALSE;
@@ -323,6 +321,7 @@ reservation_make_seq (reservation_t* reservationPtr)
     checkReservation_seq(_reservationPtr);
 
     return TRUE;
+#endif
 }
 
 
@@ -358,11 +357,9 @@ bool_t
 reservation_cancel_seq (reservation_t* reservationPtr)
 {
 #ifdef reservation2
-		_reservation_t* _reservationPtr = reservationPtr->read();
+		return reservationPtr->reservation_cancel_seq();
 #else
 		_reservation_t* _reservationPtr = reservationPtr;
-#endif
- 
     
 		if (_reservationPtr->numUsed < 1) {
         return FALSE;
@@ -374,6 +371,7 @@ reservation_cancel_seq (reservation_t* reservationPtr)
     checkReservation_seq(_reservationPtr);
 
     return TRUE;
+#endif
 }
 
 
@@ -403,19 +401,19 @@ reservation_updatePrice (TM_ARGDECL  reservation_t* reservationPtr, long newPric
 bool_t
 reservation_updatePrice_seq (reservation_t* reservationPtr, long newPrice)
 {
+#ifdef reservation2
+		return reservationPtr->reservation_update_price_seq(newPrice);
+#else
     if (newPrice < 0) {
         return FALSE;
     }
 
-#ifdef reservation2
-		_reservation_t *_reservationPtr = reservationPtr->read();
-#else
 		_reservation_t *_reservationPtr = reservationPtr;
-#endif
 		_reservationPtr->price = newPrice;
     checkReservation_seq(_reservationPtr);
 
     return TRUE;
+#endif
 }
 
 

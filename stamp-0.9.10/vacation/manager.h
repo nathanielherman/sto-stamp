@@ -86,6 +86,10 @@
 #include "map.h"
 #endif
 
+extern __thread double lookup_time;
+extern __thread double reservation_make_time;
+extern __thread double reservation_total_time;
+
 typedef struct manager {
     MAP_T* carTablePtr;
     MAP_T* roomTablePtr;
