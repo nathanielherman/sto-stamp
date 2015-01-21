@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "Clusters.h"
 
 unsigned get_cluster_size(int nfeatures){

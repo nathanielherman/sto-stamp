@@ -32,7 +32,7 @@ class Cluster: public Single<_Cluster*>{
 
 };
 #else
-#define Cluster _Cluster;
+#define Cluster _Cluster
 #endif 
 
 template<typename T>

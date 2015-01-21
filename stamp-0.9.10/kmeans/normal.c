@@ -258,8 +258,8 @@ normal_exec (int       nthreads,
         TM_SINGLE_SIMPLE_WRITE(global_i, nthreads * CHUNK);
         TM_SINGLE_SIMPLE_WRITE(global_delta, delta);
     	
-	TIMER_T start;
-	TIMER_T stop;
+				TIMER_T start;
+				TIMER_T stop;
     	TIMER_READ(start);
 #ifdef OTM
 #pragma omp parallel
