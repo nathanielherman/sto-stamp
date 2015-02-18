@@ -81,11 +81,8 @@
 #include "sto/MassTrans.hh"
 #include "tm.h"
 #include "list2.hh"
+#include "sto/Transaction.cc"
 GenericSTM __genstm;
-threadinfo_t Transaction::tinfo[MAX_THREADS];
-__thread int Transaction::threadid;
-unsigned Transaction::global_epoch;
-std::function<void(unsigned)> Transaction::epoch_advance_callback;
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
   if (!it->valid())
@@ -100,22 +97,20 @@ kvtimestamp_t initial_timestamp;
 volatile bool recovering = false;
 
 #if PERF_LOGGING
-uint64_t total_n;
-uint64_t total_r, total_w;
-uint64_t total_searched;
-uint64_t total_aborts;
-uint64_t commit_time_aborts;
-#endif
-
 void reportPerf(){
-#if PERF_LOGGING
 		printf("STO System Shutdown:\n"
 						" read: %lld, write: %lld  searched: %lld\n"
 						" aborts: %lld commit time aborts: %lld \n",
-						total_r, total_w, total_searched, total_aborts, commit_time_aborts);
-#endif
+           Transaction::total_r, Transaction::total_w, Transaction::total_searched, Transaction::total_aborts, Transaction::commit_time_aborts);
 }
-#define STO_SHUTDOWN() reportPerf()
+class ReportPerf_class {
+public:
+  ReportPerf_class() {
+    std::atexit(reportPerf);
+  }
+};
+static ReportPerf_class makeReportPerf;
+#endif
 
 #endif
 
