@@ -73,6 +73,7 @@
 #ifndef TABLE_H
 #define TABLE_H 1
 
+#include "list2.hh"
 #include "types.h"
 
 

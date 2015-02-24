@@ -17,7 +17,7 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
 #define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret ? *ret : NULL; })
 #define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMLIST_REMOVE(list, data) (list)->transRemove(TM_ARG data)
+#define TMLIST_REMOVE(list, data) (list)->transDelete(TM_ARG data)
 
 #define list_alloc TMLIST_ALLOC
 #define list_free TMLIST_FREE
@@ -29,5 +29,8 @@ typedef typename list_t::ListIter list_iter_t;
 /*__TRANS_WRAP(TMLIST_ITER_HASNEXT(it, list), bool)*/
 #define list_iter_next(it, list) __TRANS_WRAP(TMLIST_ITER_NEXT(it, list), void*)
 #define list_getSize(list) __TRANS_WRAP(TMLIST_GETSIZE(list), size_t)
+#define list_isEmpty(list) __TRANS_WRAP(TMLIST_ISEMPTY(list), bool)
+#define list_find(list, data) __TRANS_WRAP(TMLIST_FIND(list, data), void*)
+#define list_remove(list,data) __TRANS_WRAP(TMLIST_REMOVE(list, data), bool)
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
