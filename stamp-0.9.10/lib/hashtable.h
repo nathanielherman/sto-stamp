@@ -84,8 +84,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H 1
 
-
-#include "list.h"
+#include "list2.hh"
 #include "pair.h"
 #include "tm.h"
 #include "types.h"

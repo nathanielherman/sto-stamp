@@ -84,7 +84,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "hashtable.h"
-#include "list.h"
 #include "pair.h"
 #include "types.h"
 

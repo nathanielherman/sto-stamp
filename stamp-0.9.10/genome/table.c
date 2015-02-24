@@ -72,8 +72,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "list.h"
 #include "table.h"
+#include "list2.hh"
 #include "types.h"
 
 
