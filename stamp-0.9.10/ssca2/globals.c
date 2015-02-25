@@ -79,7 +79,7 @@ float      PROB_UNIDIRECTIONAL;
 float      PROB_INTERCL_EDGES;
 long       SUBGR_EDGE_LENGTH;
 long       MAX_CLUSTER_SIZE;
-//long       MAX_STRLEN;
+long       MAX_STRLEN;
 long       K3_DS;
 long       THREADS;
 
