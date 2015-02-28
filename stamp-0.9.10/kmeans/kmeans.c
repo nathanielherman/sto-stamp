@@ -121,7 +121,7 @@ extern double global_time;
 void
 usage (char* argv0)
 {
-    char* help =
+    const char* help =
         "Usage: %s [switches] -i filename\n"
         "       -i filename:     file containing data to be clustered\n"
         "       -b               input file is in binary format\n"
