@@ -6,12 +6,16 @@
 
 typedef List<void*, false, long (*)(const void*, const void*)> list_t;
 
+static inline long default_comparator(const void* a, const void* b) {
+  return a < b ? -1 : a == b ? 0 : 1;
+}
+
 typedef typename list_t::ListIter list_iter_t;
 
 #define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); /*TM_ARG_ALONE.check_reads();*/ })
 #define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_ITER_NEXT(it, list) ({ auto ret = *(it)->transNext(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMLIST_ALLOC(cmp) (new list_t(cmp))
+#define TMLIST_ALLOC(cmp) (new list_t(cmp ? cmp : default_comparator))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
 #define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
