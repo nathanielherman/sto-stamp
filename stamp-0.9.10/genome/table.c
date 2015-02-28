@@ -73,7 +73,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "table.h"
+#ifdef STO
 #include "list2.hh"
+#else
+#include "list.h"
+#endif
 #include "types.h"
 
 

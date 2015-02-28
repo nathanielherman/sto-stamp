@@ -270,7 +270,7 @@ sequencer_run (void* argPtr)
     /*
      * Step 1: Remove duplicate segments
      */
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     long numThread = thread_getNumThread();
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
@@ -327,7 +327,7 @@ sequencer_run (void* argPtr)
     numUniqueSegment = hashtable_getSize(uniqueSegmentsPtr);
     entryIndex = 0;
 
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
         long num = uniqueSegmentsPtr->numBucket;
