@@ -1810,6 +1810,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat )
 
 #  ifdef TL2_STATS
     Self->TxST++;
+  global_stats[1]++;
 #  endif
 
 
@@ -1892,6 +1893,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
 
 #  ifdef TL2_STATS
     Self->TxST++;
+  global_stats[1]++;
 #  endif
 
   LockFor = PSLOCK(addr);
@@ -1969,6 +1971,20 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
             return;
         }
     }
+  AVPair* e;
+#ifdef TL2_STATS
+  global_stats[3]++;
+#endif
+  for (e = wr->tail; e != NULL; e = e->Prev) {
+    ASSERT(e->Addr != NULL);
+#ifdef TL2_STATS
+    global_stats[2]++;
+#endif
+    if (e->Addr == addr) {
+      break;
+    }
+  }
+
 
 #    ifdef TL2_OPTIM_HASHLOG
     wrSet->BloomFilter |= FILTERBITS(addr);
@@ -2009,6 +2025,7 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
+    global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2059,6 +2076,7 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
+  global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2073,21 +2091,27 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
      */
 
     intptr_t msk = FILTERBITS(Addr);
-    if ((Self->wrSet.BloomFilter & msk) == msk) {
+    //if ((Self->wrSet.BloomFilter & msk) == msk) {
 #  ifdef TL2_OPTIM_HASHLOG
         Log* wr = &Self->wrSet.logs[HASHLOG_HASH(Addr) % Self->wrSet.numLog];
 #  else /* !TL2_OPTIM_HASHLOG */
         Log* wr = &Self->wrSet;
 #  endif /* !TL2_OPTIM_HASHLOG */
+#ifdef TL2_STATS
+  global_stats[3]++;
+#endif
         AVPair* e;
         for (e = wr->tail; e != NULL; e = e->Prev) {
             ASSERT(e->Addr != NULL);
+#ifdef TL2_STATS
+          global_stats[2]++;
+#endif
             if (e->Addr == Addr) {
                 PROF_STM_READ_END();
                 return e->Valu;
             }
         }
-    }
+    //}
 
     /*
      * TODO-FIXME:
