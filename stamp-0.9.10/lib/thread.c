@@ -99,9 +99,10 @@ volatile bool recovering = false;
 #if PERF_LOGGING
 void reportPerf(){
 		printf("STO System Shutdown:\n"
-						" read: %lld, write: %lld  searched: %lld\n"
-						" aborts: %lld commit time aborts: %lld \n",
-           Transaction::total_r, Transaction::total_w, Transaction::total_searched, Transaction::total_aborts, Transaction::commit_time_aborts);
+						" read: %llu, write: %llu  searched: %llu\n"
+						" starts: %llu aborts: %llu commit time aborts: %llu \n",
+           Transaction::total_r, Transaction::total_w, Transaction::total_searched,
+           Transaction::total_starts, Transaction::total_aborts, Transaction::commit_time_aborts);
 }
 class ReportPerf_class {
 public:
