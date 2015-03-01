@@ -73,8 +73,8 @@
 #include <string.h>
 #include "decoder.h"
 #include "error.h"
-#include "list2.hh"
-#include "map2.h"
+#include "list.h"
+#include "map.h"
 #include "packet.h"
 #include "queue.h"
 #include "tm.h"
@@ -130,7 +130,7 @@ decoder_free (decoder_t* decoderPtr)
  * decoder_process
  * =============================================================================
  */
-stamp_error_t
+error_t
 decoder_process (decoder_t* decoderPtr, char* bytes, long numByte)
 {
     bool_t status;
@@ -294,7 +294,7 @@ decoder_process (decoder_t* decoderPtr, char* bytes, long numByte)
  * TMdecoder_process
  * =============================================================================
  */
-stamp_error_t
+error_t
 TMdecoder_process (TM_ARGDECL  decoder_t* decoderPtr, char* bytes, long numByte)
 {
     bool_t status;

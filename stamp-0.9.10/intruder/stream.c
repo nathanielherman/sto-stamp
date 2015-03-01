@@ -75,7 +75,7 @@
 #include <string.h>
 #include "detector.h"
 #include "dictionary.h"
-#include "map2.h"
+#include "map.h"
 #include "packet.h"
 #include "queue.h"
 #include "random.h"
@@ -252,7 +252,7 @@ stream_generate (stream_t* streamPtr,
             char* str2 = (char*)malloc((length + 1) * sizeof(char));
             assert(str2);
             strcpy(str2, str);
-            stamp_error_t error = detector_process(detectorPtr, str2); /* updates in-place */
+            error_t error = detector_process(detectorPtr, str2); /* updates in-place */
             if (error == ERROR_SIGNATURE) {
                 bool_t status = MAP_INSERT(attackMapPtr,
                                            (void*)f,
@@ -281,7 +281,7 @@ stream_generate (stream_t* streamPtr,
 char*
 stream_getPacket (stream_t* streamPtr)
 {
-  return (char*)queue_pop(streamPtr->packetQueuePtr);
+    return (char *)queue_pop(streamPtr->packetQueuePtr);
 }
 
 

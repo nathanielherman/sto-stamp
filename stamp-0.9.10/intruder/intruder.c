@@ -98,13 +98,7 @@ enum param_defaults {
     PARAM_DEFAULT_THREAD = 1,
 };
 
-long global_params[256] = { /* 256 = ascii limit */
-    [PARAM_ATTACK] = PARAM_DEFAULT_ATTACK,
-    [PARAM_LENGTH] = PARAM_DEFAULT_LENGTH,
-    [PARAM_NUM]    = PARAM_DEFAULT_NUM,
-    [PARAM_SEED]   = PARAM_DEFAULT_SEED,
-    [PARAM_THREAD] = PARAM_DEFAULT_THREAD,
-};
+long global_params[256]; /* 256 = ascii limit */
 
 typedef struct arg {
   /* input: */
@@ -114,6 +108,20 @@ typedef struct arg {
     vector_t** errorVectors;
 } arg_t;
 
+/* =============================================================================
+ * setDefaultParams
+ * =============================================================================
+ */
+static void
+setDefaultParams ()
+{
+  global_params[PARAM_ATTACK] = PARAM_DEFAULT_ATTACK;
+  global_params[PARAM_LENGTH] = PARAM_DEFAULT_LENGTH;
+  global_params[PARAM_NUM]    = PARAM_DEFAULT_NUM;
+  global_params[PARAM_SEED]   = PARAM_DEFAULT_SEED;
+  global_params[PARAM_THREAD] = PARAM_DEFAULT_THREAD;
+
+}
 
 /* =============================================================================
  * displayUsage
@@ -145,6 +153,8 @@ parseArgs (long argc, char* const argv[])
 
     opterr = 0;
 
+    setDefaultParams();
+  
     while ((opt = getopt(argc, argv, "a:l:n:s:t:")) != -1) {
         switch (opt) {
             case 'a':
@@ -206,7 +216,7 @@ processPackets (void* argPtr)
         packet_t* packetPtr = (packet_t*)bytes;
         long flowId = packetPtr->flowId;
 
-        stamp_error_t error;
+        error_t error;
         TM_BEGIN();
         error = TMDECODER_PROCESS(decoderPtr,
                                   bytes,
@@ -227,7 +237,7 @@ processPackets (void* argPtr)
         data = TMDECODER_GETCOMPLETE(decoderPtr, &decodedFlowId);
         TM_END();
         if (data) {
-            stamp_error_t error = PDETECTOR_PROCESS(detectorPtr, data);
+            error_t error = PDETECTOR_PROCESS(detectorPtr, data);
             P_FREE(data);
             if (error) {
                 bool_t status = PVECTOR_PUSHBACK(errorVectorPtr,

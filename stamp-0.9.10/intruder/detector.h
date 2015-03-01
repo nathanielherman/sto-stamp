@@ -123,7 +123,7 @@ detector_addPreprocessor (detector_t* detectorPtr, preprocessor_t p);
  * detector_process
  * =============================================================================
  */
-stamp_error_t
+error_t
 detector_process (detector_t* detectorPtr, char* str);
 
 
