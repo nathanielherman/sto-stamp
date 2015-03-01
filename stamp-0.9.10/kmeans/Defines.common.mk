@@ -10,7 +10,6 @@ CFLAGS += -DOUTPUT_TO_STDOUT
 PROG := kmeans
 
 SRCS += \
-	Clusters.c \
 	cluster.c \
 	common.c \
 	kmeans.c \
