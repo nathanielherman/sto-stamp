@@ -644,7 +644,7 @@ computeLocalLogLikelihoodHelper (long i,
 
     float localLogLikelihood = 0.0;
 
-    query_t* parentQueryPtr = vector_at(parentQueryVectorPtr, i);
+    query_t* parentQueryPtr = (query_t*) vector_at(parentQueryVectorPtr, i);
     long parentIndex = parentQueryPtr->index;
 
     queries[parentIndex].value = 0;
@@ -887,7 +887,7 @@ TMfindBestRemoveTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
         long p;
         for (p = 0; p < numParent; p++) {
             if (p != fromId) {
-                query_t* queryPtr = PVECTOR_AT(origParentQueryVectorPtr, p);
+                query_t* queryPtr = (query_t*) PVECTOR_AT(origParentQueryVectorPtr, p);
                 status = PVECTOR_PUSHBACK(parentQueryVectorPtr,
                                           (void*)&queries[queryPtr->index]);
                 assert(status);
@@ -1013,7 +1013,7 @@ TMfindBestReverseTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
         long p;
         for (p = 0; p < numParent; p++) {
             if (p != fromId) {
-                query_t* queryPtr = PVECTOR_AT(toOrigParentQueryVectorPtr, p);
+                query_t* queryPtr = (query_t*) PVECTOR_AT(toOrigParentQueryVectorPtr, p);
                 status = PVECTOR_PUSHBACK(parentQueryVectorPtr,
                                           (void*)&queries[queryPtr->index]);
                 assert(status);
