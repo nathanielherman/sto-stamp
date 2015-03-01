@@ -111,6 +111,10 @@ public:
   }
 };
 static ReportPerf_class makeReportPerf;
+#else
+void reportPerf(){
+        printf("STO System Shutdown:\n");
+}
 #endif
 
 #endif
