@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef STO
+#error "STO required to use list2.hh"
+#endif
+
 #include "tm.h"
 #include "sto/Transaction.hh"
 #include "sto/List.hh"
@@ -22,6 +26,13 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret ? *ret : NULL; })
 #define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_REMOVE(list, data) (list)->transDelete(TM_ARG data)
+
+/* TODO: The following PLIST_* functions don't work in transactions, no need to wrap them inside transactions */
+#define PLIST_ALLOC(cmp) TMLIST_ALLOC(cmp)
+#define PLIST_FREE(list) TMLIST_FREE(list)
+#define PLIST_INSERT(list, data) TMLIST_INSERT(list, data)
+#define PLIST_GETSIZE(list) TMLIST_GETSIZE(list)
+#define PLIST_CLEAR(list) /* TODO: NOT implemented */
 
 #define list_alloc TMLIST_ALLOC
 #define list_free TMLIST_FREE

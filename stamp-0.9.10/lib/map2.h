@@ -1,3 +1,10 @@
+#ifndef STO
+#error "STO required to use map2.h"
+#endif
+
+#ifndef MAP_H
+#define MAP_H 1
+
 #ifdef MAP_USE_RBTREE
 #define MAP_USE_TREE
 #endif
@@ -34,9 +41,17 @@
 #define MAP_INSERT(map, key, data) __TRANS_WRAP(TMMAP_INSERT(map, key, data), bool)
 #define MAP_REMOVE(map, key) __TRANS_WRAP(TMMAP_REMOVE(map, key), bool)
 
+#define PMAP_ALLOC(hash, cmp) MAP_ALLOC(hash, cmp)
+#define PMAP_FREE(map) MAP_FREE(map)
+/* TODO: PMAP_* functions don't need to be wrapped inside transactions */
+#define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
+#define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
+
 #if 0
 template <typename T>
 inline T __trans_wrap(std::function<T(void)> f) {
   TM_BEGIN(); T ret = f(); TM_END(); return ret;
 }
 #endif
+
+#endif /* MAP_H */
