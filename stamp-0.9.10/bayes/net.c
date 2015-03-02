@@ -73,7 +73,7 @@
 #include <stdlib.h>
 #include "bitmap.h"
 #include "learner.h"
-#include "list.h"
+#include "list2.hh"
 #include "net.h"
 #include "operation.h"
 #include "queue.h"

@@ -74,7 +74,7 @@
 
 
 #include "bitmap.h"
-#include "list.h"
+#include "list2.hh"
 #include "operation.h"
 #include "queue.h"
 #include "tm.h"

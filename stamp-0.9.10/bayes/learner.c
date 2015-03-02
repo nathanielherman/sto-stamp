@@ -122,7 +122,7 @@
 #include "adtree.h"
 #include "data.h"
 #include "learner.h"
-#include "list.h"
+#include "list2.hh"
 #include "net.h"
 #include "operation.h"
 #include "query.h"
