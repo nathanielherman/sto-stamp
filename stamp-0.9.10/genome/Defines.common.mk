@@ -15,7 +15,6 @@ SRCS += \
 	genome.c \
 	segments.c \
 	sequencer.c \
-	table.c \
 	$(LIB)/bitmap.c \
 	$(LIB)/hash.c \
 	$(LIB)/hashtable.c \
@@ -25,6 +24,7 @@ SRCS += \
 	$(LIB)/mt19937ar.c \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
+	table.c \
 #
 OBJS := ${SRCS:.c=.o}
 
