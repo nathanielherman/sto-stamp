@@ -103,9 +103,10 @@ void reportPerf(){
     thr tc = Transaction::tinfo_combined();
     printf("STO System Shutdown:\n"
            " read: %llu, write: %llu  searched: %llu\n"
-           " starts: %llu aborts: %llu commit time aborts: %llu \n",
+           " starts: %llu aborts: %llu commit time aborts: %llu\n"
+           " average set size: %llu\n",
            LLU(tc.p[thr::p_total_r]), LLU(tc.p[thr::p_total_w]), LLU(tc.p[thr::p_total_searched]),
-           LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_total_aborts]), LLU(tc.p[thr::p_commit_time_aborts]));
+           LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_total_aborts]), LLU(tc.p[thr::p_commit_time_aborts]), LLU(tc.p[thr::p_total_n])/LLU(tc.p[thr::p_total_starts]));
 #undef LLU
 }
 #if 0
