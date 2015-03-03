@@ -30,9 +30,10 @@ typedef typename list_t::ListIter list_iter_t;
 /* TODO: The following PLIST_* functions don't work in transactions, no need to wrap them inside transactions */
 #define PLIST_ALLOC(cmp) TMLIST_ALLOC(cmp)
 #define PLIST_FREE(list) TMLIST_FREE(list)
-#define PLIST_INSERT(list, data) TMLIST_INSERT(list, data)
-#define PLIST_GETSIZE(list) TMLIST_GETSIZE(list)
-#define PLIST_CLEAR(list) /* TODO: NOT implemented */
+#define PLIST_GETSIZE(list) (list)->size()
+#define PLIST_INSERT(list, data) (list)->_insert((data))
+#define PLIST_REMOVE(list, data) (list)->remove((data))
+#define PLIST_CLEAR(list) (list)->clear()
 
 #define list_alloc TMLIST_ALLOC
 #define list_free TMLIST_FREE
