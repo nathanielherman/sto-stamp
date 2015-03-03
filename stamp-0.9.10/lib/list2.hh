@@ -26,6 +26,9 @@ typedef typename list_t::ListIter list_iter_t;
 #define list_alloc TMLIST_ALLOC
 #define list_free TMLIST_FREE
 
+#define PLIST_FREE(list) TMLIST_FREE(list)
+#define Plist_free PLIST_FREE
+
 #define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TM_BEGIN(); ___ret = OP; TM_END(); ___ret;})
 #define list_insert(list, data) __TRANS_WRAP(TMLIST_INSERT(list, data), bool)
 #define list_iter_reset(it, list) ({ TM_BEGIN(); TMLIST_ITER_RESET(it, list); TM_END(); })
