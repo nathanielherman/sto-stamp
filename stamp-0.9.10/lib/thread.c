@@ -98,11 +98,15 @@ volatile bool recovering = false;
 
 #if PERF_LOGGING
 void reportPerf(){
-		printf("STO System Shutdown:\n"
-						" read: %llu, write: %llu  searched: %llu\n"
-						" starts: %llu aborts: %llu commit time aborts: %llu \n",
-           Transaction::total_r, Transaction::total_w, Transaction::total_searched,
-           Transaction::total_starts, Transaction::total_aborts, Transaction::commit_time_aborts);
+#define LLU(x) (unsigned long long) (x)
+    using thr = threadinfo_t;
+    thr tc = Transaction::tinfo_combined();
+    printf("STO System Shutdown:\n"
+           " read: %llu, write: %llu  searched: %llu\n"
+           " starts: %llu aborts: %llu commit time aborts: %llu \n",
+           LLU(tc.p[thr::p_total_r]), LLU(tc.p[thr::p_total_w]), LLU(tc.p[thr::p_total_searched]),
+           LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_total_aborts]), LLU(tc.p[thr::p_commit_time_aborts]));
+#undef LLU
 }
 class ReportPerf_class {
 public:
