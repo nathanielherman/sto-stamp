@@ -6,7 +6,7 @@
 
 
 CFLAGS += -DLIST_NO_DUPLICATES
-CFLAGS += -DMAP_USE_AVLTREE
+CFLAGS += -DMAP_USE_RBTREE
 CFLAGS += -DSET_USE_RBTREE
 
 PROG := yada
@@ -16,7 +16,6 @@ SRCS += \
 	mesh.c \
 	region.c \
 	yada.c \
-	$(LIB)/avltree.c \
 	$(LIB)/heap.c \
 	$(LIB)/list.c \
 	$(LIB)/mt19937ar.c \

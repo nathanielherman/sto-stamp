@@ -74,12 +74,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "element.h"
-#include "list.h"
-#include "map.h"
+
+#ifdef STO
+#  include "list2.hh"
+#  include "map2.h"
+#else
+#  include "list.h"
+#  include "map.h"
+#endif
+
 #include "mesh.h"
 #include "queue.h"
 #include "random.h"
-#include "set.h"
+
+#ifdef STO
+#  include "set2.h"
+#else
+#  include "set.h"
+#endif
+
 #include "tm.h"
 #include "types.h"
 #include "utility.h"
@@ -265,7 +278,7 @@ TMmesh_remove (TM_ARGDECL  mesh_t* meshPtr, element_t* elementPtr)
      * always follows a call a mesh_remove.
      */
     if ((element_t*)TM_SHARED_READ_P(meshPtr->rootElementPtr) == elementPtr) {
-        TM_SHARED_WRITE_P(meshPtr->rootElementPtr, NULL);
+        TM_SHARED_WRITE_P(meshPtr->rootElementPtr, (element *)(NULL));
     }
 
     /*
