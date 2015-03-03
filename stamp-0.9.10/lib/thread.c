@@ -108,6 +108,7 @@ void reportPerf(){
            LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_total_aborts]), LLU(tc.p[thr::p_commit_time_aborts]));
 #undef LLU
 }
+#if 0
 class ReportPerf_class {
 public:
   ReportPerf_class() {
@@ -115,9 +116,10 @@ public:
   }
 };
 static ReportPerf_class makeReportPerf;
+#endif
 #else
 void reportPerf(){
-        printf("STO System Shutdown:\n");
+        printf("STO System Shutdown.\n");
 }
 #endif
 
