@@ -122,7 +122,13 @@
 #include "adtree.h"
 #include "data.h"
 #include "learner.h"
+
+#ifdef STO
 #include "list2.hh"
+#else 
+#include "list.h"
+#endif
+
 #include "net.h"
 #include "operation.h"
 #include "query.h"

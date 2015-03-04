@@ -73,7 +73,13 @@
 #include <stdlib.h>
 #include "bitmap.h"
 #include "learner.h"
+
+#ifdef STO
 #include "list2.hh"
+#else
+#include "list.h"
+#endif
+
 #include "net.h"
 #include "operation.h"
 #include "queue.h"
