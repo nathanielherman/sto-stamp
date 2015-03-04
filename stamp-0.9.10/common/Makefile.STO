@@ -48,7 +48,7 @@ $(PROG): $(OBJS) $(MASSTREE_OBJS)
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
 
-include ../common/Makefile.common
+include ../common/Makefile.STO.common
 
 
 # ==============================================================================
