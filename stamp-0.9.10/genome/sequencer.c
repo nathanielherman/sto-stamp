@@ -366,6 +366,10 @@ sequencer_run (void* argPtr)
             bool_t status;
 
             /* Find an empty constructEntries entry */
+            // XXX The while loop below was not there originally
+            while ((void*)constructEntries[entryIndex].segment != NULL) {
+                entryIndex = (entryIndex + 1) % numUniqueSegment;
+            }
             TM_BEGIN();
             while (((void*)TM_SHARED_READ_P(constructEntries[entryIndex].segment)) != NULL) {
                 entryIndex = (entryIndex + 1) % numUniqueSegment; /* look for empty */
