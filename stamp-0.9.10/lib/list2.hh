@@ -27,7 +27,7 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_REMOVE(list, data) (list)->transDelete(TM_ARG data)
 
-/* TODO: The following PLIST_* functions don't work in transactions, no need to wrap them inside transactions */
+/* TODO: The following PLIST_* functions aren't transactional, no need to wrap them inside transactions */
 #define PLIST_ALLOC(cmp) TMLIST_ALLOC(cmp)
 #define PLIST_FREE(list) TMLIST_FREE(list)
 #define PLIST_GETSIZE(list) (list)->size()
@@ -44,9 +44,9 @@ typedef typename list_t::ListIter list_iter_t;
 #define list_iter_hasNext(it, list) ({ bool ret; TM_BEGIN(); ret= (it)->transHasNext(TM_ARG_ALONE); TM_END(); ret; })
 /*__TRANS_WRAP(TMLIST_ITER_HASNEXT(it, list), bool)*/
 #define list_iter_next(it, list) __TRANS_WRAP(TMLIST_ITER_NEXT(it, list), void*)
-#define list_getSize(list) __TRANS_WRAP(TMLIST_GETSIZE(list), size_t)
-#define list_isEmpty(list) __TRANS_WRAP(TMLIST_ISEMPTY(list), bool)
-#define list_find(list, data) __TRANS_WRAP(TMLIST_FIND(list, data), void*)
-#define list_remove(list,data) __TRANS_WRAP(TMLIST_REMOVE(list, data), bool)
+#define list_getSize(list) PLIST_GETSIZE(list)
+#define list_isEmpty(list) (PLIST_GETSIZE(list) == 0)
+#define list_find(list, data) ((list)->_find(data))
+#define list_remove(list,data) PLIST_REMOVE(list, data)
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
