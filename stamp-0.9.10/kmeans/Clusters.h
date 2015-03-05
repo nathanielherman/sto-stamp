@@ -12,7 +12,7 @@ template<class T> using Single = T;
 typedef struct _Cluster{
 		int nfeatures;
 		int centers_len;
-		float centers[1];
+		float *centers;
 } _Cluster;
 
 unsigned get_cluster_size(int nfeatures);
