@@ -98,7 +98,6 @@ volatile bool recovering = false;
 
 #if PERF_LOGGING
 void reportPerf(){
-#define LLU(x) (unsigned long long) (x)
     using thr = threadinfo_t;
     thr tc = Transaction::tinfo_combined();
     printf("STO System Shutdown:\n"
@@ -108,11 +107,10 @@ void reportPerf(){
 #endif
            " starts: %llu, aborts: %llu, commit time aborts: %llu\n",
 #if DETAILED_LOGGING
-           LLU(tc.p[thr::p_total_r]), LLU(tc.p[thr::p_total_w]), LLU(tc.p[thr::p_total_searched]),
-           LLU(tc.p[thr::p_total_n])/LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_max_set]),
+           tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched),
+           tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
 #endif
-           LLU(tc.p[thr::p_total_starts]), LLU(tc.p[thr::p_total_aborts]), LLU(tc.p[thr::p_commit_time_aborts]));
-#undef LLU
+           tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));
 }
 #if 0
 class ReportPerf_class {
