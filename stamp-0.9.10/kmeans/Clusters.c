@@ -47,16 +47,15 @@ void reset_cluster_seq(Cluster* cluster, float* center){
 #endif
 }
 
-void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature){
+void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature, _Cluster* _temp){
 #ifdef D
 		_Cluster *_cluster = cluster->transRead(TM_ARG_ALONE);
-		_Cluster *new_cluster = _alloc_cluster(_cluster->nfeatures);
 		int j;
-		for (j = 0; j < new_cluster->nfeatures; j++){
-				new_cluster->centers[j] = _cluster->centers[j] + feature[j];
+		for (j = 0; j < _cluster->nfeatures; j++){
+				_temp->centers[j] = _cluster->centers[j] + feature[j];
 		}
-		new_cluster->centers_len = _cluster->centers_len + 1;
-		cluster->transWrite(TM_ARG new_cluster);
+		_temp->centers_len = _cluster->centers_len + 1;
+		cluster->transWrite(TM_ARG _temp);
 #else
 		int j;
 		for (j = 0; j < cluster->nfeatures; j++){

@@ -142,6 +142,10 @@ work (void* argPtr)
 
     start = myId * CHUNK;
 
+		// a temporary hack to solve the malloc problem
+		//  should get rid of it in the future
+		_Cluster *_temp= _alloc_cluster(nfeatures);
+
     while (start < npoints) {
         stop = (((start + CHUNK) < npoints) ? (start + CHUNK) : npoints);
         for (i = start; i < stop; i++) {
@@ -164,7 +168,7 @@ work (void* argPtr)
 
             /* Update new cluster centers : sum of objects located within */
 						TM_BEGIN();
-						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i]);
+						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i], _temp);
 						TM_END();
         }
 
@@ -178,6 +182,8 @@ work (void* argPtr)
             break;
         }
     }
+
+		free(_temp);
 
     TM_BEGIN();
     TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ_F(global_delta) + delta);
