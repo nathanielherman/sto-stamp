@@ -12,7 +12,7 @@ template<class T> using Single = T;
 typedef struct _Cluster{
 		int nfeatures;
 		int centers_len;
-		float centers[1];
+		float *centers;
 } _Cluster;
 
 unsigned get_cluster_size(int nfeatures);
@@ -24,6 +24,7 @@ class Cluster: public Single<_Cluster*>{
 						_Cluster* cluster_ptr = s_.read_value();
 						_Cluster* new_cluster_ptr = item.template write_value<_Cluster*>();
 						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
+						cluster_ptr->centers = (float *)((char *)cluster_ptr + sizeof(_Cluster));
 						Versioning::inc_version(s_.version());
 					//	printf("cluter len %d\n", s_.read_value()->centers_len);
 				}

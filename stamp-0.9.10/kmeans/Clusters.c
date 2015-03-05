@@ -3,7 +3,7 @@
 #include "Clusters.h"
 
 unsigned get_cluster_size(int nfeatures){
-    unsigned cluster_size = sizeof(_Cluster) + (nfeatures - 1) * sizeof(float);
+    unsigned cluster_size = sizeof(_Cluster) + (nfeatures) * sizeof(float);
     cluster_size += (CACHE_LINE_SIZE - 1) - ((cluster_size - 1) % CACHE_LINE_SIZE);
     return cluster_size;
 }
@@ -13,6 +13,7 @@ _Cluster *_alloc_cluster(int nfeatures){
 		_Cluster *c = (_Cluster *)malloc(cluster_size);
 		c->nfeatures = nfeatures;
 		c->centers_len = 0;
+		c->centers = (float *)((char *)c + sizeof(_Cluster));
 		memset(c->centers, 0, nfeatures * sizeof(float));
 		return c;
 }
@@ -61,6 +62,7 @@ void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature, _Cluster* _
 		for (j = 0; j < cluster->nfeatures; j++){
 				TM_SHARED_WRITE_F(cluster->centers[j],
 								TM_SHARED_READ_F(cluster->centers[j]) + feature[j]);
+
 		}
 		TM_SHARED_WRITE(cluster->centers_len,
 						TM_SHARED_READ(cluster->centers_len) + 1);
