@@ -5,9 +5,10 @@
 # ==============================================================================
 
 
-CC       := gcc 
+CC       := gcc
+OPT      := -O3
 CFLAGS   += -g -Wall -pthread
-CFLAGS   += -O3
+CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
 CPP      := g++ -std=c++11
 CPPFLAGS += $(CFLAGS)
