@@ -112,6 +112,7 @@ void reportPerf(){
            tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
 #endif
            tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));
+    printf("DON'T USE THIS RUN FOR BENCHMARKS--TURN OFF PERF_LOGGING in Transaction.hh\n");
 }
 #if 0
 class ReportPerf_class {
