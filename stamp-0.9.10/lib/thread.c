@@ -85,10 +85,11 @@
 GenericSTM __genstm;
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
-  if (!it->valid())
     *it = l->transIter(TM_ARG_ALONE);
-  else
-    it->transReset(TM_ARG_ALONE);
+}
+
+void list_iter_reset(list_iter_t* it, list_t* l) {
+    *it = l->iter();
 }
 
 kvepoch_t global_log_epoch = 0;
