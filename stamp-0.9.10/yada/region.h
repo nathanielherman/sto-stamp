@@ -74,7 +74,7 @@
 
 
 #include "element.h"
-#include "heap.h"
+#include "heap.h"    // TODO: Implement TMHeap, now using generic STM
 #include "mesh.h"
 #include "tm.h"
 

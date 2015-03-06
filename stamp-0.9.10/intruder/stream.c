@@ -75,7 +75,13 @@
 #include <string.h>
 #include "detector.h"
 #include "dictionary.h"
-#include "map2.h"
+
+#ifdef STO
+#  include "map2.h"
+#else
+#  include "map.h"
+#endif
+
 #include "packet.h"
 #include "queue.h"
 #include "random.h"

@@ -1,10 +1,18 @@
 #pragma once
 
+#ifndef STO
+#error "STO required to use list2.hh"
+#endif
+
 #include "tm.h"
 #include "sto/Transaction.hh"
 #include "sto/List.hh"
 
+#ifdef LIST_NO_DUPLICATES
 typedef List<void*, false, long (*)(const void*, const void*)> list_t;
+#else
+typedef List<void*, true, long (*)(const void*, const void*)> list_t;
+#endif
 
 static inline long default_comparator(const void* a, const void* b) {
   return a < b ? -1 : a == b ? 0 : 1;
@@ -23,21 +31,29 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG data); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMLIST_REMOVE(list, data) (list)->transDelete(TM_ARG data)
 
-#define list_alloc TMLIST_ALLOC
-#define list_free TMLIST_FREE
+#define list_alloc(cmp) TMLIST_ALLOC(cmp)
+#define list_free(list) TMLIST_FREE(list)
+#define list_insert(list, data) ((list)->insert((data)))
+#define list_iter_hasNext(it, list) ((it)->hasNext())
+#define list_iter_next(it, list) (*((it)->next()))
+#define list_getSize(list) ((list)->size())
+#define list_isEmpty(list) (((list)->size()) == 0)
+#define list_find(list, data) ((list)->_find(data))
+#define list_remove(list, data) ((list)->remove((data)))
+#define list_clear(list) ((list)->clear())
+
+#define PLIST_ALLOC(cmp) list_alloc(cmp)
+#define PLIST_FREE(list) list_free(list)
+#define PLIST_GETSIZE(list) list_getSize(list)
+#define PLIST_INSERT(list, data) list_insert(list, data)
+#define PLIST_REMOVE(list, data) list_remove(list, data)
+#define PLIST_CLEAR(list) list_clear(list)
 
 #define PLIST_FREE(list) TMLIST_FREE(list)
 #define Plist_free PLIST_FREE
 
 #define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TM_BEGIN(); ___ret = OP; TM_END(); ___ret;})
-#define list_insert(list, data) __TRANS_WRAP(TMLIST_INSERT(list, data), bool)
-#define list_iter_reset(it, list) ({ TM_BEGIN(); TMLIST_ITER_RESET(it, list); TM_END(); })
-#define list_iter_hasNext(it, list) ({ bool ret; TM_BEGIN(); ret= (it)->transHasNext(TM_ARG_ALONE); TM_END(); ret; })
-/*__TRANS_WRAP(TMLIST_ITER_HASNEXT(it, list), bool)*/
-#define list_iter_next(it, list) __TRANS_WRAP(TMLIST_ITER_NEXT(it, list), void*)
-#define list_getSize(list) __TRANS_WRAP(TMLIST_GETSIZE(list), size_t)
-#define list_isEmpty(list) __TRANS_WRAP(TMLIST_ISEMPTY(list), bool)
-#define list_find(list, data) __TRANS_WRAP(TMLIST_FIND(list, data), void*)
-#define list_remove(list,data) __TRANS_WRAP(TMLIST_REMOVE(list, data), bool)
 
-void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
+// Defined in thread.c
+extern void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
+extern void list_iter_reset(list_iter_t* it, list_t* l);

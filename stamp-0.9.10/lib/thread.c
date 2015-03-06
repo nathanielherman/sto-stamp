@@ -85,10 +85,11 @@
 GenericSTM __genstm;
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
-  if (!it->valid())
     *it = l->transIter(TM_ARG_ALONE);
-  else
-    it->transReset(TM_ARG_ALONE);
+}
+
+void list_iter_reset(list_iter_t* it, list_t* l) {
+    *it = l->iter();
 }
 
 kvepoch_t global_log_epoch = 0;
@@ -98,12 +99,21 @@ volatile bool recovering = false;
 
 #if PERF_LOGGING
 void reportPerf(){
-		printf("STO System Shutdown:\n"
-						" read: %llu, write: %llu  searched: %llu\n"
-						" starts: %llu aborts: %llu commit time aborts: %llu \n",
-           Transaction::total_r, Transaction::total_w, Transaction::total_searched,
-           Transaction::total_starts, Transaction::total_aborts, Transaction::commit_time_aborts);
+    using thr = threadinfo_t;
+    thr tc = Transaction::tinfo_combined();
+    printf("STO System Shutdown:\n"
+#if DETAILED_LOGGING
+           " read: %llu, write: %llu, searched: %llu\n"
+           " average set size: %llu, max set size: %llu\n"
+#endif
+           " starts: %llu, aborts: %llu, commit time aborts: %llu\n",
+#if DETAILED_LOGGING
+           tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched),
+           tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
+#endif
+           tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));
 }
+#if 0
 class ReportPerf_class {
 public:
   ReportPerf_class() {
@@ -111,9 +121,10 @@ public:
   }
 };
 static ReportPerf_class makeReportPerf;
+#endif
 #else
 void reportPerf(){
-        printf("STO System Shutdown:\n");
+        printf("STO System Shutdown.\n");
 }
 #endif
 

@@ -74,9 +74,16 @@
 #include "region.h"
 #include "coordinate.h"
 #include "element.h"
-#include "list.h"
-#include "map.h"
-#include "queue.h"
+
+#ifdef STO
+#  include "list2.hh"
+#  include "map2.h"
+#else
+#  include "list.h"
+#  include "map.h"
+#endif
+
+#include "queue.h"     // Irrelevant, not used in transactions
 #include "mesh.h"
 #include "tm.h"
 
