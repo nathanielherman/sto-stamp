@@ -49,6 +49,9 @@ typedef typename list_t::ListIter list_iter_t;
 #define PLIST_REMOVE(list, data) list_remove(list, data)
 #define PLIST_CLEAR(list) list_clear(list)
 
+
+#define Plist_free PLIST_FREE
+
 #define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TM_BEGIN(); ___ret = OP; TM_END(); ___ret;})
 
 // Defined in thread.c
