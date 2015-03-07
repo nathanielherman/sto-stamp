@@ -243,7 +243,7 @@ TMheap_insert (TM_ARGDECL  heap_t* heapPtr, void* dataPtr)
         }
         TM_SHARED_WRITE(heapPtr->capacity, newCapacity);
         long i;
-        void** elements = TM_SHARED_READ_P(heapPtr->elements);
+        void** elements = (void**)TM_SHARED_READ_P(heapPtr->elements);
         for (i = 0; i <= size; i++) {
             newElements[i] = (void*)TM_SHARED_READ_P(elements[i]);
         }
