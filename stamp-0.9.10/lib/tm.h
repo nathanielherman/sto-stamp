@@ -485,6 +485,7 @@
 #    define P_FREE(ptr)                 /* TODO: thread local free is non-trivial */
 #    define TM_MALLOC(size)             memory_get(thread_getId(), size)
 #    define TM_FREE(ptr)                /* TODO: thread local free is non-trivial */
+#    define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  else /* !SIMULATOR */
 
@@ -492,6 +493,7 @@
 #    define P_FREE(ptr)                 free(ptr)
 #    define TM_MALLOC(size)             malloc(size)
 #    define TM_FREE(ptr)                /*free(ptr)*/
+#   define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  endif /* !SIMULATOR */
 
