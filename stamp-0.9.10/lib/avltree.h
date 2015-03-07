@@ -94,15 +94,8 @@
 #define JSW_AVLTREE_H
 
 
-#ifdef __cplusplus
-#include <cstddef>
-
-using std::size_t;
-
-extern "C" {
-#else
 #include <stddef.h>
-#endif
+
 
 #include "tm.h"
 
@@ -142,9 +135,6 @@ void          *jsw_avltlast ( jsw_avltrav_t *trav, jsw_avltree_t *tree );
 void          *jsw_avltnext ( jsw_avltrav_t *trav );
 void          *jsw_avltprev ( jsw_avltrav_t *trav );
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 
