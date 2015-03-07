@@ -187,7 +187,7 @@ initializeWork (heap_t* workHeapPtr, mesh_t* meshPtr)
  * =============================================================================
  */
 void
-process ()
+process (void *)
 {
     TM_THREAD_ENTER();
 
@@ -205,7 +205,7 @@ process ()
         element_t* elementPtr;
 
         TM_BEGIN();
-        elementPtr = TMHEAP_REMOVE(workHeapPtr);
+        elementPtr = (element_t*)TMHEAP_REMOVE(workHeapPtr);
         TM_END();
         if (elementPtr == NULL) {
             break;
@@ -306,7 +306,7 @@ MAIN(argc, argv)
 #ifdef OTM
 #pragma omp parallel
     {
-        process();
+        process(NULL);
     }
 #else
     thread_start(process, NULL);

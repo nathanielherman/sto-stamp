@@ -265,7 +265,7 @@ TMmesh_remove (TM_ARGDECL  mesh_t* meshPtr, element_t* elementPtr)
      * always follows a call a mesh_remove.
      */
     if ((element_t*)TM_SHARED_READ_P(meshPtr->rootElementPtr) == elementPtr) {
-        TM_SHARED_WRITE_P(meshPtr->rootElementPtr, NULL);
+        TM_SHARED_WRITE_P(meshPtr->rootElementPtr, (element_t *)NULL);
     }
 
     /*
