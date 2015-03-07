@@ -11,48 +11,48 @@
  *
  * For the license of bayes/sort.h and bayes/sort.c, please see the header
  * of the files.
- * 
+ *
  * ------------------------------------------------------------------------
- * 
+ *
  * For the license of kmeans, please see kmeans/LICENSE.kmeans
- * 
+ *
  * ------------------------------------------------------------------------
- * 
+ *
  * For the license of ssca2, please see ssca2/COPYRIGHT
- * 
+ *
  * ------------------------------------------------------------------------
- * 
+ *
  * For the license of lib/mt19937ar.c and lib/mt19937ar.h, please see the
  * header of the files.
- * 
+ *
  * ------------------------------------------------------------------------
- * 
+ *
  * For the license of lib/rbtree.h and lib/rbtree.c, please see
  * lib/LEGALNOTICE.rbtree and lib/LICENSE.rbtree
- * 
+ *
  * ------------------------------------------------------------------------
- * 
+ *
  * Unless otherwise noted, the following license applies to STAMP files:
- * 
+ *
  * Copyright (c) 2007, Stanford University
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- * 
+ *
  *     * Neither the name of Stanford University nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY STANFORD UNIVERSITY ``AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -98,11 +98,22 @@ volatile bool recovering = false;
 
 #if PERF_LOGGING
 void reportPerf(){
-		printf("STO System Shutdown:\n"
-						" read: %lld, write: %lld  searched: %lld\n"
-						" aborts: %lld commit time aborts: %lld \n",
-           Transaction::total_r, Transaction::total_w, Transaction::total_searched, Transaction::total_aborts, Transaction::commit_time_aborts);
+  using thr = threadinfo_t;
+  thr tc = Transaction::tinfo_combined();
+  printf("STO System Shutdown:\n"
+#if DETAILED_LOGGING
+         " read: %llu, write: %llu, searched: %llu\n"
+         " average set size: %llu, max set size: %llu\n"
+#endif
+         " starts: %llu, aborts: %llu, commit time aborts: %llu\n",
+#if DETAILED_LOGGING
+         tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched),
+         tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
+#endif
+         tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));
+  printf("DON'T USE THIS RUN FOR BENCHMARKS--TURN OFF PERF_LOGGING in Transaction.hh\n");
 }
+#if 0
 class ReportPerf_class {
 public:
   ReportPerf_class() {
@@ -110,6 +121,11 @@ public:
   }
 };
 static ReportPerf_class makeReportPerf;
+#endif
+#else
+void reportPerf(){
+  printf("STO System Shutdown.\n");
+}
 #endif
 
 #endif
@@ -133,21 +149,21 @@ static volatile bool_t   global_doShutdown      = FALSE;
 static void
 threadWait (void* argPtr)
 {
-    long threadId = *(long*)argPtr;
-
-    THREAD_LOCAL_SET(global_threadId, (long)threadId);
-
-    while (1) {
-        THREAD_BARRIER(global_barrierPtr, threadId); /* wait for start parallel */
-        if (global_doShutdown) {
-            break;
-        }
-        global_funcPtr(global_argPtr);
-        THREAD_BARRIER(global_barrierPtr, threadId); /* wait for end parallel */
-        if (threadId == 0) {
-            break;
-        }
+  long threadId = *(long*)argPtr;
+  
+  THREAD_LOCAL_SET(global_threadId, (long)threadId);
+  
+  while (1) {
+    THREAD_BARRIER(global_barrierPtr, threadId); /* wait for start parallel */
+    if (global_doShutdown) {
+      break;
     }
+    global_funcPtr(global_argPtr);
+    THREAD_BARRIER(global_barrierPtr, threadId); /* wait for end parallel */
+    if (threadId == 0) {
+      break;
+    }
+  }
 }
 
 
@@ -160,43 +176,43 @@ threadWait (void* argPtr)
 void
 thread_startup (long numThread)
 {
-    long i;
-
-    global_numThread = numThread;
-    global_doShutdown = FALSE;
-
-    /* Set up barrier */
-    assert(global_barrierPtr == NULL);
-    global_barrierPtr = THREAD_BARRIER_ALLOC(numThread);
-    assert(global_barrierPtr);
-    THREAD_BARRIER_INIT(global_barrierPtr, numThread);
-
-    /* Set up ids */
-    THREAD_LOCAL_INIT(global_threadId);
-    assert(global_threadIds == NULL);
-    global_threadIds = (long*)malloc(numThread * sizeof(long));
-    assert(global_threadIds);
-    for (i = 0; i < numThread; i++) {
-        global_threadIds[i] = i;
-    }
-
-    /* Set up thread list */
-    assert(global_threads == NULL);
-    global_threads = (THREAD_T*)malloc(numThread * sizeof(THREAD_T));
-    assert(global_threads);
-
-    /* Set up pool */
-    THREAD_ATTR_INIT(global_threadAttr);
-    for (i = 1; i < numThread; i++) {
-        THREAD_CREATE(global_threads[i],
-                      global_threadAttr,
-                      &threadWait,
-                      &global_threadIds[i]);
-    }
-
-    /*
-     * Wait for primary thread to call thread_start
-     */
+  long i;
+  
+  global_numThread = numThread;
+  global_doShutdown = FALSE;
+  
+  /* Set up barrier */
+  assert(global_barrierPtr == NULL);
+  global_barrierPtr = THREAD_BARRIER_ALLOC(numThread);
+  assert(global_barrierPtr);
+  THREAD_BARRIER_INIT(global_barrierPtr, numThread);
+  
+  /* Set up ids */
+  THREAD_LOCAL_INIT(global_threadId);
+  assert(global_threadIds == NULL);
+  global_threadIds = (long*)malloc(numThread * sizeof(long));
+  assert(global_threadIds);
+  for (i = 0; i < numThread; i++) {
+    global_threadIds[i] = i;
+  }
+  
+  /* Set up thread list */
+  assert(global_threads == NULL);
+  global_threads = (THREAD_T*)malloc(numThread * sizeof(THREAD_T));
+  assert(global_threads);
+  
+  /* Set up pool */
+  THREAD_ATTR_INIT(global_threadAttr);
+  for (i = 1; i < numThread; i++) {
+    THREAD_CREATE(global_threads[i],
+                  global_threadAttr,
+                  &threadWait,
+                  &global_threadIds[i]);
+  }
+  
+  /*
+   * Wait for primary thread to call thread_start
+   */
 }
 
 
@@ -210,11 +226,11 @@ thread_startup (long numThread)
 void
 thread_start (void (*funcPtr)(void*), void* argPtr)
 {
-    global_funcPtr = funcPtr;
-    global_argPtr = argPtr;
-
-    long threadId = 0; /* primary */
-    threadWait((void*)&threadId);
+  global_funcPtr = funcPtr;
+  global_argPtr = argPtr;
+  
+  long threadId = 0; /* primary */
+  threadWait((void*)&threadId);
 }
 
 
@@ -226,27 +242,27 @@ thread_start (void (*funcPtr)(void*), void* argPtr)
 void
 thread_shutdown ()
 {
-    /* Make secondary threads exit wait() */
-    global_doShutdown = TRUE;
-    THREAD_BARRIER(global_barrierPtr, 0);
-
-    long numThread = global_numThread;
-
-    long i;
-    for (i = 1; i < numThread; i++) {
-        THREAD_JOIN(global_threads[i]);
-    }
-
-    THREAD_BARRIER_FREE(global_barrierPtr);
-    global_barrierPtr = NULL;
-
-    free(global_threadIds);
-    global_threadIds = NULL;
-
-    free(global_threads);
-    global_threads = NULL;
-
-    global_numThread = 1;
+  /* Make secondary threads exit wait() */
+  global_doShutdown = TRUE;
+  THREAD_BARRIER(global_barrierPtr, 0);
+  
+  long numThread = global_numThread;
+  
+  long i;
+  for (i = 1; i < numThread; i++) {
+    THREAD_JOIN(global_threads[i]);
+  }
+  
+  THREAD_BARRIER_FREE(global_barrierPtr);
+  global_barrierPtr = NULL;
+  
+  free(global_threadIds);
+  global_threadIds = NULL;
+  
+  free(global_threads);
+  global_threads = NULL;
+  
+  global_numThread = 1;
 }
 
 
@@ -257,16 +273,16 @@ thread_shutdown ()
 thread_barrier_t*
 thread_barrier_alloc (long numThread)
 {
-    thread_barrier_t* barrierPtr;
-
-    assert(numThread > 0);
-    assert((numThread & (numThread - 1)) == 0); /* must be power of 2 */
-    barrierPtr = (thread_barrier_t*)malloc(numThread * sizeof(thread_barrier_t));
-    if (barrierPtr != NULL) {
-        barrierPtr->numThread = numThread;
-    }
-
-    return barrierPtr;
+  thread_barrier_t* barrierPtr;
+  
+  assert(numThread > 0);
+  assert((numThread & (numThread - 1)) == 0); /* must be power of 2 */
+  barrierPtr = (thread_barrier_t*)malloc(numThread * sizeof(thread_barrier_t));
+  if (barrierPtr != NULL) {
+    barrierPtr->numThread = numThread;
+  }
+  
+  return barrierPtr;
 }
 
 
@@ -277,7 +293,7 @@ thread_barrier_alloc (long numThread)
 void
 thread_barrier_free (thread_barrier_t* barrierPtr)
 {
-    free(barrierPtr);
+  free(barrierPtr);
 }
 
 
@@ -288,15 +304,15 @@ thread_barrier_free (thread_barrier_t* barrierPtr)
 void
 thread_barrier_init (thread_barrier_t* barrierPtr)
 {
-    long i;
-    long numThread = barrierPtr->numThread;
-
-    for (i = 0; i < numThread; i++) {
-        barrierPtr[i].count = 0;
-        THREAD_MUTEX_INIT(barrierPtr[i].countLock);
-        THREAD_COND_INIT(barrierPtr[i].proceedCond);
-        THREAD_COND_INIT(barrierPtr[i].proceedAllCond);
-    }
+  long i;
+  long numThread = barrierPtr->numThread;
+  
+  for (i = 0; i < numThread; i++) {
+    barrierPtr[i].count = 0;
+    THREAD_MUTEX_INIT(barrierPtr[i].countLock);
+    THREAD_COND_INIT(barrierPtr[i].proceedCond);
+    THREAD_COND_INIT(barrierPtr[i].proceedAllCond);
+  }
 }
 
 
@@ -308,51 +324,51 @@ thread_barrier_init (thread_barrier_t* barrierPtr)
 void
 thread_barrier (thread_barrier_t* barrierPtr, long threadId)
 {
-    long i = 2;
-    long base = 0;
-    long index;
-    long numThread = barrierPtr->numThread;
-
-    if (numThread < 2) {
-        return;
+  long i = 2;
+  long base = 0;
+  long index;
+  long numThread = barrierPtr->numThread;
+  
+  if (numThread < 2) {
+    return;
+  }
+  
+  do {
+    index = base + threadId / i;
+    if ((threadId % i) == 0) {
+      THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
+      barrierPtr[index].count++;
+      while (barrierPtr[index].count < 2) {
+        THREAD_COND_WAIT(barrierPtr[index].proceedCond,
+                         barrierPtr[index].countLock);
+      }
+      THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
+    } else {
+      THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
+      barrierPtr[index].count++;
+      if (barrierPtr[index].count == 2) {
+        THREAD_COND_SIGNAL(barrierPtr[index].proceedCond);
+      }
+      while (THREAD_COND_WAIT(barrierPtr[index].proceedAllCond,
+                              barrierPtr[index].countLock) != 0)
+      {
+        /* wait */
+      }
+      THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
+      break;
     }
-
-    do {
-        index = base + threadId / i;
-        if ((threadId % i) == 0) {
-            THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
-            barrierPtr[index].count++;
-            while (barrierPtr[index].count < 2) {
-                THREAD_COND_WAIT(barrierPtr[index].proceedCond,
-                                 barrierPtr[index].countLock);
-            }
-            THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
-        } else {
-            THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
-            barrierPtr[index].count++;
-            if (barrierPtr[index].count == 2) {
-                THREAD_COND_SIGNAL(barrierPtr[index].proceedCond);
-            }
-            while (THREAD_COND_WAIT(barrierPtr[index].proceedAllCond,
-                                    barrierPtr[index].countLock) != 0)
-            {
-                /* wait */
-            }
-            THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
-            break;
-        }
-        base = base + numThread / i;
-        i *= 2;
-    } while (i <= numThread);
-
-    for (i /= 2; i > 1; i /= 2) {
-        base = base - numThread / i;
-        index = base + threadId / i;
-        THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
-        barrierPtr[index].count = 0;
-        THREAD_COND_SIGNAL(barrierPtr[index].proceedAllCond);
-        THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
-    }
+    base = base + numThread / i;
+    i *= 2;
+  } while (i <= numThread);
+  
+  for (i /= 2; i > 1; i /= 2) {
+    base = base - numThread / i;
+    index = base + threadId / i;
+    THREAD_MUTEX_LOCK(barrierPtr[index].countLock);
+    barrierPtr[index].count = 0;
+    THREAD_COND_SIGNAL(barrierPtr[index].proceedAllCond);
+    THREAD_MUTEX_UNLOCK(barrierPtr[index].countLock);
+  }
 }
 
 
@@ -364,7 +380,7 @@ thread_barrier (thread_barrier_t* barrierPtr, long threadId)
 long
 thread_getId()
 {
-    return (long)THREAD_LOCAL_GET(global_threadId);
+  return (long)THREAD_LOCAL_GET(global_threadId);
 }
 
 
@@ -376,7 +392,7 @@ thread_getId()
 long
 thread_getNumThread()
 {
-    return global_numThread;
+  return global_numThread;
 }
 
 
@@ -389,9 +405,9 @@ void
 thread_barrier_wait()
 {
 #ifndef SIMULATOR
-    long threadId = thread_getId();
+  long threadId = thread_getId();
 #endif /* !SIMULATOR */
-    THREAD_BARRIER(global_barrierPtr, threadId);
+  THREAD_BARRIER(global_barrierPtr, threadId);
 }
 
 
@@ -414,43 +430,43 @@ thread_barrier_wait()
 void
 printId (void* argPtr)
 {
-    long threadId = thread_getId();
-    long numThread = thread_getNumThread();
-    long i;
-
-    for ( i = 0; i < NUM_ITERATIONS; i++ ) {
-        thread_barrier_wait();
-        if (threadId == 0) {
-            sleep(1);
-        } else if (threadId == numThread-1) {
-            usleep(100);
-        }
-        printf("i = %li, tid = %li\n", i, threadId);
-        if (threadId == 0) {
-            puts("");
-        }
-        fflush(stdout);
+  long threadId = thread_getId();
+  long numThread = thread_getNumThread();
+  long i;
+  
+  for ( i = 0; i < NUM_ITERATIONS; i++ ) {
+    thread_barrier_wait();
+    if (threadId == 0) {
+      sleep(1);
+    } else if (threadId == numThread-1) {
+      usleep(100);
     }
+    printf("i = %li, tid = %li\n", i, threadId);
+    if (threadId == 0) {
+      puts("");
+    }
+    fflush(stdout);
+  }
 }
 
 
 int
 main ()
 {
-    puts("Starting...");
-
-    /* Run in parallel */
-    thread_startup(NUM_THREADS);
-    /* Start timing here */
-    thread_start(printId, NULL);
-    thread_start(printId, NULL);
-    thread_start(printId, NULL);
-    /* Stop timing here */
-    thread_shutdown();
-
-    puts("Done.");
-
-    return 0;
+  puts("Starting...");
+  
+  /* Run in parallel */
+  thread_startup(NUM_THREADS);
+  /* Start timing here */
+  thread_start(printId, NULL);
+  thread_start(printId, NULL);
+  thread_start(printId, NULL);
+  /* Stop timing here */
+  thread_shutdown();
+  
+  puts("Done.");
+  
+  return 0;
 }
 
 
