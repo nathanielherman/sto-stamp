@@ -74,7 +74,13 @@
 
 
 #include "bitmap.h"
+
+#ifdef STO
+#include "list2.hh"
+#else
 #include "list.h"
+#endif
+
 #include "operation.h"
 #include "queue.h"
 #include "tm.h"
