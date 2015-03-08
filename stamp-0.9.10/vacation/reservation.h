@@ -288,27 +288,6 @@ typedef _reservation_t reservation_t;
 #define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \
 		TM_SHARED_READ(reservationPtr->price)
 #endif
-
-#else
-typedef _reservation_t reservation_t;
-#define TM_RESERVATION_ALLOC(_reservationPtr) _reservationPtr
-#define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr) 
-
-#define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numTotal)
-#define TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) \
-		reservationPtr->numTotal
-#define TM_RESERVATION_SHARED_READ_USED(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numUsed)
-#define TM_RESERVATION_SEQ_READ_USED(reservationPtr) \
-		reservationPtr->numUsed
-#define TM_RESERVATION_SEQ_READ_FREE(reservationPtr) \
-		reservationPtr->numFree
-#define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numFree)
-#define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->price)
-#endif
 /* =============================================================================
  * reservation_info_alloc
  * -- Returns NULL on failure
