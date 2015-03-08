@@ -87,6 +87,11 @@
 #  define TMMAP_FIND(map, key)       TMhashtable_find(TM_ARG  (map), (void*)(key))
 #  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  (map), (void*)(key), (void*)(data))
 #  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  (map), (void*)(key))
+// XXX fake PMAP_* functions
+#  define PMAP_ALLOC(hash, cmp) MAP_ALLOC(hash, cmp)
+#  define PMAP_FREE(map) MAP_FREE(map)
+#  define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
+#  define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
 
 #elif defined(MAP_USE_ATREE)
 

@@ -73,8 +73,11 @@
 #ifndef TABLE_H
 #define TABLE_H 1
 
-
+#ifdef STO
+#include "list2.hh"
+#else
 #include "list.h"
+#endif
 #include "types.h"
 
 

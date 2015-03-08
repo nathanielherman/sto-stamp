@@ -73,8 +73,15 @@
 #include <string.h>
 #include "decoder.h"
 #include "error.h"
-#include "list2.hh"
-#include "map2.h"
+
+#ifdef STO
+#  include "list2.hh"
+#  include "map2.h"
+#else
+#  include "list.h"
+#  include "map.h"
+#endif
+
 #include "packet.h"
 #include "queue.h"
 #include "tm.h"

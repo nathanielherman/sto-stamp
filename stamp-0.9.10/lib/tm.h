@@ -466,7 +466,7 @@
 #  define TM_ARGDECL                    Transaction& TM_ARG
 #  define TM_ARGDECL_ALONE              Transaction& TM_ARG_ALONE
 #  define TM_CALLABLE                   /* nothing */
-#  define TM_BEGIN()                    while (1) { try { Transaction __transaction;
+#  define TM_BEGIN()                    while (1) { try { Transaction& __transaction = Transaction::get_transaction();
 #  define TM_BEGIN_RO() TM_BEGIN()
 #  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
 #  define TM_RESTART() __transaction.abort()

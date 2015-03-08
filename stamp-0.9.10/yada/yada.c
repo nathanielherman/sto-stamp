@@ -74,9 +74,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "region.h"
-#include "list.h"
+
+#ifdef STO
+#  include "list2.hh"
+#else
+#  include "list.h"
+#endif
+
 #include "mesh.h"
-#include "heap.h"
+#include "heap.h"   // TODO: Implement TMHeap, now using generic STM
 #include "thread.h"
 #include "timer.h"
 #include "tm.h"
@@ -187,7 +193,7 @@ initializeWork (heap_t* workHeapPtr, mesh_t* meshPtr)
  * =============================================================================
  */
 void
-process ()
+process (void * noarg)
 {
     TM_THREAD_ENTER();
 
@@ -205,7 +211,7 @@ process ()
         element_t* elementPtr;
 
         TM_BEGIN();
-        elementPtr = TMHEAP_REMOVE(workHeapPtr);
+        elementPtr = (element_t *)TMHEAP_REMOVE(workHeapPtr);
         TM_END();
         if (elementPtr == NULL) {
             break;
@@ -306,7 +312,7 @@ MAIN(argc, argv)
 #ifdef OTM
 #pragma omp parallel
     {
-        process();
+        process(NULL);
     }
 #else
     thread_start(process, NULL);

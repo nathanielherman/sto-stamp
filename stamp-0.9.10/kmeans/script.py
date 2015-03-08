@@ -42,7 +42,7 @@ def printfmt_int(header, out, precision, width):
 if __name__ == "__main__":
     nthreads = [1,2,4,8,16,32]
     t = 1;
-    cmds = [['./kmeans', '-p1', '-m80', '-n80', '-t0.05', '-i', 'inputs/random-n65536-d32-c16.txt'], \
+    cmds = [['./kmeans', '-p1', '-m80', '-n80', '-t0.001', '-i', 'inputs/random-n65536-d32-c16.txt'], \
             ['./kmeans', '-p1', '-m160', '-n160', '-t0.001', '-i', 'inputs/random-n65536-d32-c16.txt']]
 
     for cmd in cmds:

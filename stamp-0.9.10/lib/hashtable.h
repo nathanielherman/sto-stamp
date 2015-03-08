@@ -84,8 +84,11 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H 1
 
-
+#ifdef STO
+#include "list2.hh"
+#else
 #include "list.h"
+#endif
 #include "pair.h"
 #include "tm.h"
 #include "types.h"

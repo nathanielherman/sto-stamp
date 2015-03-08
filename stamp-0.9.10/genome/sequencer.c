@@ -270,7 +270,7 @@ sequencer_run (void* argPtr)
     /*
      * Step 1: Remove duplicate segments
      */
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     long numThread = thread_getNumThread();
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
@@ -327,7 +327,7 @@ sequencer_run (void* argPtr)
     numUniqueSegment = hashtable_getSize(uniqueSegmentsPtr);
     entryIndex = 0;
 
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
         long num = uniqueSegmentsPtr->numBucket;
@@ -366,6 +366,10 @@ sequencer_run (void* argPtr)
             bool_t status;
 
             /* Find an empty constructEntries entry */
+            // XXX The while loop below was not there originally
+            while ((void*)constructEntries[entryIndex].segment != NULL) {
+                entryIndex = (entryIndex + 1) % numUniqueSegment;
+            }
             TM_BEGIN();
             while (((void*)TM_SHARED_READ_P(constructEntries[entryIndex].segment)) != NULL) {
                 entryIndex = (entryIndex + 1) % numUniqueSegment; /* look for empty */
@@ -429,7 +433,7 @@ sequencer_run (void* argPtr)
         long index_start;
         long index_stop;
 
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
         {
             /* Choose disjoint segments [index_start,index_stop) for each thread */
             long partitionSize = (numUniqueSegment + numThread/2) / numThread; /* with rounding */
