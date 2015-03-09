@@ -118,7 +118,7 @@ static long compareLong(const void *a, const void *b){
 static MAP_T*
 tableAlloc ()
 {
-    return MAP_ALLOC(hash, compareLong);
+    return MAP_ALLOC(hash, NULL);
 }
 
 
