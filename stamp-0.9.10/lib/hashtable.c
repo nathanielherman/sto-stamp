@@ -306,13 +306,63 @@ ulong_t default_hash(const void* k) {
 }
 
 /* =============================================================================
+ * compareDataPtrAddresses
+ * -- Default compare function
+ * =============================================================================
+ */
+static long
+compareDataPtrAddresses (const void* a, const void* b)
+{
+  return ((long)a - (long)b);
+}
+
+#define REP3(F) F(0) F(1) F(2)
+
+#define N_COMPAREFUNCS 3
+
+long (*hashtable_compareKeys[N_COMPAREFUNCS])(const void*, const void*);
+#define KTH_COMPAREPAIRS_FUNC(i) long hashtable_comparePairs ## i (const pair_t *p1, const pair_t *p2) { return hashtable_compareKeys[i](p1->firstPtr, p2->firstPtr); }
+#define COMPAREFUNC_ARRAY(i) hashtable_comparePairs ## i ,
+
+REP3(KTH_COMPAREPAIRS_FUNC)
+long (*hashtable_comparePairs[]) (const pair_t *p1, const pair_t *p2) = { REP3(COMPAREFUNC_ARRAY) };
+
+hashtable_t*
+hashtable_alloc (long initNumBucket,
+                 ulong_t (*hash)(const void*),
+                 long (*compareKeys)(const void*, const void*),
+                 long resizeRatio,
+                 long growthFactor)
+{
+  long (*comparePairs)(const pair_t*, const pair_t*) = NULL;
+  if (!compareKeys) {
+    compareKeys = compareDataPtrAddresses;
+  }
+  int idx = 0;
+  for (; idx < N_COMPAREFUNCS; ++idx) {
+    if (!hashtable_compareKeys[idx]) {
+      hashtable_compareKeys[idx] = compareKeys;
+      comparePairs = hashtable_comparePairs[idx];
+      break;
+    }
+    else if (hashtable_compareKeys[idx] == compareKeys) {
+      comparePairs = hashtable_comparePairs[idx];
+      break;
+    }
+  }
+  // make sure we didn't run out of functions
+  assert(idx < N_COMPAREFUNCS);
+  return hashtable_alloc_pairs(initNumBucket, hash, comparePairs, resizeRatio, growthFactor);
+}
+
+/* =============================================================================
  * hashtable_alloc
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
  * =============================================================================
  */
 hashtable_t*
-hashtable_alloc (long initNumBucket,
+hashtable_alloc_pairs (long initNumBucket,
                  ulong_t (*hash)(const void*),
                  long (*comparePairs)(const pair_t*, const pair_t*),
                  long resizeRatio,
