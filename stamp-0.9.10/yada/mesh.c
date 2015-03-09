@@ -97,7 +97,6 @@
 #include "types.h"
 #include "utility.h"
 
-
 struct mesh {
     element_t* rootElementPtr;
     queue_t* initBadQueuePtr;

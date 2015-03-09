@@ -358,8 +358,9 @@ element_listCompare (const void* aPtr, const void* bPtr)
  * =============================================================================
  */
 long
-element_mapCompare (const pair_t* aPtr, const pair_t* bPtr)
+element_listCompare_pairs (const pair_t* aPtr, const pair_t* bPtr)
 {
+  return element_listCompare(aPtr->firstPtr, bPtr->firstPtr);
     // DON'T USE
     assert(0);
     element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
@@ -574,8 +575,9 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
  * =============================================================================
  */
 long
-element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
+element_listCompareEdge_pairs (const pair_t* aPtr, const pair_t* bPtr)
 {
+  return element_listCompareEdge(aPtr->firstPtr, bPtr->firstPtr);
     // DON'T USE
     assert(0);
     edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);

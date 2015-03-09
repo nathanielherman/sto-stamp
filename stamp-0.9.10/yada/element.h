@@ -115,7 +115,7 @@ element_listCompare (const void* aPtr, const void* bPtr);
  * =============================================================================
  */
 long
-element_mapCompare (const pair_t* aPtr, const pair_t* bPtr);
+element_listCompare_pairs (const pair_t* aPtr, const pair_t* bPtr);
 
 
 /* =============================================================================
@@ -207,7 +207,7 @@ element_listCompareEdge (const void* aPtr, const void* bPtr);
  * =============================================================================
  */
 long
-element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr);
+element_listCompareEdge_pairs (const pair_t* aPtr, const pair_t* bPtr);
 
 
 /* =============================================================================

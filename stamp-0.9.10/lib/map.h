@@ -77,7 +77,7 @@
 #  include "hashtable.h"
 
 #  define MAP_T                       hashtable_t
-#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp, 2, 2)
+#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp ## _pairs, 2, 2)
 #  define MAP_FREE(map)               hashtable_free(map)
 #  define MAP_CONTAINS(map, key)      hashtable_containsKey(map, (void*)(key))
 #  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
@@ -151,7 +151,7 @@
 #  include "pair2keycompare.h"
 
 #  define MAP_T                       jsw_avltree_t
-#  define MAP_ALLOC(hash, cmp)        jsw_avlnew((cmp_f)get_comparePairsFunc(cmp))
+#  define MAP_ALLOC(hash, cmp)        jsw_avlnew((cmp_f)(cmp ## _pairs))
 #  define MAP_FREE(map)               jsw_avldelete(map)
 #  define MAP_CONTAINS(map, key) \
     ({ \

@@ -85,7 +85,6 @@
 #include <stdlib.h>
 #include "hashtable.h"
 #include "pair.h"
-#include "pair2keycompare.h"
 #include "types.h"
 
 #ifdef HAVE_CONFIG_H
@@ -308,23 +307,6 @@ ulong_t default_hash(const void* k) {
 
 /* =============================================================================
  * hashtable_alloc
- * -- Returns NULL on failure
- * -- Negative values for resizeRatio or growthFactor select default values
- * =============================================================================
- */
-hashtable_t*
-hashtable_alloc (long initNumBucket,
-                 ulong_t (*hash)(const void*),
-                 long (*compareKeys)(const void*, const void*),
-                 long resizeRatio,
-                 long growthFactor)
-{
-
-  return hashtable_alloc_pairs(initNumBucket, hash, get_comparePairsFunc(compareKeys), resizeRatio, growthFactor);
-}
-
-/* =============================================================================
- * hashtable_alloc_pairs
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
  * -- comparePairs is a function comparing PAIRS of key, values in the
