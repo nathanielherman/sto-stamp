@@ -18,6 +18,7 @@ SRCS += \
 	$(LIB)/list.c \
 	$(LIB)/mt19937ar.c \
 	$(LIB)/pair.c \
+	$(LIB)/pair2keycompare.c \
 	$(LIB)/queue.c \
 	$(LIB)/random.c \
 	$(LIB)/rbtree.c \
