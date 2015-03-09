@@ -524,7 +524,7 @@ TMpopTask (TM_ARGDECL  list_t* taskListPtr)
     if (TMLIST_ITER_HASNEXT(&it, taskListPtr)) {
         taskPtr = (learner_task_t*)TMLIST_ITER_NEXT(&it, taskListPtr);
         bool_t status = TMLIST_REMOVE(taskListPtr, (void*)taskPtr);
-        assert(status);
+        if (!status) TM_RESTART();
     }
 
     return taskPtr;
