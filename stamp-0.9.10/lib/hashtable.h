@@ -179,6 +179,7 @@ TMhashtable_iter_next (TM_ARGDECL
  * hashtable_alloc
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
+ * -- Takes a key comparison function
  * =============================================================================
  */
 hashtable_t*
@@ -197,9 +198,10 @@ hashtable_alloc_pairs (long initNumBucket,
 
 
 /* =============================================================================
- * TMhashtable_alloc
+ * TMhashtable_alloc_pairs
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
+ * -- Takes a key, value pair comparison function
  * =============================================================================
  */
 hashtable_t*

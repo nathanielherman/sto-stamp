@@ -316,6 +316,11 @@ compareDataPtrAddresses (const void* a, const void* b)
   return ((long)a - (long)b);
 }
 
+/* Macro magickz. Hashtable is an array of linked lists, meaning it 
+ * expects a key, value comparison function. But maps should really
+ * just take key comparison functions, so we convert a key comparison
+ * function to a key, value comparison function.
+ */
 #define REP3(F) F(0) F(1) F(2)
 
 #define N_COMPAREFUNCS 3
@@ -327,6 +332,12 @@ long (*hashtable_compareKeys[N_COMPAREFUNCS])(const void*, const void*);
 REP3(KTH_COMPAREPAIRS_FUNC)
 long (*hashtable_comparePairs[]) (const pair_t *p1, const pair_t *p2) = { REP3(COMPAREFUNC_ARRAY) };
 
+/* =============================================================================
+ * hashtable_alloc
+ * -- Returns NULL on failure
+ * -- Negative values for resizeRatio or growthFactor select default values
+ * =============================================================================
+ */
 hashtable_t*
 hashtable_alloc (long initNumBucket,
                  ulong_t (*hash)(const void*),
@@ -356,9 +367,11 @@ hashtable_alloc (long initNumBucket,
 }
 
 /* =============================================================================
- * hashtable_alloc
+ * hashtable_alloc_pairs
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
+ * -- comparePairs is a function comparing PAIRS of key, values in the
+ * table. You probably want to be calling hashtable_alloc which just takes a key comparator
  * =============================================================================
  */
 hashtable_t*
