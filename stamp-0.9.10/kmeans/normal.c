@@ -108,9 +108,13 @@ typedef struct args {
     Cluster** new_clusters;
 } args_t;
 
+#ifndef STO
+float global_delta;
+float global_i;
+#else
 Single<float> global_delta;
 Single<long> global_i; /* index into task queue */
-
+#endif
 
 #define CHUNK 3
 

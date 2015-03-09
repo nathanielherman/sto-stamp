@@ -4,7 +4,7 @@
 #define D
 #include "single.h"
 #else
-template<class T> using Single = T;
+//template<class T> using Single = T;
 #endif
 
 #define CACHE_LINE_SIZE 64
@@ -30,15 +30,16 @@ class Cluster: public Single<_Cluster*>{
 				}
 
 };
-#else
-#define Cluster _Cluster
-#endif 
 
 template<typename T>
 struct CacheLineStorage {
 		public:
 				 T data __attribute__ ((aligned (CACHE_LINE_SIZE)));
 };
+#else
+#define Cluster _Cluster
+#endif 
+
 
 #define AlignedCluster CacheLineStorage<Cluster>
 
