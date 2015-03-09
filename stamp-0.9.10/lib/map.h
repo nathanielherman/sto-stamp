@@ -88,7 +88,7 @@
 #  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  (map), (void*)(key), (void*)(data))
 #  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  (map), (void*)(key))
 // XXX fake PMAP_* functions
-#  define PMAP_ALLOC(hash, cmp) MAP_ALLOC(hash, cmp)
+#  define PMAP_ALLOC(hash, cmp) hashtable_alloc(1000, hash, cmp, 2, 2)
 #  define PMAP_FREE(map) MAP_FREE(map)
 #  define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
 #  define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
@@ -243,6 +243,12 @@
 #  define TMMAP_INSERT(map, key, data) \
     TMRBTREE_INSERT(map, (void*)(key), (void*)(data))
 #  define TMMAP_REMOVE(map, key)      TMRBTREE_DELETE(map, (void*)(key))
+
+// XXX: fake PMAP functions
+#  define PMAP_ALLOC(hash, cmp) MAP_ALLOC(hash, cmp)
+#  define PMAP_FREE(map) MAP_FREE(map)
+#  define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
+#  define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
 
 
 #elif defined(MAP_USE_SKIPLIST)
