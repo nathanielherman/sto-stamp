@@ -77,7 +77,7 @@
 #  include "hashtable.h"
 
 #  define MAP_T                       hashtable_t
-#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp ## _pairs, 2, 2)
+#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp, 2, 2)
 #  define MAP_FREE(map)               hashtable_free(map)
 #  define MAP_CONTAINS(map, key)      hashtable_containsKey(map, (void*)(key))
 #  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
@@ -88,7 +88,7 @@
 #  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  (map), (void*)(key), (void*)(data))
 #  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  (map), (void*)(key))
 // XXX fake PMAP_* functions
-#  define PMAP_ALLOC(hash, cmp) hashtable_alloc(1000, hash, cmp ## _pairs, 2, 2)
+#  define PMAP_ALLOC(hash, cmp) hashtable_alloc(1000, hash, cmp, 2, 2)
 #  define PMAP_FREE(map) MAP_FREE(map)
 #  define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
 #  define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
@@ -151,7 +151,7 @@
 #  include "pair2keycompare.h"
 
 #  define MAP_T                       jsw_avltree_t
-#  define MAP_ALLOC(hash, cmp)        jsw_avlnew((cmp_f)(cmp ## _pairs))
+#  define MAP_ALLOC(hash, cmp)        jsw_avlnew((cmp_f)(cmp))
 #  define MAP_FREE(map)               jsw_avldelete(map)
 #  define MAP_CONTAINS(map, key) \
     ({ \
@@ -198,7 +198,7 @@
         success; \
      })
 
-#  define PMAP_ALLOC(hash, cmp)        Pjsw_avlnew((cmp_f)cmp ## _pairs)
+#  define PMAP_ALLOC(hash, cmp)        Pjsw_avlnew((cmp_f)cmp)
 #  define PMAP_FREE(map)               Pjsw_avldelete(map)
 #  define PMAP_INSERT(map, key, data) \
     ({ \

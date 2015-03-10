@@ -157,11 +157,16 @@ TMlist_iter_hasNext (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr)
  * =============================================================================
  */
 void*
-list_iter_next (list_iter_t* itPtr, list_t* listPtr)
+list_iter_next (list_iter_t* itPtr, list_t* listPtr) {
+    return list_full_iter_next(itPtr, listPtr).firstPtr;
+}
+
+pair_t
+list_full_iter_next (list_iter_t* itPtr, list_t* listPtr)
 {
     *itPtr = (*itPtr)->nextPtr;
 
-    return (*itPtr)->dataPtr;
+    return (pair_t){(*itPtr)->dataPtr, (*itPtr)->secondaryDataPtr};
 }
 
 
@@ -170,12 +175,17 @@ list_iter_next (list_iter_t* itPtr, list_t* listPtr)
  * =============================================================================
  */
 void*
-TMlist_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr)
+TMlist_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr) {
+    return TMlist_full_iter_next(TM_ARG  itPtr, listPtr).firstPtr;
+}
+
+pair_t
+TMlist_full_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr)
 {
     list_iter_t next = (list_iter_t)TM_SHARED_READ_P((*itPtr)->nextPtr);
     TM_LOCAL_WRITE_P(*itPtr, next);
 
-    return next->dataPtr;
+    return (pair_t){next->dataPtr, next->secondaryDataPtr};
 }
 
 
@@ -185,7 +195,7 @@ TMlist_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr)
  * =============================================================================
  */
 static list_node_t*
-allocNode (void* dataPtr)
+allocNode (void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* nodePtr = (list_node_t*)malloc(sizeof(list_node_t));
     if (nodePtr == NULL) {
@@ -193,6 +203,7 @@ allocNode (void* dataPtr)
     }
 
     nodePtr->dataPtr = dataPtr;
+    nodePtr->secondaryDataPtr = secondaryDataPtr;
     nodePtr->nextPtr = NULL;
 
     return nodePtr;
@@ -205,7 +216,7 @@ allocNode (void* dataPtr)
  * =============================================================================
  */
 static list_node_t*
-PallocNode (void* dataPtr)
+PallocNode (void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* nodePtr = (list_node_t*)P_MALLOC(sizeof(list_node_t));
     if (nodePtr == NULL) {
@@ -213,6 +224,7 @@ PallocNode (void* dataPtr)
     }
 
     nodePtr->dataPtr = dataPtr;
+    nodePtr->secondaryDataPtr = secondaryDataPtr;
     nodePtr->nextPtr = NULL;
 
     return nodePtr;
@@ -225,7 +237,7 @@ PallocNode (void* dataPtr)
  * =============================================================================
  */
 static list_node_t*
-TMallocNode (TM_ARGDECL  void* dataPtr)
+TMallocNode (TM_ARGDECL  void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* nodePtr = (list_node_t*)TM_MALLOC(sizeof(list_node_t));
     if (nodePtr == NULL) {
@@ -233,6 +245,7 @@ TMallocNode (TM_ARGDECL  void* dataPtr)
     }
 
     nodePtr->dataPtr = dataPtr;
+    nodePtr->secondaryDataPtr = secondaryDataPtr;
     nodePtr->nextPtr = NULL;
 
     return nodePtr;
@@ -254,6 +267,7 @@ list_alloc (long (*compare)(const void*, const void*))
     }
 
     listPtr->head.dataPtr = NULL;
+    listPtr->head.secondaryDataPtr = NULL;
     listPtr->head.nextPtr = NULL;
     listPtr->size = 0;
 
@@ -282,6 +296,7 @@ Plist_alloc (long (*compare)(const void*, const void*))
     }
 
     listPtr->head.dataPtr = NULL;
+    listPtr->head.secondaryDataPtr = NULL;
     listPtr->head.nextPtr = NULL;
     listPtr->size = 0;
 
@@ -310,6 +325,7 @@ TMlist_alloc (TM_ARGDECL  long (*compare)(const void*, const void*))
     }
 
     listPtr->head.dataPtr = NULL;
+    listPtr->head.secondaryDataPtr = NULL;
     listPtr->head.nextPtr = NULL;
     listPtr->size = 0;
 
@@ -536,7 +552,12 @@ TMfindPrevious (TM_ARGDECL  list_t* listPtr, void* dataPtr)
  * =============================================================================
  */
 void*
-list_find (list_t* listPtr, void* dataPtr)
+list_find (list_t* listPtr, void* dataPtr) {
+    return list_full_find(listPtr, dataPtr).firstPtr;
+}
+
+pair_t
+list_full_find (list_t* listPtr, void* dataPtr)
 {
     list_node_t* nodePtr;
     list_node_t* prevPtr = findPrevious(listPtr, dataPtr);
@@ -545,10 +566,10 @@ list_find (list_t* listPtr, void* dataPtr)
 
     if ((nodePtr == NULL) ||
         (listPtr->compare(nodePtr->dataPtr, dataPtr) != 0)) {
-        return NULL;
+        return (pair_t){NULL, NULL};
     }
 
-    return (nodePtr->dataPtr);
+    return (pair_t){nodePtr->dataPtr, nodePtr->secondaryDataPtr};
 }
 
 
@@ -558,7 +579,12 @@ list_find (list_t* listPtr, void* dataPtr)
  * =============================================================================
  */
 void*
-TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr)
+TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr) {
+    return TMlist_full_find(TM_ARG  listPtr, dataPtr).firstPtr;
+}
+
+pair_t
+TMlist_full_find (TM_ARGDECL  list_t* listPtr, void* dataPtr)
 {
     list_node_t* nodePtr;
     list_node_t* prevPtr = TMfindPrevious(TM_ARG  listPtr, dataPtr);
@@ -567,10 +593,10 @@ TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr)
 
     if ((nodePtr == NULL) ||
         (listPtr->compare(nodePtr->dataPtr, dataPtr) != 0)) {
-        return NULL;
+        return (pair_t){NULL, NULL};
     }
 
-    return (nodePtr->dataPtr);
+    return (pair_t){nodePtr->dataPtr, nodePtr->secondaryDataPtr};
 }
 
 
@@ -580,7 +606,12 @@ TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr)
  * =============================================================================
  */
 bool_t
-list_insert (list_t* listPtr, void* dataPtr)
+list_insert (list_t* listPtr, void* dataPtr) {
+    return list_full_insert(listPtr, dataPtr, NULL);
+}
+
+bool_t
+list_full_insert (list_t* listPtr, void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* prevPtr;
     list_node_t* nodePtr;
@@ -596,7 +627,7 @@ list_insert (list_t* listPtr, void* dataPtr)
     }
 #endif
 
-    nodePtr = allocNode(dataPtr);
+    nodePtr = allocNode(dataPtr, secondaryDataPtr);
     if (nodePtr == NULL) {
         return FALSE;
     }
@@ -615,7 +646,12 @@ list_insert (list_t* listPtr, void* dataPtr)
  * =============================================================================
  */
 bool_t
-Plist_insert (list_t* listPtr, void* dataPtr)
+Plist_insert (list_t* listPtr, void* dataPtr) {
+    return Plist_full_insert(listPtr, dataPtr, NULL);
+}
+
+bool_t
+Plist_full_insert (list_t* listPtr, void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* prevPtr;
     list_node_t* nodePtr;
@@ -631,7 +667,7 @@ Plist_insert (list_t* listPtr, void* dataPtr)
     }
 #endif
 
-    nodePtr = PallocNode(dataPtr);
+    nodePtr = PallocNode(dataPtr, secondaryDataPtr);
     if (nodePtr == NULL) {
         return FALSE;
     }
@@ -650,7 +686,12 @@ Plist_insert (list_t* listPtr, void* dataPtr)
  * =============================================================================
  */
 bool_t
-TMlist_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr)
+TMlist_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr) {
+    return TMlist_full_insert(TM_ARG  listPtr, dataPtr, NULL);
+}
+
+bool_t
+TMlist_full_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr, void* secondaryDataPtr)
 {
     list_node_t* prevPtr;
     list_node_t* nodePtr;
@@ -666,7 +707,7 @@ TMlist_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr)
     }
 #endif
 
-    nodePtr = TMallocNode(TM_ARG  dataPtr);
+    nodePtr = TMallocNode(TM_ARG  dataPtr, secondaryDataPtr);
     if (nodePtr == NULL) {
         return FALSE;
     }
@@ -829,7 +870,7 @@ static void
 insertInt (list_t* listPtr, long* data)
 {
     printf("Inserting: %li\n", *data);
-    list_insert(listPtr, (void*)data);
+    list_insert(listPtr, (void*)data, NULL);
     printList(listPtr);
 }
 
@@ -868,7 +909,7 @@ main ()
 
     for (i = 0; data1[i] >= 0; i++) {
         removeInt(listPtr, &data1[i]);
-        assert(list_find(listPtr, &data1[i]) == NULL);
+        assert(list_find(listPtr, &data1[i]).firstPtr == NULL);
     }
 
     list_free(listPtr);
@@ -884,7 +925,7 @@ main ()
 
     for (i = 0; data2[i] >= 0; i++) {
         removeInt(listPtr, &data2[i]);
-        assert(list_find(listPtr, &data2[i]) == NULL);
+        assert(list_find(listPtr, &data2[i]).firstPtr == NULL);
     }
 
     list_free(listPtr);
