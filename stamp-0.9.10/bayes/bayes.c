@@ -331,7 +331,7 @@ MAIN(argc, argv)
 
     puts("done.");
     fflush(stdout);
-    printf("Learn time = %f\n",
+    printf("Time = %f\n",
            TIMER_DIFF_SECONDS(learnStartTime, learnStopTime));
     fflush(stdout);
 
