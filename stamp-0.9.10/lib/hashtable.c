@@ -314,7 +314,7 @@ ulong_t default_hash(const void* k) {
  * =============================================================================
  */
 hashtable_t*
-hashtable_alloc_pairs (long initNumBucket,
+hashtable_alloc (long initNumBucket,
                  ulong_t (*hash)(const void*),
                  long (*comparePairs)(const pair_t*, const pair_t*),
                  long resizeRatio,

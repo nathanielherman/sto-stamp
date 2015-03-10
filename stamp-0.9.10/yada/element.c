@@ -350,25 +350,7 @@ element_listCompare (const void* aPtr, const void* bPtr)
     return element_compare(aElementPtr, bElementPtr);
 }
 
-
-/* =============================================================================
- * element_mapCompare
- *
- * For use in MAP_T. DON'T USE THIS, use element_listCompare. See element_mapCompareEdge
- * =============================================================================
- */
-long
-element_listCompare_pairs (const pair_t* aPtr, const pair_t* bPtr)
-{
-  return element_listCompare(aPtr->firstPtr, bPtr->firstPtr);
-    // DON'T USE
-    assert(0);
-    element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
-    element_t* bElementPtr = (element_t*)(bPtr->firstPtr);
-
-    return element_compare(aElementPtr, bElementPtr);
-}
-
+GEN_COMPAREPAIR_BODY(element_listCompare);
 
 /* =============================================================================
  * element_alloc
@@ -562,29 +544,7 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
     return compareEdge(aEdgePtr, bEdgePtr);
 }
 
-
-/* =============================================================================
- * element_mapCompareEdge
- *
-  * For use in MAP_T
-  * DON'T USE THIS. Nate: STAMP isn't consistent about whether map comparators
-  * should compare keys or key, value pairs, so tests use comparators
-  * based on which map they want to use. We really want everything to work
-  * invariant on what map type we're using, so we're going to try to make all
-  * maps use key comparators
- * =============================================================================
- */
-long
-element_listCompareEdge_pairs (const pair_t* aPtr, const pair_t* bPtr)
-{
-  return element_listCompareEdge(aPtr->firstPtr, bPtr->firstPtr);
-    // DON'T USE
-    assert(0);
-    edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);
-    edge_t* bEdgePtr = (edge_t*)(bPtr->firstPtr);
-
-    return compareEdge(aEdgePtr, bEdgePtr);
-}
+GEN_COMPAREPAIR_BODY(element_listCompareEdge);
 
 
 /* =============================================================================
