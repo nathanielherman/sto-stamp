@@ -763,7 +763,7 @@ TMfindBestInsertTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
     float bestLocalLogLikelihood = oldLocalLogLikelihood;
 
     status = TMNET_FINDDESCENDANTS(netPtr, toId, invalidBitmapPtr, workQueuePtr);
-    assert(status);
+    if (!status) TM_RESTART();
     long fromId = -1;
 
     list_t* parentIdListPtr = net_getParentIdListPtr(netPtr, toId);
