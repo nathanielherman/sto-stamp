@@ -47,11 +47,11 @@ if __name__ == "__main__":
 
     for cmd in cmds:
         print cmd
-        print printfmt_int('n', nthreads, 2, 8)
+        print printfmt_int('n', nthreads, 4, 8)
         seq_time, seq_std = run_benchmark(cmd, 'seq', [1])
-        print printfmt_double('seq', seq_time, 2, 8)
+        print printfmt_double('seq', seq_time, 4, 8)
         stm_time, stm_std = run_benchmark(cmd, 'stm', nthreads)
-        print printfmt_double('stm', stm_time, 2, 8)
+        print printfmt_double('stm', stm_time, 4, 8)
         sto_time, sto_std = run_benchmark(cmd, 'STO', nthreads)
-        print printfmt_double('sto', sto_time, 2, 8)
+        print printfmt_double('sto', sto_time, 4, 8)
 
