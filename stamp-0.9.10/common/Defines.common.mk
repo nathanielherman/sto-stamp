@@ -5,12 +5,12 @@
 # ==============================================================================
 
 
-#CC       := gcc 
-CC       := g++ -std=c++11
+CC       := gcc 
+#CC       := g++ -std=c++11
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += -O3
 CFLAGS   += -I$(LIB)
-CPP      := g++
+CPP      := g++ --std=c++11
 CPPFLAGS += $(CFLAGS)
 LD       := g++
 LIBS     += -lpthread
