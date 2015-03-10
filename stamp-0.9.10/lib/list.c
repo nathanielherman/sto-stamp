@@ -158,7 +158,9 @@ TMlist_iter_hasNext (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr)
  */
 void*
 list_iter_next (list_iter_t* itPtr, list_t* listPtr) {
-    return list_full_iter_next(itPtr, listPtr).firstPtr;
+    *itPtr = (*itPtr)->nextPtr;
+
+    return (*itPtr)->dataPtr;
 }
 
 pair_t
@@ -176,7 +178,10 @@ list_full_iter_next (list_iter_t* itPtr, list_t* listPtr)
  */
 void*
 TMlist_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr) {
-    return TMlist_full_iter_next(TM_ARG  itPtr, listPtr).firstPtr;
+    list_iter_t next = (list_iter_t)TM_SHARED_READ_P((*itPtr)->nextPtr);
+    TM_LOCAL_WRITE_P(*itPtr, next);
+
+    return next->dataPtr;
 }
 
 pair_t
@@ -553,7 +558,17 @@ TMfindPrevious (TM_ARGDECL  list_t* listPtr, void* dataPtr)
  */
 void*
 list_find (list_t* listPtr, void* dataPtr) {
-    return list_full_find(listPtr, dataPtr).firstPtr;
+    list_node_t* nodePtr;
+    list_node_t* prevPtr = findPrevious(listPtr, dataPtr);
+
+    nodePtr = prevPtr->nextPtr;
+
+    if ((nodePtr == NULL) ||
+        (listPtr->compare(nodePtr->dataPtr, dataPtr) != 0)) {
+        return NULL;
+    }
+
+    return nodePtr->dataPtr;
 }
 
 pair_t
@@ -580,7 +595,17 @@ list_full_find (list_t* listPtr, void* dataPtr)
  */
 void*
 TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr) {
-    return TMlist_full_find(TM_ARG  listPtr, dataPtr).firstPtr;
+    list_node_t* nodePtr;
+    list_node_t* prevPtr = TMfindPrevious(TM_ARG  listPtr, dataPtr);
+
+    nodePtr = (list_node_t*)TM_SHARED_READ_P(prevPtr->nextPtr);
+
+    if ((nodePtr == NULL) ||
+        (listPtr->compare(nodePtr->dataPtr, dataPtr) != 0)) {
+        return NULL;
+    }
+
+    return nodePtr->dataPtr;
 }
 
 pair_t
