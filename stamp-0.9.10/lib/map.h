@@ -148,7 +148,6 @@
 #elif defined(MAP_USE_AVLTREE)
 
 #  include "avltree.h"
-#  include "pair2keycompare.h"
 
 #  define MAP_T                       jsw_avltree_t
 #  define MAP_ALLOC(hash, cmp)        jsw_avlnew((cmp_f)(cmp))
