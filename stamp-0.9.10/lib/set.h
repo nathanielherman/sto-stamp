@@ -99,7 +99,7 @@
 #  include "map.h"
 
 #  define SET_T                       MAP_T
-#  define SET_ALLOC(hash, cmp)        MAP_ALLOC(hash, (long int (*)(const pair_t*, const pair_t*))(cmp))
+#  define SET_ALLOC(hash, cmp)        MAP_ALLOC(hash, (cmp))
 #  define SET_FREE(map)               MAP_FREE(map)
 
 #  define SET_CONTAINS(map, key)      MAP_CONTAINS(map, key)

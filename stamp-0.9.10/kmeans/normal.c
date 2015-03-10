@@ -108,8 +108,13 @@ typedef struct args {
     Cluster** new_clusters;
 } args_t;
 
+#if !defined(STO)
+float global_delta;
+float global_i;
+#else
 Single<float> global_delta;
 Single<long> global_i; /* index into task queue */
+#endif
 
 
 #define CHUNK 3
@@ -142,6 +147,10 @@ work (void* argPtr)
 
     start = myId * CHUNK;
 
+		// a temporary hack to solve the malloc problem
+		//  should get rid of it in the future
+		_Cluster *_temp= _alloc_cluster(nfeatures);
+
     while (start < npoints) {
         stop = (((start + CHUNK) < npoints) ? (start + CHUNK) : npoints);
         for (i = start; i < stop; i++) {
@@ -164,7 +173,7 @@ work (void* argPtr)
 
             /* Update new cluster centers : sum of objects located within */
 						TM_BEGIN();
-						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i]);
+						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i], _temp);
 						TM_END();
         }
 
@@ -178,6 +187,8 @@ work (void* argPtr)
             break;
         }
     }
+
+		free(_temp);
 
     TM_BEGIN();
     TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ_F(global_delta) + delta);
@@ -258,8 +269,8 @@ normal_exec (int       nthreads,
         TM_SINGLE_SIMPLE_WRITE(global_i, nthreads * CHUNK);
         TM_SINGLE_SIMPLE_WRITE(global_delta, delta);
     	
-	TIMER_T start;
-	TIMER_T stop;
+				TIMER_T start;
+				TIMER_T stop;
     	TIMER_READ(start);
 #ifdef OTM
 #pragma omp parallel
@@ -276,7 +287,6 @@ normal_exec (int       nthreads,
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
 						TM_CLUSTER_RESET(new_clusters[i], clusters[i]);
-	    //printf("\n");
         }
 
         delta /= npoints;

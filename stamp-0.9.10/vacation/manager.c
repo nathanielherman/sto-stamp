@@ -73,12 +73,13 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "customer.h"
-#include "map.h"
 #include "pair.h"
 #include "manager.h"
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
+#include "timer.h"
+
 /* =============================================================================
  * DECLARATION OF TM_CALLABLE FUNCTIONS
  * =============================================================================
@@ -108,6 +109,10 @@ addReservation (TM_ARGDECL  MAP_T* tablePtr, long id, long num, long price);
 
 static ulong_t hash(const void* p){
 		return (ulong_t)p;
+}
+
+static long compareLong(const void *a, const void *b){
+		return *((const long*)a) - *((const long*)b);
 }
 
 static MAP_T*
@@ -202,7 +207,7 @@ addReservation (TM_ARGDECL  MAP_T* tablePtr, long id, long num, long price)
         if (!RESERVATION_ADD_TO_TOTAL(reservationPtr, num)) {
             return FALSE;
         }
-        if ((long)TM_SHARED_READ(reservationPtr->numTotal) == 0) {
+        if ((long)TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) == 0) {
             bool_t status = TMMAP_REMOVE(tablePtr, id);
             if (status == FALSE) {
                 TM_RESTART();
@@ -232,13 +237,15 @@ addReservation_seq (MAP_T* tablePtr, long id, long num, long price)
         reservationPtr = reservation_alloc_seq(id, num, price);
         assert(reservationPtr != NULL);
         status = MAP_INSERT(tablePtr, id, reservationPtr);
+				assert((reservation_t*)MAP_FIND(tablePtr, id));
         assert(status);
+				assert(MAP_FIND(tablePtr, id));
     } else {
         /* Update existing reservation */
         if (!reservation_addToTotal_seq(reservationPtr, num)) {
             return FALSE;
         }
-        if (reservationPtr->numTotal == 0) {
+        if (TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) == 0) {
             status = MAP_REMOVE(tablePtr, id);
             assert(status);
         } else {
@@ -369,14 +376,14 @@ manager_deleteFlight (TM_ARGDECL  manager_t* managerPtr, long flightId)
         return FALSE;
     }
 
-    if ((long)TM_SHARED_READ(reservationPtr->numUsed) > 0) {
+    if ((long)TM_RESERVATION_SHARED_READ_USED(reservationPtr) > 0) {
         return FALSE; /* somebody has a reservation */
     }
 
     return addReservation(TM_ARG
                           managerPtr->flightTablePtr,
                           flightId,
-                          -1*(long)TM_SHARED_READ(reservationPtr->numTotal),
+                          -1*(long)TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr),
                           -1 /* -1 keeps old price */);
 }
 
@@ -502,7 +509,7 @@ queryNumFree (TM_ARGDECL  MAP_T* tablePtr, long id)
 
     reservationPtr = (reservation_t*)TMMAP_FIND(tablePtr, id);
     if (reservationPtr != NULL) {
-        numFree = (long)TM_SHARED_READ(reservationPtr->numFree);
+        numFree = (long)TM_RESERVATION_SHARED_READ_FREE(reservationPtr);
     }
 
     return numFree;
@@ -522,7 +529,7 @@ queryPrice (TM_ARGDECL  MAP_T* tablePtr, long id)
 
     reservationPtr = (reservation_t*)TMMAP_FIND(tablePtr, id);
     if (reservationPtr != NULL) {
-        price = (long)TM_SHARED_READ(reservationPtr->price);
+        price = (long)TM_RESERVATION_SHARED_READ_PRICE(reservationPtr);
     }
 
     return price;
@@ -646,28 +653,43 @@ reserve (TM_ARGDECL
          MAP_T* tablePtr, MAP_T* customerTablePtr,
          long customerId, long id, reservation_type_t type)
 {
+		//TIMER_T begin;
+		//TIMER_T end;
+ 	//TIMER_READ(begin);
     customer_t* customerPtr;
     reservation_t* reservationPtr;
 
+		//TIMER_T start;
+		//TIMER_T stop;
+		//TIMER_READ(start);
     customerPtr = (customer_t*)TMMAP_FIND(customerTablePtr, customerId);
+		//TIMER_READ(stop);
+	  //lookup_time+=TIMER_DIFF_SECONDS(start, stop);
+
     if (customerPtr == NULL) {
         return FALSE;
     }
 
+		//TIMER_READ(start);
     reservationPtr = (reservation_t*)TMMAP_FIND(tablePtr, id);
+		//TIMER_READ(stop);
+		//lookup_time+=TIMER_DIFF_SECONDS(start, stop);
     if (reservationPtr == NULL) {
         return FALSE;
     }
 
+		//TIMER_READ(start);
     if (!RESERVATION_MAKE(reservationPtr)) {
         return FALSE;
     }
+		//TIMER_READ(stop);
+		//reservation_make_time+=TIMER_DIFF_SECONDS(start, stop);
 
     if (!CUSTOMER_ADD_RESERVATION_INFO(
             customerPtr,
             type,
             id,
-            (long)TM_SHARED_READ(reservationPtr->price)))
+            (long)TM_RESERVATION_SHARED_READ_PRICE(reservationPtr)))
     {
         /* Undo previous successful reservation */
         bool_t status = RESERVATION_CANCEL(reservationPtr);
@@ -676,6 +698,8 @@ reserve (TM_ARGDECL
         }
         return FALSE;
     }
+		//TIMER_READ(end);
+		//reservation_total_time+=TIMER_DIFF_SECONDS(begin, end);
 
     return TRUE;
 }

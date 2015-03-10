@@ -173,7 +173,7 @@ sequencer_alloc (long geneLength, long segmentLength, segments_t* segmentsPtr)
     }
 
     sequencerPtr->uniqueSegmentsPtr =
-        hashtable_alloc(geneLength, &hashSegment, &compareSegment, -1, -1);
+        hashtable_alloc_pairs(geneLength, &hashSegment, &compareSegment, -1, -1);
     if (sequencerPtr->uniqueSegmentsPtr == NULL) {
         return NULL;
     }

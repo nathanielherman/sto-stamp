@@ -1,9 +1,15 @@
 #include <stdlib.h>
+#include <string.h>
 #include "Clusters.h"
 
+unsigned get_cluster_size(int nfeatures){
+    unsigned cluster_size = sizeof(_Cluster) + (nfeatures) * sizeof(float);
+    cluster_size += (CACHE_LINE_SIZE - 1) - ((cluster_size - 1) % CACHE_LINE_SIZE);
+    return cluster_size;
+}
+
 _Cluster *_alloc_cluster(int nfeatures){
-		uint64_t cluster_size = sizeof(_Cluster) + nfeatures * sizeof(float);
-		cluster_size += (CACHE_LINE_SIZE - 1) - ((cluster_size - 1) % CACHE_LINE_SIZE);
+		unsigned cluster_size = get_cluster_size(nfeatures);
 		_Cluster *c = (_Cluster *)malloc(cluster_size);
 		c->nfeatures = nfeatures;
 		c->centers_len = 0;
@@ -42,21 +48,21 @@ void reset_cluster_seq(Cluster* cluster, float* center){
 #endif
 }
 
-void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature){
+void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature, _Cluster* _temp){
 #ifdef D
 		_Cluster *_cluster = cluster->transRead(TM_ARG_ALONE);
-		_Cluster *new_cluster = _alloc_cluster(_cluster->nfeatures);
 		int j;
-		for (j = 0; j < new_cluster->nfeatures; j++){
-				new_cluster->centers[j] = _cluster->centers[j] + feature[j];
+		for (j = 0; j < _cluster->nfeatures; j++){
+				_temp->centers[j] = _cluster->centers[j] + feature[j];
 		}
-		new_cluster->centers_len = _cluster->centers_len + 1;
-		cluster->transWrite(TM_ARG new_cluster);
+		_temp->centers_len = _cluster->centers_len + 1;
+		cluster->transWrite(TM_ARG _temp);
 #else
 		int j;
 		for (j = 0; j < cluster->nfeatures; j++){
 				TM_SHARED_WRITE_F(cluster->centers[j],
 								TM_SHARED_READ_F(cluster->centers[j]) + feature[j]);
+
 		}
 		TM_SHARED_WRITE(cluster->centers_len,
 						TM_SHARED_READ(cluster->centers_len) + 1);

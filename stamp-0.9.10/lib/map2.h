@@ -45,11 +45,11 @@
 #else /* !MAP_USE_TREE */
 //hashtable
 #include "sto/Hashtable.hh"
-#define MAP_T Hashtable<void*, void*, 100000>
-#define TMMAP_CONTAINS(map, key) ({ void* val; bool ret = map->transGet(TM_ARG key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMMAP_FIND(map, key) ({ void *val = NULL; map->transGet(TM_ARG key, val); /*TM_ARG_ALONE.check_reads();*/ val; })
-#define TMMAP_INSERT(map, key, data) ({ auto ret = map->transInsert(TM_ARG key, data); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMMAP_REMOVE(map, key) ({ map->transDelete(TM_ARG key); })
+#define MAP_T Hashtable<void*, void*, 1000000>
+#define TMMAP_CONTAINS(map, key) ({ void* val; bool ret = map->transGet(TM_ARG (void *)key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
+#define TMMAP_FIND(map, key) ({ void *val = NULL; map->transGet(TM_ARG (void *)key, val); /*TM_ARG_ALONE.check_reads();*/ val; })
+#define TMMAP_INSERT(map, key, data) ({ auto ret = map->transInsert(TM_ARG (void *) key, (void *)data); /*TM_ARG_ALONE.check_reads();*/ ret; })
+#define TMMAP_REMOVE(map, key) ({ map->transDelete(TM_ARG (void *)key); })
 
 // Preventing double-definition
 #define MAP_ALLOC(hash, cmp) (new MAP_T())

@@ -75,9 +75,7 @@
 #include <getopt.h>
 #include "client.h"
 #include "customer.h"
-#include "list.h"
 #include "manager.h"
-#include "map.h"
 #include "memory.h"
 #include "operation.h"
 #include "random.h"
@@ -105,7 +103,6 @@ enum param_types {
 #define PARAM_DEFAULT_USER         (80)
 
 double global_params[256]; /* 256 = ascii limit */
-
 
 /* =============================================================================
  * displayUsage

@@ -18,15 +18,17 @@ SRCS += \
 	$(LIB)/list.c \
 	$(LIB)/mt19937ar.c \
 	$(LIB)/pair.c \
+	$(LIB)/pair2keycompare.c \
 	$(LIB)/queue.c \
 	$(LIB)/random.c \
 	$(LIB)/rbtree.c \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
+	$(LIB)/hashtable.c
 #
 OBJS := ${SRCS:.c=.o}
 
-CFLAGS += -DMAP_USE_RBTREE
+CFLAGS += -DMAP_USE_HASHTABLE
 
 
 # ==============================================================================

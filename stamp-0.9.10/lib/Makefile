@@ -20,6 +20,7 @@ SRCS := \
 	memory.c \
 	mt19937ar.c \
 	pair.c \
+	pair2keycompare.c \
 	queue.c \
 	random.c \
         rbtree.c \

@@ -3,8 +3,6 @@
 #if defined(STO) && !defined(GTM)
 #define D
 #include "single.h"
-#else
-template<class T> using Single = T;
 #endif
 
 #define CACHE_LINE_SIZE 64
@@ -12,27 +10,41 @@ template<class T> using Single = T;
 typedef struct _Cluster{
 		int nfeatures;
 		int centers_len;
-		float* centers;
+		float *centers;
 } _Cluster;
 
+unsigned get_cluster_size(int nfeatures);
+
 #ifdef D 
-#define Cluster Single<_Cluster*>
-#else
-#define Cluster _Cluster;
-#endif 
+class Cluster: public Single<_Cluster*>{
+		public:
+				void install(TransItem& item) {
+						_Cluster* cluster_ptr = s_.read_value();
+						_Cluster* new_cluster_ptr = item.write_value<_Cluster*>();
+						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
+						cluster_ptr->centers = (float *)((char *)cluster_ptr + sizeof(_Cluster));
+						Versioning::inc_version(s_.version());
+					//	printf("cluter len %d\n", s_.read_value()->centers_len);
+				}
+
+};
 
 template<typename T>
 struct CacheLineStorage {
 		public:
 				 T data __attribute__ ((aligned (CACHE_LINE_SIZE)));
 };
+#else
+#define Cluster _Cluster
+#endif 
+
 
 #define AlignedCluster CacheLineStorage<Cluster>
 
 Cluster *alloc_cluster_seq(int nfeatures);
 _Cluster *_alloc_cluster(int nfeatures);
 void reset_cluster_seq(Cluster* cluster, float* center);
-void cluster_add_center(TM_ARGDECL Cluster* cluster, float* feature);
+void cluster_add_center(TM_ARGDECL Cluster* cluster, float* feature, _Cluster* _temp);
 void free_cluster_seq(Cluster* cluster);
 
 #ifdef D 
@@ -45,7 +57,7 @@ void free_cluster_seq(Cluster* cluster);
 #define TM_SINGLE_SIMPLE_WRITE(var, val) (var=val)
 #endif
 
-#define TM_CLUSTER_UPDATE_CENTER(cluster, feature) cluster_add_center(TM_ARG cluster, feature)
+#define TM_CLUSTER_UPDATE_CENTER(cluster, feature, _temp) cluster_add_center(TM_ARG cluster, feature, _temp)
 #define TM_CLUSTER_RESET(new_cluster, cluster) reset_cluster_seq(new_cluster, cluster)
 #define TM_CLUSTER_FREE(cluster) free_cluster_seq(cluster)
 #define TM_CLUSTER_ALLOC(nfeatures) alloc_cluster_seq(nfeatures);

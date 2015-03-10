@@ -376,7 +376,7 @@ mesh_read (mesh_t* meshPtr, char* fileNamePrefix)
     long i;
     long numElement = 0;
 
-    MAP_T* edgeMapPtr = MAP_ALLOC(NULL, &element_mapCompareEdge);
+    MAP_T* edgeMapPtr = MAP_ALLOC(NULL, &element_listCompareEdge);
     assert(edgeMapPtr);
 
     /*
@@ -524,7 +524,7 @@ mesh_check (mesh_t* meshPtr, long expectedNumElement)
 
     searchQueuePtr = queue_alloc(-1);
     assert(searchQueuePtr);
-    visitedMapPtr = MAP_ALLOC(NULL, &element_mapCompare);
+    visitedMapPtr = MAP_ALLOC(NULL, &element_listCompare);
     assert(visitedMapPtr);
 
     /*

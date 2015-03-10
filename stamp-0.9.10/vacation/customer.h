@@ -1,4 +1,4 @@
-/* =============================================================================
+		/* =============================================================================
  *
  * customer.h
  * -- Representation of customer
@@ -73,11 +73,18 @@
 #ifndef CUSTOMER_H
 #define CUSTOMER_H 1
 
+#if defined(STO) && !defined(GTM)
+#define list2
+#endif
 
-#include "list.h"
 #include "reservation.h"
 #include "tm.h"
 #include "types.h"
+#ifdef list2
+#include "list2.hh"
+#else
+#include "list.h"
+#endif
 
 typedef struct customer {
     long id;

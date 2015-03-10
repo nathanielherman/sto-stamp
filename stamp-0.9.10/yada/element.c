@@ -354,12 +354,14 @@ element_listCompare (const void* aPtr, const void* bPtr)
 /* =============================================================================
  * element_mapCompare
  *
- * For use in MAP_T
+ * For use in MAP_T. DON'T USE THIS, use element_listCompare. See element_mapCompareEdge
  * =============================================================================
  */
 long
 element_mapCompare (const pair_t* aPtr, const pair_t* bPtr)
 {
+    // DON'T USE
+    assert(0);
     element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
     element_t* bElementPtr = (element_t*)(bPtr->firstPtr);
 
@@ -564,11 +566,18 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
  * element_mapCompareEdge
  *
   * For use in MAP_T
+  * DON'T USE THIS. Nate: STAMP isn't consistent about whether map comparators
+  * should compare keys or key, value pairs, so tests use comparators
+  * based on which map they want to use. We really want everything to work
+  * invariant on what map type we're using, so we're going to try to make all
+  * maps use key comparators
  * =============================================================================
  */
 long
 element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
 {
+    // DON'T USE
+    assert(0);
     edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);
     edge_t* bEdgePtr = (edge_t*)(bPtr->firstPtr);
 
