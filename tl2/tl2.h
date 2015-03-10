@@ -42,7 +42,7 @@
 
 #include <stdint.h>
 #include "tmalloc.h"
-
+#include <stdbool.h>
 
 #  include <setjmp.h>
 
@@ -87,8 +87,8 @@ void     TxInitThread  (Thread*, long id);
 int      TxCommit      (Thread*);
 void     TxAbort       (Thread*);
 intptr_t TxLoad        (Thread*, volatile intptr_t*);
-void     TxStore       (Thread*, volatile intptr_t*, intptr_t);
-void     TxStoreLocal  (Thread*, volatile intptr_t*, intptr_t);
+void     TxStore       (Thread*, volatile intptr_t*, intptr_t, bool isFloat);
+void     TxStoreLocal  (Thread*, volatile intptr_t*, intptr_t, bool isFloat);
 void     TxOnce        ();
 void     TxShutdown    ();
 
@@ -115,3 +115,4 @@ void     TxFree        (Thread*, void*);
  *
  * =============================================================================
  */
+

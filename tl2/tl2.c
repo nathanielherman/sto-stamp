@@ -135,6 +135,7 @@ typedef struct _AVPair {
 #endif /* TL2_EAGER */
     struct _Thread* Owner;
     long Ordinal;
+    bool isFloat;
 } AVPair;
 
 typedef struct _Log {
@@ -745,6 +746,7 @@ ResizeHashLog (HashLog* hlPtr, Thread* Self)
             newEntry->LockFor = oldEntry->LockFor;
             newEntry->Held    = oldEntry->Held;
             newEntry->rdv     = oldEntry->rdv;
+            newEntry->isFloat = oldEntry->isFloat;
         }
     }
 
@@ -770,7 +772,11 @@ WriteBackForward (Log* k)
     AVPair* e;
     AVPair* End = k->put;
     for (e = k->List; e != End; e = e->Next) {
-        *(e->Addr) = e->Valu;
+        if (e->isFloat)
+	    memcpy(e->Addr, &(e->Valu), sizeof(float));
+            //*((float *)(e->Addr)) = (float) (e->Valu);
+        else
+            *(e->Addr) = e->Valu;
     }
 }
 
@@ -786,7 +792,11 @@ WriteBackReverse (Log* k)
 {
     AVPair* e;
     for (e = k->tail; e != NULL; e = e->Prev) {
-        *(e->Addr) = e->Valu;
+        if (e->isFloat)
+	    memcpy(e->Addr, &(e->Valu), sizeof(float));
+            //*((float *)(e->Addr)) = (float) (e->Valu);
+        else
+            *(e->Addr) = e->Valu;
     }
 }
 
@@ -821,6 +831,7 @@ __INLINE__ AVPair*
 RecordStore (Log* k,
              volatile intptr_t* Addr,
              intptr_t Valu,
+             bool isFloat
              volatile vwLock* Lock,
              vwLock cv)
 {
@@ -837,12 +848,13 @@ RecordStore (Log* k,
     e->Valu    = Valu;
     e->LockFor = Lock;
     e->rdv     = cv;
+    e->isFloat = isFloat;
 
     return e;
 }
 #else /* !TL2_EAGER */
 __INLINE__ void
-RecordStore (Log* k, volatile intptr_t* Addr, intptr_t Valu, volatile vwLock* Lock)
+RecordStore (Log* k, volatile intptr_t* Addr, intptr_t Valu, bool isFloat, volatile vwLock* Lock)
 {
     /*
      * As an optimization we could squash multiple stores to the same location.
@@ -867,6 +879,7 @@ RecordStore (Log* k, volatile intptr_t* Addr, intptr_t Valu, volatile vwLock* Lo
     e->LockFor = Lock;
     e->Held    = 0;
     e->rdv     = LOCKBIT; /* use either 0 or LOCKBIT */
+    e->isFloat = isFloat;
 }
 #endif /* !TL2_EAGER */
 
@@ -876,7 +889,7 @@ RecordStore (Log* k, volatile intptr_t* Addr, intptr_t Valu, volatile vwLock* Lo
  * =============================================================================
  */
 __INLINE__ void
-SaveForRollBack (Log* k, volatile intptr_t* Addr, intptr_t Valu)
+SaveForRollBack (Log* k, volatile intptr_t* Addr, intptr_t Valu, bool isFloat)
 {
     AVPair* e = k->put;
     if (e == NULL) {
@@ -889,6 +902,7 @@ SaveForRollBack (Log* k, volatile intptr_t* Addr, intptr_t Valu)
     e->Addr    = Addr;
     e->Valu    = Valu;
     e->LockFor = NULL;
+    e->isFloat = isFloat;
 }
 
 
@@ -1782,7 +1796,7 @@ __rollback:
  */
 #ifdef TL2_EAGER
 void
-TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
+TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat )
 {
     PROF_STM_WRITE_BEGIN();
 
@@ -1796,7 +1810,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
 
 #  ifdef TL2_STATS
     Self->TxST++;
-  global_stats[1]++;
 #  endif
 
 
@@ -1844,7 +1857,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
 
 
     Log* wr = &Self->wrSet;
-    AVPair* e = RecordStore(wr, addr, *addr, LockFor, cv);
+    AVPair* e = RecordStore(wr, addr, *addr, LockFor, cv, isFloat);
     if (cv > Self->maxv) {
         Self->maxv = cv;
     }
@@ -1857,7 +1870,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
 }
 #else /* !TL2_EAGER */
 void
-TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
+TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
 {
     PROF_STM_WRITE_BEGIN();
 
@@ -1879,7 +1892,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
 
 #  ifdef TL2_STATS
     Self->TxST++;
-  global_stats[1]++;
 #  endif
 
   LockFor = PSLOCK(addr);
@@ -1942,6 +1954,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
             if (e->Addr == addr) {
                 ASSERT(LockFor == e->LockFor);
                 e->Valu = valu; /* CCM: update associated value in write-set */
+                e->isFloat = isFloat;
                 PROF_STM_WRITE_END();
                 return;
             }
@@ -1956,20 +1969,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
             return;
         }
     }
-  AVPair* e;
-#ifdef TL2_STATS
-  global_stats[3]++;
-#endif
-  for (e = wr->tail; e != NULL; e = e->Prev) {
-    ASSERT(e->Addr != NULL);
-#ifdef TL2_STATS
-    global_stats[2]++;
-#endif
-    if (e->Addr == addr) {
-      break;
-    }
-  }
-
 
 #    ifdef TL2_OPTIM_HASHLOG
     wrSet->BloomFilter |= FILTERBITS(addr);
@@ -1982,7 +1981,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu)
     wrSet->numEntry++;
 #  endif /* TL2_OPTIM_HASHLOG*/
 
-    RecordStore(wr, addr, valu, LockFor);
+    RecordStore(wr, addr, valu, isFloat, LockFor);
 
 #  if defined(TL2_OPTIM_HASHLOG) && defined(TL2_RESIZE_HASHLOG)
     long numEntry = wrSet->numEntry;
@@ -2010,7 +2009,6 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
-    global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2061,7 +2059,6 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
-  global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2076,27 +2073,21 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
      */
 
     intptr_t msk = FILTERBITS(Addr);
-    //if ((Self->wrSet.BloomFilter & msk) == msk) {
+    if ((Self->wrSet.BloomFilter & msk) == msk) {
 #  ifdef TL2_OPTIM_HASHLOG
         Log* wr = &Self->wrSet.logs[HASHLOG_HASH(Addr) % Self->wrSet.numLog];
 #  else /* !TL2_OPTIM_HASHLOG */
         Log* wr = &Self->wrSet;
 #  endif /* !TL2_OPTIM_HASHLOG */
-#ifdef TL2_STATS
-  global_stats[3]++;
-#endif
         AVPair* e;
         for (e = wr->tail; e != NULL; e = e->Prev) {
             ASSERT(e->Addr != NULL);
-#ifdef TL2_STATS
-          global_stats[2]++;
-#endif
             if (e->Addr == Addr) {
                 PROF_STM_READ_END();
                 return e->Valu;
             }
         }
-    //}
+    }
 
     /*
      * TODO-FIXME:
@@ -2182,12 +2173,16 @@ txSterilize (void* Base, size_t Length)
  * =============================================================================
  */
 void
-TxStoreLocal (Thread* Self, volatile intptr_t* Addr, intptr_t Valu)
+TxStoreLocal (Thread* Self, volatile intptr_t* Addr, intptr_t Valu, bool isFloat)
 {
     PROF_STM_WRITELOCAL_BEGIN();
 
-    SaveForRollBack(&Self->LocalUndo, Addr, *Addr);
-    *Addr = Valu;
+    SaveForRollBack(&Self->LocalUndo, Addr, *Addr, isFloat);
+    if (isFloat)
+	memcpy(Addr, &Valu, sizeof(float));
+        //*((float *)Addr) = (float) Valu;
+    else
+        *(Addr) = Valu;
 
     PROF_STM_WRITELOCAL_END();
 }
@@ -2330,7 +2325,7 @@ TxFree (Thread* Self, void* ptr)
      * TODO: record in separate log to avoid making the write set large
      */
 #  ifdef TL2_EAGER
-    TxStore(Self, (volatile intptr_t*)ptr, 0);
+    TxStore(Self, (volatile intptr_t*)ptr, 0, 0);
 #  else /* !TL2_EAGER */
     volatile vwLock* LockFor = PSLOCK(ptr);
 #    ifdef TL2_OPTIM_HASHLOG
@@ -2341,7 +2336,7 @@ TxFree (Thread* Self, void* ptr)
 #    else /* !TL2_OPTIM_HASHLOG */
     Log* wr = &Self->wrSet;
 #    endif /* !TL2_OPTIM_HASHLOG */
-    RecordStore(wr, (volatile intptr_t*)ptr, 0, LockFor);
+    RecordStore(wr, (volatile intptr_t*)ptr, 0, 0, LockFor);
 #  endif /* !TL2_EAGER */
 }
 
@@ -2354,3 +2349,4 @@ TxFree (Thread* Self, void* ptr)
  *
  * =============================================================================
  */
+
