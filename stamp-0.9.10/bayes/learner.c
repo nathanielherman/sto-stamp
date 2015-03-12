@@ -524,7 +524,7 @@ TMpopTask (TM_ARGDECL  list_t* taskListPtr)
     if (TMLIST_ITER_HASNEXT(&it, taskListPtr)) {
         taskPtr = (learner_task_t*)TMLIST_ITER_NEXT(&it, taskListPtr);
         bool_t status = TMLIST_REMOVE(taskListPtr, (void*)taskPtr);
-        assert(status);
+        if (!status) TM_RESTART();
     }
 
     return taskPtr;
@@ -763,7 +763,7 @@ TMfindBestInsertTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
     float bestLocalLogLikelihood = oldLocalLogLikelihood;
 
     status = TMNET_FINDDESCENDANTS(netPtr, toId, invalidBitmapPtr, workQueuePtr);
-    assert(status);
+    if (!status) TM_RESTART();
     long fromId = -1;
 
     list_t* parentIdListPtr = net_getParentIdListPtr(netPtr, toId);
