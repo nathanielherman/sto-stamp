@@ -836,6 +836,9 @@ RecordStore (Log* k,
              vwLock cv)
 {
     AVPair* e = k->put;
+#ifdef TL2_STATS
+    global_stats[1]++;
+#endif
     if (e == NULL) {
         k->ovf++;
         e = ExtendList(k->tail);
@@ -914,7 +917,9 @@ __INLINE__ int
 TrackLoad (Thread* Self, volatile vwLock* LockFor)
 {
     Log* k = &Self->rdSet;
-
+#ifdef TL2_STATS
+    global_stats[1]++;
+#endif
     /*
      * Consider collapsing back-to-back track loads ...
      * if the previous LockFor and rdv match the incoming arguments then
@@ -1810,7 +1815,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat )
 
 #  ifdef TL2_STATS
     Self->TxST++;
-  global_stats[1]++;
 #  endif
 
 
@@ -1893,7 +1897,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
 
 #  ifdef TL2_STATS
     Self->TxST++;
-  global_stats[1]++;
 #  endif
 
   LockFor = PSLOCK(addr);
@@ -1953,6 +1956,7 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
         AVPair* e;
         for (e = wr->tail; e != NULL; e = e->Prev) {
             ASSERT(e->Addr != NULL);
+	    global_stats[2]++;
             if (e->Addr == addr) {
                 ASSERT(LockFor == e->LockFor);
                 e->Valu = valu; /* CCM: update associated value in write-set */
@@ -1972,9 +1976,6 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
         }
     }
   AVPair* e;
-#ifdef TL2_STATS
-  global_stats[3]++;
-#endif
   for (e = wr->tail; e != NULL; e = e->Prev) {
     ASSERT(e->Addr != NULL);
 #ifdef TL2_STATS
@@ -2025,7 +2026,6 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
-    global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2076,7 +2076,6 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
 
 #  ifdef TL2_STATS
     Self->TxLD++;
-  global_stats[0]++;
 #  endif
 
     ASSERT(Self->Mode == TTXN);
@@ -2091,15 +2090,12 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
      */
 
     intptr_t msk = FILTERBITS(Addr);
-    //if ((Self->wrSet.BloomFilter & msk) == msk) {
+    if ((Self->wrSet.BloomFilter & msk) == msk) {
 #  ifdef TL2_OPTIM_HASHLOG
         Log* wr = &Self->wrSet.logs[HASHLOG_HASH(Addr) % Self->wrSet.numLog];
 #  else /* !TL2_OPTIM_HASHLOG */
         Log* wr = &Self->wrSet;
 #  endif /* !TL2_OPTIM_HASHLOG */
-#ifdef TL2_STATS
-  global_stats[3]++;
-#endif
         AVPair* e;
         for (e = wr->tail; e != NULL; e = e->Prev) {
             ASSERT(e->Addr != NULL);
@@ -2111,7 +2107,7 @@ TxLoad (Thread* Self, volatile intptr_t* Addr)
                 return e->Valu;
             }
         }
-    //}
+    }
 
     /*
      * TODO-FIXME:
