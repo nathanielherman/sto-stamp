@@ -27,7 +27,7 @@ SRCS += \
 #
 OBJS := ${SRCS:.c=.o}
 
-CFLAGS += -DMAP_USE_RBTREE
+CFLAGS += -DMAP_USE_HASHTABLE
 
 
 # ==============================================================================

@@ -300,6 +300,12 @@ TMallocBuckets (TM_ARGDECL
     return buckets;
 }
 
+ulong_t
+default_hash(const void *a)
+{
+    return (ulong_t)a;
+}
+
 /* =============================================================================
  * hashtable_alloc
  * -- Returns NULL on failure
@@ -332,7 +338,12 @@ hashtable_alloc (long initNumBucket,
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
-    assert(hash);
+    // we don't want to provide a hash function if they gave us a custom
+    // compare function, because we could break the invariant that forall x,y
+    // s.t. compareKeys(x,y)==0, hash(x)==hash(y)
+    assert(hash || !compareKeys);
+    if (!hash && !compareKeys)
+        hash = default_hash;
     hashtablePtr->hash = hash;
     hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
@@ -375,7 +386,12 @@ TMhashtable_alloc (TM_ARGDECL
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
-    assert(hash);
+    // we don't want to provide a hash function if they gave us a custom
+    // compare function, because we could break the invariant that forall x,y
+    // s.t. compareKeys(x,y)==0, hash(x)==hash(y)
+    assert(hash || !compareKeys);
+    if (!hash && !compareKeys)
+        hash = default_hash;
     hashtablePtr->hash = hash;
     hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
