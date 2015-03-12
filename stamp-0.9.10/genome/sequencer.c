@@ -81,7 +81,7 @@
 #include "tm.h"
 
 #include <assert.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 #include "hash.h"
 #include "hashtable.h"
@@ -352,14 +352,17 @@ sequencer_run (void* argPtr)
 
     for (i = i_start; i < i_stop; i++) {
 
+        // XXX: this is using the hashtable's linked list,
+        // so it has to make same assumptions that the hashtable
+        // does (i.e., formerly, that the list contained pairs,
+        // and now, that the list has a dataPtr and a secondaryDataPtr entry)
         list_t* chainPtr = uniqueSegmentsPtr->buckets[i];
         list_iter_t it;
         list_iter_reset(&it, chainPtr);
 
         while (list_iter_hasNext(&it, chainPtr)) {
-
             char* segment =
-                (char*)((pair_t*)list_iter_next(&it, chainPtr))->firstPtr;
+                (char*)(list_iter_next(&it, chainPtr));
             constructEntry_t* constructEntryPtr;
             long j;
             ulong_t startHash;
