@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "types.h"
 #include "sto/Hashtable.hh"
 
 static inline long default_table_comparator(const void *a, const void* b) {
