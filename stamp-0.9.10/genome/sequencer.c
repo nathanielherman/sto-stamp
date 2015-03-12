@@ -149,9 +149,9 @@ hashSegment (const void* keyPtr)
  * =============================================================================
  */
 static long
-compareSegment (const pair_t* a, const pair_t* b)
+compareSegment (const void* a, const void* b)
 {
-    return strcmp((char*)(a->firstPtr), (char*)(b->firstPtr));
+    return strcmp((char*)a, (char*)b);
 }
 
 
@@ -173,7 +173,7 @@ sequencer_alloc (long geneLength, long segmentLength, segments_t* segmentsPtr)
     }
 
     sequencerPtr->uniqueSegmentsPtr =
-        hashtable_alloc_pairs(geneLength, &hashSegment, &compareSegment, -1, -1);
+        hashtable_alloc(geneLength, &hashSegment, &compareSegment, -1, -1);
     if (sequencerPtr->uniqueSegmentsPtr == NULL) {
         return NULL;
     }

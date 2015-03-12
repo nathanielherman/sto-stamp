@@ -19,7 +19,6 @@ SRCS += \
 	$(LIB)/hash.c \
 	$(LIB)/hashtable.c \
 	$(LIB)/pair.c \
-	$(LIB)/pair2keycompare.c \
 	$(LIB)/random.c \
 	$(LIB)/list.c \
 	$(LIB)/mt19937ar.c \
