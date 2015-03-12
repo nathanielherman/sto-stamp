@@ -340,7 +340,7 @@ TMregion_refine (TM_ARGDECL
     TMELEMENT_ISGARBAGE(elementPtr); /* so we can detect conflicts */
 
     while (1) {
-        edgeMapPtr = PMAP_ALLOC(NULL, &element_listCompareEdge);
+        edgeMapPtr = PMAP_ALLOC(NULL, &element_mapCompareEdge);
         assert(edgeMapPtr);
         encroachElementPtr = TMgrowRegion(TM_ARG
                                           elementPtr,

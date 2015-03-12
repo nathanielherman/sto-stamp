@@ -350,7 +350,21 @@ element_listCompare (const void* aPtr, const void* bPtr)
     return element_compare(aElementPtr, bElementPtr);
 }
 
-GEN_COMPAREPAIR_BODY(element_listCompare);
+/* =============================================================================
+ * element_mapCompare
+ *
+ * For use in MAP_T
+ * =============================================================================
+ */
+long
+element_mapCompare (const pair_t* aPtr, const pair_t* bPtr)
+{
+  element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
+  element_t* bElementPtr = (element_t*)(bPtr->firstPtr);
+
+  return element_compare(aElementPtr, bElementPtr);
+}
+
 
 /* =============================================================================
  * element_alloc
@@ -544,8 +558,20 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
     return compareEdge(aEdgePtr, bEdgePtr);
 }
 
-GEN_COMPAREPAIR_BODY(element_listCompareEdge);
+/* =============================================================================
+ * element_mapCompareEdge
+ *
+ * For use in MAP_T
+ * =============================================================================
+ */
+long
+element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
+{
+  edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);
+  edge_t* bEdgePtr = (edge_t*)(bPtr->firstPtr);
 
+  return compareEdge(aEdgePtr, bEdgePtr);
+}
 
 /* =============================================================================
  * element_heapCompare

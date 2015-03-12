@@ -81,8 +81,6 @@
 #  include "list.h"
 #endif
 
-#include "key2paircompare.h"
-
 #include "pair.h"
 #include "tm.h"
 #include "types.h"
@@ -109,7 +107,14 @@ element_compare (element_t* aElementPtr, element_t* bElementPtr);
 long
 element_listCompare (const void* aPtr, const void* bPtr);
 
-GEN_COMPAREPAIR_HEADER(element_listCompare);
+/* =============================================================================
+ * element_mapCompare
+ *
+ * For use in MAP_T
+ * =============================================================================
+ */
+long
+element_mapCompare (const pair_t* aPtr, const pair_t* bPtr);
 
 /* =============================================================================
  * element_alloc
@@ -192,7 +197,14 @@ element_getEdge (element_t* elementPtr, long i);
 long
 element_listCompareEdge (const void* aPtr, const void* bPtr);
 
-GEN_COMPAREPAIR_HEADER(element_listCompareEdge);
+/* =============================================================================
+ * element_mapCompareEdge
+ *
+ * For use in MAP_T
+ * =============================================================================
+ */
+long
+element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr);
 
 /* =============================================================================
  * element_heapCompare

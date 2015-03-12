@@ -6,8 +6,12 @@
 
 
 CFLAGS += -DLIST_NO_DUPLICATES
-CFLAGS += -DMAP_USE_HASHTABLE
-CFLAGS += -DSET_USE_MAP
+# Note that changing this will break things. AVLTREE expects a pair comparison
+# function so if you change to a different structure you must change all
+# MAP_ALLOC's to pass the listCompare function rather than the mapCompare function
+CFLAGS += -DMAP_USE_AVLTREE
+# This is OK to change
+CFLAGS += -DSET_USE_HASHTABLE
 
 PROG := yada
 SRCS += \
