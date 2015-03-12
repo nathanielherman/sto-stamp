@@ -77,11 +77,11 @@
 
 #ifdef STO
 #  include "list2.hh"
-#  include "map2.h"
 #else
 #  include "list.h"
-#  include "map.h"
 #endif
+// we just use AVLTREE for STO since map is non-transactional
+#include "map.h"
 
 #include "mesh.h"
 #include "queue.h"

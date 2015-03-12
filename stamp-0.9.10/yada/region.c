@@ -77,11 +77,10 @@
 
 #ifdef STO
 #  include "list2.hh"
-#  include "map2.h"
 #else
 #  include "list.h"
-#  include "map.h"
 #endif
+#include "map.h"
 
 #include "queue.h"     // Irrelevant, not used in transactions
 #include "mesh.h"

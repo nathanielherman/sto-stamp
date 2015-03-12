@@ -23,27 +23,7 @@
 #define TMMAP_REMOVE(map, key) ({ map->transDelete(TM_ARG key); })
 
 #elif defined(MAP_USE_HASHTABLE)
-// use the STAMP hash table (basically just list)
-#  include "hashtable.h"
-
-#  define MAP_T                       hashtable_t
-#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp, 2, 2)
-#  define MAP_FREE(map)               hashtable_free(map)
-#  define MAP_CONTAINS(map, key)      hashtable_containsKey(map, (void*)(key))
-#  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
-#  define MAP_INSERT(map, key, data)  hashtable_insert(map, (void*)(key), (void*)(data))
-#  define MAP_REMOVE(map, key)        hashtable_remove(map, (void*)(key))
-#  define TMMAP_CONTAINS(map, key)    TMhashtable_containsKey(TM_ARG  (map), (void*)(key))
-#  define TMMAP_FIND(map, key)       TMhashtable_find(TM_ARG  (map), (void*)(key))
-#  define TMMAP_INSERT(map, key, data)  TMhashtable_insert(TM_ARG  (map), (void*)(key), (void*)(data))
-#  define TMMAP_REMOVE(map, key)        TMhashtable_remove(TM_ARG  (map), (void*)(key))
-
-   /* TODO: The following two can be extended to support STO Hashtable or tree */
-#  define PMAP_INSERT(map, key, data) MAP_INSERT(map, key, data)
-#  define PMAP_REMOVE(map, key) MAP_REMOVE(map, key)
-
-#else /* !MAP_USE_TREE */
-//hashtable
+// XXX: if you really want to use the default hashtable, just include map.h instead of map2.h
 #include "sto/Hashtable.hh"
 #define MAP_T Hashtable<void*, void*, 1000000>
 #define TMMAP_CONTAINS(map, key) ({ void* val; bool ret = map->transGet(TM_ARG (void *)key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
@@ -54,6 +34,7 @@
 // Preventing double-definition
 #define MAP_ALLOC(hash, cmp) (new MAP_T())
 #define MAP_FREE(map) (delete map)
+// XXX: THIS IS PROBABLY HURTING PERF SOMEWHERE
 #define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TM_BEGIN(); ___ret = OP; TM_END(); ___ret;})
 #define MAP_CONTAINS(map, key) __TRANS_WRAP(TMMAP_CONTAINS(map, key), bool)
 #define MAP_FIND(map, key) __TRANS_WRAP(TMMAP_FIND(map, key), void*)
@@ -62,14 +43,9 @@
 
 #endif
 
+// XXX: "parallel" region malloc is probably correct to use normal malloc
+// but maybe we can get a perf win if we do some thread-local malloc??
 #define PMAP_ALLOC(hash, cmp) MAP_ALLOC(hash, cmp)
 #define PMAP_FREE(map) MAP_FREE(map)
-
-#if 0
-template <typename T>
-inline T __trans_wrap(std::function<T(void)> f) {
-  TM_BEGIN(); T ret = f(); TM_END(); return ret;
-}
-#endif
 
 #endif /* MAP_H */

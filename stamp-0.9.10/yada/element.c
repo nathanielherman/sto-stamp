@@ -576,7 +576,7 @@ element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
 ulong_t element_edgeHash(const void* a) {
     // meh
     const edge_t* e = (const edge_t*)a;
-    return coordinate_distance(e->firstPtr, e->secondPtr);
+    return coordinate_distance((coordinate_t*)e->firstPtr, (coordinate_t*)e->secondPtr);
 }
 
 /* =============================================================================
