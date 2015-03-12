@@ -79,11 +79,6 @@
 
 
 #ifdef __cplusplus
-#include <cstdlib>
-
-using std::malloc;
-using std::free;
-using std::size_t;
 #else
 #include <stdlib.h>
 #endif
@@ -663,7 +658,7 @@ size_t jsw_avlsize ( jsw_avltree_t *tree )
 
 jsw_avltrav_t *jsw_avltnew ( void )
 {
-  return malloc ( sizeof ( jsw_avltrav_t ) );
+  return (jsw_avltrav_t*)malloc ( sizeof ( jsw_avltrav_t ) );
 }
 
 void jsw_avltdelete ( jsw_avltrav_t *trav )

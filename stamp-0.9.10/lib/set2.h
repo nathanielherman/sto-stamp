@@ -22,25 +22,18 @@
 #  define TMSET_REMOVE(map, key)      TMMAP_REMOVE(map, key)
 
 #elif defined(SET_USE_HASHTABLE)
-// XXX: better way to do this than just copying map2.h??
-
-#include "sto/Hashtable.hh"
-#define SET_T Hashtable<void*, void*, 1000000>
-#define TMSET_CONTAINS(map, key) ({ void* val; bool ret = map->transGet(TM_ARG (void *)key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMSET_INSERT(map, key) ({ auto ret = map->transInsert(TM_ARG (void *) key, (void*)NULL); /*TM_ARG_ALONE.check_reads();*/ ret; })
-#define TMSET_REMOVE(map, key) ({ map->transDelete(TM_ARG (void *)key); })
+#include "sto_hashtable.h"
+#define SET_T STOHASHTABLE_T
+#define TMSET_CONTAINS TMSTOHASHTABLE_CONTAINS
+#define TMSET_INSERT(map, key) TMSTOHASHTABLE_INSERT(map, key, NULL)
+#define TMSET_REMOVE TMSTOHASHTABLE_REMOVE
 
 // Preventing double-definition
-#define SET_ALLOC(hash, cmp) (new SET_T())
-#define SET_FREE(map) (delete map)
-#ifndef __TRANS_WRAP
-#define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TM_BEGIN(); ___ret = OP; TM_END(); ___ret;})
-#endif
-#define SET_CONTAINS(map, key) __TRANS_WRAP(TMSET_CONTAINS(map, key), bool)
-#define SET_INSERT(map, key) __TRANS_WRAP(TMSET_INSERT(map, key), bool)
-#define SET_REMOVE(map, key) __TRANS_WRAP(TMSET_REMOVE(map, key), bool)
-
-#undef __TRANS_WRAP
+#define SET_ALLOC STOHASHTABLE_ALLOC
+#define SET_FREE STOHASHTABLE_FREE
+#define SET_CONTAINS STOHASHTABLE_CONTAINS
+#define SET_INSERT(map, key) STOHASHTABLE_INSERT(map, key, NULL)
+#define SET_REMOVE STOHASHTABLE_REMOVE
 
 #else
 
