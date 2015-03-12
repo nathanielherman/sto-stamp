@@ -567,10 +567,16 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
 long
 element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
 {
-  edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);
-  edge_t* bEdgePtr = (edge_t*)(bPtr->firstPtr);
+    edge_t* aEdgePtr = (edge_t*)(aPtr->firstPtr);
+    edge_t* bEdgePtr = (edge_t*)(bPtr->firstPtr);
 
-  return compareEdge(aEdgePtr, bEdgePtr);
+    return compareEdge(aEdgePtr, bEdgePtr);
+}
+
+ulong_t element_edgeHash(const void* a) {
+    // meh
+    const edge_t* e = (const edge_t*)a;
+    return coordinate_distance(e->firstPtr, e->secondPtr);
 }
 
 /* =============================================================================

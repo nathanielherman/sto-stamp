@@ -206,6 +206,9 @@ element_listCompareEdge (const void* aPtr, const void* bPtr);
 long
 element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr);
 
+// hash an edge
+ulong_t element_edgeHash(const void* a);
+
 /* =============================================================================
  * element_heapCompare
  *

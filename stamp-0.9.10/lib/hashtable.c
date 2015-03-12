@@ -300,10 +300,6 @@ TMallocBuckets (TM_ARGDECL
     return buckets;
 }
 
-ulong_t default_hash(const void* k) {
-  return (ulong_t)k;
-}
-
 /* =============================================================================
  * hashtable_alloc
  * -- Returns NULL on failure
@@ -336,8 +332,7 @@ hashtable_alloc (long initNumBucket,
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
-    if (!hash)
-      hash = default_hash;
+    assert(hash);
     hashtablePtr->hash = hash;
     hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
@@ -380,6 +375,7 @@ TMhashtable_alloc (TM_ARGDECL
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
+    assert(hash);
     hashtablePtr->hash = hash;
     hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?

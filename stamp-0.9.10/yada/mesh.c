@@ -119,7 +119,7 @@ mesh_alloc ()
         meshPtr->initBadQueuePtr = queue_alloc(-1);
         assert(meshPtr->initBadQueuePtr);
         meshPtr->size = 0;
-        meshPtr->boundarySetPtr = SET_ALLOC(NULL, &element_listCompareEdge);
+        meshPtr->boundarySetPtr = SET_ALLOC(&element_edgeHash, &element_listCompareEdge);
         assert(meshPtr->boundarySetPtr);
     }
 
