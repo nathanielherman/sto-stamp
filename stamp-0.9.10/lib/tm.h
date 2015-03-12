@@ -474,7 +474,7 @@
 #  define TM_STARTUP(numThread)         /* nothing */
 #  define TM_SHUTDOWN()                 STO_SHUTDOWN()
 
-#  define TM_THREAD_ENTER()             /* nothing */
+#  define TM_THREAD_ENTER()             ({ Transaction::threadid = thread_getId(); })
 #  define TM_THREAD_EXIT()              /* nothing */
 
 #  ifdef SIMULATOR
