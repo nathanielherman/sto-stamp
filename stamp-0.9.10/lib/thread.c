@@ -88,9 +88,11 @@ void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
     *it = l->transIter(TM_ARG_ALONE);
 }
 
+#if 0
 void list_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->iter();
 }
+#endif
 
 kvepoch_t global_log_epoch = 0;
 volatile uint64_t globalepoch = 1;

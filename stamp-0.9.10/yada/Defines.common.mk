@@ -22,7 +22,6 @@ SRCS += \
 	yada.c \
 	$(LIB)/avltree.c \
 	$(LIB)/heap.c \
-	$(LIB)/hashtable.c\
 	$(LIB)/list.c \
 	$(LIB)/mt19937ar.c \
 	$(LIB)/pair.c \

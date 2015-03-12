@@ -6,7 +6,7 @@
 
 
 CC       := gcc
-OPT      := -O3
+OPT      := #-O3
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
