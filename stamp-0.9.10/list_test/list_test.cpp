@@ -46,8 +46,10 @@ void print_vector(std::vector<unsigned long>& v, bool error) {
 void assert_equiv(list_t *tmlist, std::vector<unsigned long>& ref, std::string testname) {
     std::stringstream err;
     err << "Assertion failed in " << testname << ": ";
-    if (list_getSize(tmlist) == ref.size()) {
+    if (list_getSize(tmlist) != ref.size()) {
         err << "size mismatch!" << std::endl;
+        err << "Wanted " << ref.size() << ", got "
+            << list_getSize(tmlist) << "!" << std::endl;
         std::cerr << err.str();
         abort();
     }
@@ -67,7 +69,6 @@ void assert_equiv(list_t *tmlist, std::vector<unsigned long>& ref, std::string t
 }
 
 void grow_list(list_t *tmlist, int tx_len, int rounds, std::vector<unsigned long>& refout) {
-    unsigned long n;
     std::default_random_engine gen;
     unsigned long dist_max = std::numeric_limits<unsigned long>::max();
     std::uniform_int_distribution<unsigned long> dist(0UL, dist_max);
@@ -78,10 +79,10 @@ void grow_list(list_t *tmlist, int tx_len, int rounds, std::vector<unsigned long
         for (int j = 0; j < tx_len; ++j) {
             refout.push_back(dist(gen));
         }
-        
+
         TM_BEGIN();
         for (int j = 0; j < tx_len; ++j) {
-            TMLIST_INSERT(tmlist, (void *)refout[j]);
+            TMLIST_INSERT(tmlist, (void *)refout[i*tx_len + j]);
         }
         TM_END();
     }
@@ -93,8 +94,8 @@ int main() {
     list_t *list = TMLIST_ALLOC(NULL);
 
     // Test 1: Concurrent insertion
-    t1 = new std::thread(grow_list, list, 10, 100, std::ref(ref1));
-    t2 = new std::thread(grow_list, list, 10, 100, std::ref(ref2));
+    t1 = new std::thread(grow_list, list, 20, 1000, std::ref(ref1));
+    t2 = new std::thread(grow_list, list, 20, 1000, std::ref(ref2));
 
     t1->join();
     t2->join();
@@ -102,7 +103,8 @@ int main() {
     // Deduplicate reference list
     ref1.insert(ref1.end(), ref2.begin(), ref2.end());
     std::sort(ref1.begin(), ref1.end());
-    ref1.erase(std::unique(ref1.begin(), ref1.end()), ref1.end());
+    auto last = std::unique(ref1.begin(), ref1.end());
+    ref1.erase(last, ref1.end());
     
     assert_equiv(list, ref1, "Test 1");
 

@@ -1,7 +1,27 @@
-all:
-	clang++ -std=c++11 -g -c -O3 -I../lib -DSTO -DLIST_NO_DUPLICATES list_test.cpp -o list_test.o
-	clang++ -std=c++11 -g -c -O3 -I../lib -DSTO -DLIST_NO_DUPLICATES ../lib/thread.c -o ../lib/thread.o
-	clang++ -std=c++11 -g -O3 ../lib/thread.o list_test.o -o list_test -lpthread
+CPP = g++
+LD = $(CPP)
+CFLAGS = -std=c++11 -g -Wall
+LDFLAGS = -lpthread
+OPT = -O3
+INCPATH = ../lib
+SYMBOLS = -DSTO -DLIST_NO_DUPLICATES
+CFLAGS += $(OPT) -I$(INCPATH) $(SYMBOLS)
+
+MAINSRC = list_test.cpp
+DEPSRC = ../lib/thread.c
+OBJS = $(MAINSRC:.cpp=.o) $(DEPSRC:.c=.o)
+TARGET = list_test
+
+%.o: %.cpp
+	$(CPP) $(CFLAGS) -c $< -o $@
+
+%.o: %.c
+	$(CPP) $(CFLAGS) -c $< -o $@
+
+$(TARGET): $(OBJS)
+	$(LD) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
+
+all: $(TARGET)
 
 clean:
-	rm -vf list_test list_test.o ../lib/thread.o
+	rm -vf $(TARGET) $(OBJS)
