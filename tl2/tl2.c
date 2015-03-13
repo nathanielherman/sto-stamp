@@ -868,6 +868,9 @@ RecordStore (Log* k, volatile intptr_t* Addr, intptr_t Valu, bool isFloat, volat
      * LockRecord at the appropriate location in the list.
      * Call InsertIfAbsent (Self, LockFor)
      */
+#ifdef TL2_STATS
+    global_stats[1]++;
+#endif
     AVPair* e = k->put;
     if (e == NULL) {
         k->ovf++;
@@ -918,7 +921,7 @@ TrackLoad (Thread* Self, volatile vwLock* LockFor)
 {
     Log* k = &Self->rdSet;
 #ifdef TL2_STATS
-    global_stats[1]++;
+    global_stats[0]++;
 #endif
     /*
      * Consider collapsing back-to-back track loads ...
@@ -1294,7 +1297,10 @@ ReadSetCoherent (Thread* Self)
     ASSERT((rv & LOCKBIT) == 0);
 
     for (e = rd->List; e != EndOfList; e = e->Next) {
-        ASSERT(e->LockFor != NULL);
+#ifdef TL2_STATS
+      global_stats[3]++;
+#endif
+	ASSERT(e->LockFor != NULL);
         vwLock v = LDLOCK(e->LockFor);
         if (v & LOCKBIT) {
 #  ifdef TL2_EAGER
@@ -1335,6 +1341,9 @@ ReadSetCoherentPessimistic (Thread* Self)
     ASSERT((rv & LOCKBIT) == 0);
 
     for (e = rd->List; e != EndOfList; e = e->Next) {
+#ifdef TL2_STATS
+      global_stats[3]++;
+#endif
         ASSERT(e->LockFor != NULL);
         vwLock v = LDLOCK(e->LockFor);
         if (v & LOCKBIT) {
@@ -1550,12 +1559,18 @@ TryFastUpdate (Thread* Self)
     ctr = 1000; /* Spin budget - TUNABLE */
     vwLock maxv = 0;
     AVPair* p;
+#ifdef TL2_STATS
+    int i = 0;
+#endif;
 #      ifdef TL2_OPTIM_HASHLOG
     for (wr = logs; wr != end; wr++)
 #      endif /* TL2_OPTIM_HASHLOG*/
     {
         AVPair* const End = wr->put;
         for (p = wr->List; p != End; p = p->Next) {
+#ifdef TL2_STATS
+            i++;
+#endif
             volatile vwLock* const LockFor = p->LockFor;
             vwLock cv;
             ASSERT(p->Addr != NULL);
@@ -1650,6 +1665,28 @@ TryFastUpdate (Thread* Self)
 
 #  endif /* !TL2_EAGER */
 
+#ifdef TL2_STATS
+  global_stats[4] += i;
+  if ( i > global_stats[5]) {
+    global_stats[5] = i;
+  }
+  
+  
+  // Track read set
+  Log* const rd_ = &Self->rdSet;
+  AVPair* const EndOfList_ = rd_->put;
+  AVPair* e_;
+  
+  int j = 0;
+  for (e_ = rd_->List; e_ != EndOfList_; e_ = e_->Next) {
+    j++;
+  }
+  global_stats[6] += j;
+  if (j > global_stats[7]) {
+    global_stats[7] = j;
+  }
+  
+#endif
 
 #    ifdef TL2_EAGER
     wv = GVGenerateWV(Self, Self->maxv);
@@ -1956,7 +1993,9 @@ TxStore (Thread* Self, volatile intptr_t* addr, intptr_t valu, bool isFloat)
         AVPair* e;
         for (e = wr->tail; e != NULL; e = e->Prev) {
             ASSERT(e->Addr != NULL);
+#ifdef TL2_STATS
 	    global_stats[2]++;
+#endif
             if (e->Addr == addr) {
                 ASSERT(LockFor == e->LockFor);
                 e->Valu = valu; /* CCM: update associated value in write-set */
