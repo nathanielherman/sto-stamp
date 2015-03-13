@@ -21,8 +21,6 @@ SRCS += \
 	$(LIB)/random.c \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
-#
-OBJS := ${SRCS:.c=.o}
 
 CFLAGS += -DLIST_NO_DUPLICATES
 CFLAGS += -DLEARNER_TRY_REMOVE

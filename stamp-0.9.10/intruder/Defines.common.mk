@@ -24,8 +24,6 @@ SRCS += \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
 	$(LIB)/hashtable.c
-#
-OBJS := ${SRCS:.c=.o}
 
 CFLAGS += -DMAP_USE_HASHTABLE
 

@@ -12,14 +12,18 @@
 .PHONY: default
 default: $(PROG)
 
-.PHONY: clean
-clean:
-	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+
+include ../common/Makefile.common
+
 
 $(PROG): $(OBJS)
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
-include ../common/Makefile.common
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	$(RM) -rf $(DEPSDIR) $(OBJDIR)
 
 
 # ==============================================================================
