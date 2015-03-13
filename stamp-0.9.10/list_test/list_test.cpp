@@ -7,17 +7,40 @@
 #include <random>
 #include "list2.hh"
 
-void print_list(list_t *list) {
+inline void print_s(const std::string& msg, bool error) {
+    if (error) {
+        std::cerr << msg;
+    } else {
+        std::cout << msg;
+    }
+}
+
+void print_list(list_t *list, bool error) {
     list_iter_t it;
-    std::cout << "{";
+    std::stringstream liststr;
+    liststr << "{";
     list_iter_reset(&it, list);
     while (list_iter_hasNext(&it, list)) {
-        std::cout << (unsigned long)(list_iter_next(&it, list));
+        liststr << (unsigned long)(list_iter_next(&it, list));
         if (list_iter_hasNext(&it, list)) {
-            std::cout << ", ";
+            liststr << ", ";
         }
     }
-    std::cout << "}" << std::endl;
+    liststr << "}" << std::endl;
+    print_s(liststr.str(), error);
+}
+
+void print_vector(std::vector<unsigned long>& v, bool error) {
+    std::stringstream vecStr;
+    vecStr << "{";
+    for (auto it = v.begin(); it != v.end(); ++it) {
+        vecStr << *it;
+        if (it + 1 != v.end()) {
+            vecStr << ", ";
+        }
+    }
+    vecStr << "}" << std::endl;
+    print_s(vecStr.str(), error);
 }
 
 void assert_equiv(list_t *tmlist, std::vector<unsigned long>& ref, std::string testname) {
@@ -36,7 +59,8 @@ void assert_equiv(list_t *tmlist, std::vector<unsigned long>& ref, std::string t
             *rit != (unsigned long)list_iter_next(&it, tmlist)) {
             err << "content mismatch at idx " << rit - ref.begin() << "!" << std::endl;
             std::cerr << err.str();
-            print_list(tmlist);
+            print_list(tmlist, true);
+            //print_vector(ref, true);
             abort();
         }
     }
@@ -54,6 +78,7 @@ void grow_list(list_t *tmlist, int tx_len, int rounds, std::vector<unsigned long
         for (int j = 0; j < tx_len; ++j) {
             refout.push_back(dist(gen));
         }
+        
         TM_BEGIN();
         for (int j = 0; j < tx_len; ++j) {
             TMLIST_INSERT(tmlist, (void *)refout[j]);
@@ -74,8 +99,11 @@ int main() {
     t1->join();
     t2->join();
 
+    // Deduplicate reference list
     ref1.insert(ref1.end(), ref2.begin(), ref2.end());
     std::sort(ref1.begin(), ref1.end());
+    ref1.erase(std::unique(ref1.begin(), ref1.end()), ref1.end());
+    
     assert_equiv(list, ref1, "Test 1");
 
     TMLIST_FREE(list)
