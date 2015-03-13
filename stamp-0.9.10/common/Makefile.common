@@ -4,12 +4,64 @@
 #
 # ==============================================================================
 
+DEPFILES := $(wildcard $(DEPSDIR)/*.d)
+ifneq ($(DEPFILES),)
+include $(DEPFILES)
+endif
 
-%.o: %.c *.h
-	$(CC) $(CFLAGS) -c $< -o $@
+BUILDSTAMP := $(DEPSDIR)/buildstamp
 
-%.o: %.cpp *.h
-	$(CPP) $(CPPFLAGS) -c $< -o $@
+ALLFLAGS := $(CC) $(CFLAGS) / $(CXX) $(CXXFLAGS)
+ifneq ($(ALLFLAGS),$(DEPALLFLAGS))
+REMAKE_ALL := $(shell rm -f $(BUILDSTAMP); mkdir -p $(DEPSDIR); echo DEPALLFLAGS := "$(ALLFLAGS)" > $(DEPSDIR)/_flags.d)
+endif
+
+$(BUILDSTAMP):
+	mkdir -p $(DEPSDIR) $(OBJDIR)
+	echo >$(DEPSDIR)/buildstamp
+
+
+OBJS = $(patsubst %,$(OBJDIR)/%.o,$(basename $(notdir $(SRCS))))
+
+
+ifeq ($(ALWAYSCXX),1)
+CCOMPILE = $(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
+CXXCOMPILE = $(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
+else
+CCOMPILE = $(CC) $(CFLAGS) $(DEPCFLAGS) -c $< -o $@
+CXXCOMPILE = $(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
+endif
+
+
+HERESRCS = $(filter-out ../lib/%,$(SRCS))
+LIBSRCS = $(notdir $(filter ../lib/%,$(SRCS)))
+
+
+$(patsubst %.c,$(OBJDIR)/%.o,$(filter %.c,$(HERESRCS))): \
+$(OBJDIR)/%.o: %.c $(BUILDSTAMP)
+	$(CCOMPILE)
+
+$(patsubst %.c,$(OBJDIR)/%.o,$(filter %.c,$(LIBSRCS))): \
+$(OBJDIR)/%.o: ../lib/%.c $(BUILDSTAMP)
+	$(CCOMPILE)
+
+
+$(patsubst %.cpp,$(OBJDIR)/%.o,$(filter %.cpp,$(HERESRCS))): \
+$(OBJDIR)/%.o: %.cpp $(BUILDSTAMP)
+	$(CXXCOMPILE)
+
+$(patsubst %.cpp,$(OBJDIR)/%.o,$(filter %.cpp,$(LIBSRCS))): \
+$(OBJDIR)/%.o: ../lib/%.cpp $(BUILDSTAMP)
+	$(CXXCOMPILE)
+
+
+$(patsubst %.cc,$(OBJDIR)/%.o,$(filter %.cc,$(HERESRCS))): \
+$(OBJDIR)/%.o: %.cc $(BUILDSTAMP)
+	$(CXXCOMPILE)
+
+$(patsubst %.cc,$(OBJDIR)/%.o,$(filter %.cc,$(LIBSRCS))): \
+$(OBJDIR)/%.o: ../lib/%.cc $(BUILDSTAMP)
+	$(CXXCOMPILE)
 
 
 # ==============================================================================

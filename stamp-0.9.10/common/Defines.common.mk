@@ -10,10 +10,14 @@ OPT      := -O3
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
-CPP      := g++ -std=c++11
-CPPFLAGS += $(CFLAGS)
+CXX      := g++ -std=c++11
+CXXFLAGS += $(CFLAGS)
 LD       := g++
 LIBS     += -lpthread
+
+DEPSDIR  := .deps
+OBJDIR   := obj
+DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
 # Remove these files when doing clean
 OUTPUT +=
