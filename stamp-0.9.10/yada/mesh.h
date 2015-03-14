@@ -75,11 +75,7 @@
 
 #include "element.h"
 
-#ifdef STO
-#  include "map2.h"
-#else
-#  include "map.h"
-#endif
+#include "map.h"
 
 #include "random.h"
 #include "tm.h"

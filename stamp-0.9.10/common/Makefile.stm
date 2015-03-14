@@ -10,7 +10,7 @@
 # ==============================================================================
 
 CFLAGS   += -DSTM -I$(STM)
-CPPFLAGS := $(CFLAGS)
+CXXFLAGS := $(CFLAGS)
 LDFLAGS  += -L$(STM)
 LIBS     += -ltl2
 
@@ -22,15 +22,18 @@ LIBS     += -ltl2
 .PHONY: default
 default: $(PROG)
 
-.PHONY: clean
-clean:
-	$(RM) $(OBJS) $(PROG) $(OUTPUT)
-
-$(PROG): $(OBJS)
-	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
 include ../common/Makefile.common
 
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	$(RM) -rf $(DEPSDIR) $(OBJDIR)
+
+
+$(PROG): $(OBJS)
+	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
 # ==============================================================================
 #

@@ -80,12 +80,10 @@
  * =============================================================================
  */
 
-
 #include <assert.h>
 #include <stdlib.h>
 #include "hashtable.h"
 #include "pair.h"
-#include "pair2keycompare.h"
 #include "types.h"
 
 #ifdef HAVE_CONFIG_H
@@ -189,8 +187,8 @@ hashtable_iter_next (hashtable_iter_t* itPtr, hashtable_t* hashtablePtr)
     for (bucket = itPtr->bucket; bucket < numBucket; /* inside body */) {
         list_t* chainPtr = hashtablePtr->buckets[bucket];
         if (list_iter_hasNext(&it, chainPtr)) {
-            pair_t* pairPtr = (pair_t*)list_iter_next(&it, chainPtr);
-            dataPtr = pairPtr->secondPtr;
+            pair_t pairPtr = list_full_iter_next(&it, chainPtr);
+            dataPtr = pairPtr.secondPtr;
             break;
         }
         /* May use dummy bucket; see allocBuckets() */
@@ -242,7 +240,7 @@ TMhashtable_iter_next (TM_ARGDECL
  * =============================================================================
  */
 static list_t**
-allocBuckets (long numBucket, long (*comparePairs)(const pair_t*, const pair_t*))
+allocBuckets (long numBucket, long (*compareKeys)(const void*, const void*))
 {
     long i;
     list_t** buckets;
@@ -255,7 +253,7 @@ allocBuckets (long numBucket, long (*comparePairs)(const pair_t*, const pair_t*)
 
     for (i = 0; i < (numBucket + 1); i++) {
         list_t* chainPtr =
-            list_alloc((long (*)(const void*, const void*))comparePairs);
+            list_alloc((long (*)(const void*, const void*))compareKeys);
         if (chainPtr == NULL) {
             while (--i >= 0) {
                 list_free(buckets[i]);
@@ -276,7 +274,7 @@ allocBuckets (long numBucket, long (*comparePairs)(const pair_t*, const pair_t*)
  */
 static list_t**
 TMallocBuckets (TM_ARGDECL
-                long numBucket, long (*comparePairs)(const pair_t*, const pair_t*))
+                long numBucket, long (*compareKeys)(const void*, const void*))
 {
     long i;
     list_t** buckets;
@@ -289,7 +287,7 @@ TMallocBuckets (TM_ARGDECL
 
     for (i = 0; i < (numBucket + 1); i++) {
         list_t* chainPtr =
-            TMLIST_ALLOC((long (*)(const void*, const void*))comparePairs);
+            TMLIST_ALLOC((long (*)(const void*, const void*))compareKeys);
         if (chainPtr == NULL) {
             while (--i >= 0) {
                 TMLIST_FREE(buckets[i]);
@@ -302,39 +300,24 @@ TMallocBuckets (TM_ARGDECL
     return buckets;
 }
 
-ulong_t default_hash(const void* k) {
-  return (ulong_t)k;
+ulong_t
+default_hash(const void *a)
+{
+    return (ulong_t)a;
 }
 
 /* =============================================================================
  * hashtable_alloc
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
+ * -- compareKeys is a function comparing PAIRS of key, values in the
+ * table. You probably want to be calling hashtable_alloc which just takes a key comparator
  * =============================================================================
  */
 hashtable_t*
 hashtable_alloc (long initNumBucket,
                  ulong_t (*hash)(const void*),
                  long (*compareKeys)(const void*, const void*),
-                 long resizeRatio,
-                 long growthFactor)
-{
-
-  return hashtable_alloc_pairs(initNumBucket, hash, get_comparePairsFunc(compareKeys), resizeRatio, growthFactor);
-}
-
-/* =============================================================================
- * hashtable_alloc_pairs
- * -- Returns NULL on failure
- * -- Negative values for resizeRatio or growthFactor select default values
- * -- comparePairs is a function comparing PAIRS of key, values in the
- * table. You probably want to be calling hashtable_alloc which just takes a key comparator
- * =============================================================================
- */
-hashtable_t*
-hashtable_alloc_pairs (long initNumBucket,
-                 ulong_t (*hash)(const void*),
-                 long (*comparePairs)(const pair_t*, const pair_t*),
                  long resizeRatio,
                  long growthFactor)
 {
@@ -345,7 +328,7 @@ hashtable_alloc_pairs (long initNumBucket,
         return NULL;
     }
 
-    hashtablePtr->buckets = allocBuckets(initNumBucket, comparePairs);
+    hashtablePtr->buckets = allocBuckets(initNumBucket, compareKeys);
     if (hashtablePtr->buckets == NULL) {
         free(hashtablePtr);
         return NULL;
@@ -355,10 +338,14 @@ hashtable_alloc_pairs (long initNumBucket,
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
-    if (!hash)
-      hash = default_hash;
+    // we don't want to provide a hash function if they gave us a custom
+    // compare function, because we could break the invariant that forall x,y
+    // s.t. compareKeys(x,y)==0, hash(x)==hash(y)
+    assert(hash || !compareKeys);
+    if (!hash && !compareKeys)
+        hash = default_hash;
     hashtablePtr->hash = hash;
-    hashtablePtr->comparePairs = comparePairs;
+    hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
                                   HASHTABLE_DEFAULT_RESIZE_RATIO : resizeRatio);
     hashtablePtr->growthFactor = ((growthFactor < 0) ?
@@ -378,7 +365,7 @@ hashtable_t*
 TMhashtable_alloc (TM_ARGDECL
                    long initNumBucket,
                    ulong_t (*hash)(const void*),
-                   long (*comparePairs)(const pair_t*, const pair_t*),
+                   long (*compareKeys)(const void*, const void*),
                    long resizeRatio,
                    long growthFactor)
 {
@@ -389,7 +376,7 @@ TMhashtable_alloc (TM_ARGDECL
         return NULL;
     }
 
-    hashtablePtr->buckets = TMallocBuckets(TM_ARG  initNumBucket, comparePairs);
+    hashtablePtr->buckets = TMallocBuckets(TM_ARG  initNumBucket, compareKeys);
     if (hashtablePtr->buckets == NULL) {
         TM_FREE(hashtablePtr);
         return NULL;
@@ -399,8 +386,14 @@ TMhashtable_alloc (TM_ARGDECL
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size = 0;
 #endif
+    // we don't want to provide a hash function if they gave us a custom
+    // compare function, because we could break the invariant that forall x,y
+    // s.t. compareKeys(x,y)==0, hash(x)==hash(y)
+    assert(hash || !compareKeys);
+    if (!hash && !compareKeys)
+        hash = default_hash;
     hashtablePtr->hash = hash;
-    hashtablePtr->comparePairs = comparePairs;
+    hashtablePtr->compareKeys = compareKeys;
     hashtablePtr->resizeRatio = ((resizeRatio < 0) ?
                                   HASHTABLE_DEFAULT_RESIZE_RATIO : resizeRatio);
     hashtablePtr->growthFactor = ((growthFactor < 0) ?
@@ -568,13 +561,11 @@ bool_t
 hashtable_containsKey (hashtable_t* hashtablePtr, void* keyPtr)
 {
     long i = hashtablePtr->hash(keyPtr) % hashtablePtr->numBucket;
-    pair_t* pairPtr;
-    pair_t findPair;
+    pair_t pairPtr;
 
-    findPair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)list_find(hashtablePtr->buckets[i], &findPair);
+    pairPtr = list_full_find(hashtablePtr->buckets[i], keyPtr);
 
-    return ((pairPtr != NULL) ? TRUE : FALSE);
+    return ((pairPtr.firstPtr != NULL) ? TRUE : FALSE);
 }
 
 
@@ -586,13 +577,11 @@ bool_t
 TMhashtable_containsKey (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr)
 {
     long i = hashtablePtr->hash(keyPtr) % hashtablePtr->numBucket;
-    pair_t* pairPtr;
-    pair_t findPair;
+    pair_t pairPtr;
 
-    findPair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)TMLIST_FIND(hashtablePtr->buckets[i], &findPair);
+    pairPtr = TMLIST_FULL_FIND(hashtablePtr->buckets[i], keyPtr);
 
-    return ((pairPtr != NULL) ? TRUE : FALSE);
+    return ((pairPtr.firstPtr != NULL) ? TRUE : FALSE);
 }
 
 
@@ -605,16 +594,14 @@ void*
 hashtable_find (hashtable_t* hashtablePtr, void* keyPtr)
 {
     long i = hashtablePtr->hash(keyPtr) % hashtablePtr->numBucket;
-    pair_t* pairPtr;
-    pair_t findPair;
+    pair_t pairPtr;
 
-    findPair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)list_find(hashtablePtr->buckets[i], &findPair);
-    if (pairPtr == NULL) {
+    pairPtr = list_full_find(hashtablePtr->buckets[i], keyPtr);
+    if (pairPtr.firstPtr == NULL) {
         return NULL;
     }
 
-    return pairPtr->secondPtr;
+    return pairPtr.secondPtr;
 }
 
 
@@ -627,16 +614,14 @@ void*
 TMhashtable_find (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr)
 {
     long i = hashtablePtr->hash(keyPtr) % hashtablePtr->numBucket;
-    pair_t* pairPtr;
-    pair_t findPair;
+    pair_t pairPtr;
 
-    findPair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)TMLIST_FIND(hashtablePtr->buckets[i], &findPair);
-    if (pairPtr == NULL) {
+    pairPtr = TMLIST_FULL_FIND(hashtablePtr->buckets[i], keyPtr);
+    if (pairPtr.firstPtr == NULL) {
         return NULL;
     }
 
-    return pairPtr->secondPtr;
+    return pairPtr.secondPtr;
 }
 
 
@@ -654,7 +639,7 @@ rehash (hashtable_t* hashtablePtr)
     list_t** newBuckets;
     long i;
 
-    newBuckets = allocBuckets(newNumBucket, hashtablePtr->comparePairs);
+    newBuckets = allocBuckets(newNumBucket, hashtablePtr->compareKeys);
     if (newBuckets == NULL) {
         return NULL;
     }
@@ -664,9 +649,9 @@ rehash (hashtable_t* hashtablePtr)
         list_iter_t it;
         list_iter_reset(&it, chainPtr);
         while (list_iter_hasNext(&it, chainPtr)) {
-            pair_t* transferPtr = (pair_t*)list_iter_next(&it, chainPtr);
+            pair_t transferPtr = (pair_t)list_full_iter_next(&it, chainPtr);
             long j = hashtablePtr->hash(transferPtr->firstPtr) % newNumBucket;
-            if (list_insert(newBuckets[j], (void*)transferPtr) == FALSE) {
+            if (list_insert(newBuckets[j], transferPtr.firstPtr, transferPtr.secondPtr) == FALSE) {
                 return NULL;
             }
         }
@@ -692,15 +677,12 @@ hashtable_insert (hashtable_t* hashtablePtr, void* keyPtr, void* dataPtr)
 
     pair_t findPair;
     findPair.firstPtr = keyPtr;
-    pair_t* pairPtr = (pair_t*)list_find(hashtablePtr->buckets[i], &findPair);
-    if (pairPtr != NULL) {
+    pair_t pairPtr = list_full_find(hashtablePtr->buckets[i], keyPtr);
+    if (pairPtr.firstPtr != NULL) {
         return FALSE;
     }
 
-    pair_t* insertPtr = pair_alloc(keyPtr, dataPtr);
-    if (insertPtr == NULL) {
-        return FALSE;
-    }
+    pair_t insertPtr = {keyPtr, dataPtr};
 
 #ifdef HASHTABLE_SIZE_FIELD
     newSize = hashtablePtr->size + 1;
@@ -727,8 +709,7 @@ hashtable_insert (hashtable_t* hashtablePtr, void* keyPtr, void* dataPtr)
 #endif
 
     /* Add new entry  */
-    if (list_insert(hashtablePtr->buckets[i], insertPtr) == FALSE) {
-        pair_free(insertPtr);
+    if (list_full_insert(hashtablePtr->buckets[i], insertPtr.firstPtr, insertPtr.secondPtr) == FALSE) {
         return FALSE;
     }
 #ifdef HASHTABLE_SIZE_FIELD
@@ -750,21 +731,13 @@ TMhashtable_insert (TM_ARGDECL
     long numBucket = hashtablePtr->numBucket;
     long i = hashtablePtr->hash(keyPtr) % numBucket;
 
-    pair_t findPair;
-    findPair.firstPtr = keyPtr;
-    pair_t* pairPtr = (pair_t*)TMLIST_FIND(hashtablePtr->buckets[i], &findPair);
-    if (pairPtr != NULL) {
-        return FALSE;
-    }
-
-    pair_t* insertPtr = TMPAIR_ALLOC(keyPtr, dataPtr);
-    if (insertPtr == NULL) {
+    pair_t pairPtr = TMLIST_FULL_FIND(hashtablePtr->buckets[i], keyPtr);
+    if (pairPtr.firstPtr != NULL) {
         return FALSE;
     }
 
     /* Add new entry  */
-    if (TMLIST_INSERT(hashtablePtr->buckets[i], insertPtr) == FALSE) {
-        TMPAIR_FREE(insertPtr);
+    if (TMLIST_FULL_INSERT(hashtablePtr->buckets[i], keyPtr, dataPtr) == FALSE) {
         return FALSE;
     }
 
@@ -789,18 +762,15 @@ hashtable_remove (hashtable_t* hashtablePtr, void* keyPtr)
     long numBucket = hashtablePtr->numBucket;
     long i = hashtablePtr->hash(keyPtr) % numBucket;
     list_t* chainPtr = hashtablePtr->buckets[i];
-    pair_t* pairPtr;
-    pair_t removePair;
+    pair_t pairPtr;
 
-    removePair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)list_find(chainPtr, &removePair);
-    if (pairPtr == NULL) {
+    pairPtr = list_full_find(chainPtr, keyPtr);
+    if (pairPtr.firstPtr == NULL) {
         return FALSE;
     }
 
-    bool_t status = list_remove(chainPtr, &removePair);
+    bool_t status = list_remove(chainPtr, keyPtr);
     assert(status);
-    pair_free(pairPtr);
 
 #ifdef HASHTABLE_SIZE_FIELD
     hashtablePtr->size--;
@@ -822,18 +792,15 @@ TMhashtable_remove (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr)
     long numBucket = hashtablePtr->numBucket;
     long i = hashtablePtr->hash(keyPtr) % numBucket;
     list_t* chainPtr = hashtablePtr->buckets[i];
-    pair_t* pairPtr;
-    pair_t removePair;
+    pair_t pairPtr;
 
-    removePair.firstPtr = keyPtr;
-    pairPtr = (pair_t*)TMLIST_FIND(chainPtr, &removePair);
-    if (pairPtr == NULL) {
+    pairPtr = TMLIST_FULL_FIND(chainPtr, keyPtr);
+    if (pairPtr.firstPtr == NULL) {
         return FALSE;
     }
 
-    bool_t status = TMLIST_REMOVE(chainPtr, &removePair);
+    bool_t status = TMLIST_REMOVE(chainPtr, keyPtr);
     assert(status);
-    TMPAIR_FREE(pairPtr);
 
 #ifdef HASHTABLE_SIZE_FIELD
     TM_SHARED_WRITE(hashtablePtr->size
@@ -863,9 +830,10 @@ hash (const void* keyPtr)
 
 
 static long
-comparePairs (const pair_t* a, const pair_t* b)
+compareKeys (const void* a, const void* b)
 {
-    return (*(long*)(a->firstPtr) - *(long*)(b->firstPtr));
+  return *(long*)a - *(long*)b;
+  //return (*(long*)(a->firstPtr) - *(long*)(b->firstPtr));
 }
 
 
@@ -888,8 +856,8 @@ printHashtable (hashtable_t* hashtablePtr)
         printf("%2li: [", i);
         list_iter_reset(&it, hashtablePtr->buckets[i]);
         while (list_iter_hasNext(&it, hashtablePtr->buckets[i])) {
-            void* pairPtr = list_iter_next(&it, hashtablePtr->buckets[i]);
-            printf("%li ", *(long*)(((pair_t*)pairPtr)->secondPtr));
+            pair_t pairPtr = list_full_iter_next(&it, hashtablePtr->buckets[i]);
+            printf("%li ", *(long*)(pairPtr.secondPtr);
         }
         puts("]");
     }
@@ -925,7 +893,7 @@ main ()
 
     puts("Starting...");
 
-    hashtablePtr = hashtable_alloc(1, &hash, &comparePairs, -1, -1);
+    hashtablePtr = hashtable_alloc(1, &hash, &compareKeys, -1, -1);
 
     for (i = 0; data[i] >= 0; i++) {
         insertInt(hashtablePtr, &data[i]);

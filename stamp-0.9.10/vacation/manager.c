@@ -111,10 +111,6 @@ static ulong_t hash(const void* p){
 		return (ulong_t)p;
 }
 
-static long compareLong(const void *a, const void *b){
-		return *((const long*)a) - *((const long*)b);
-}
-
 static MAP_T*
 tableAlloc ()
 {

@@ -111,7 +111,7 @@ typedef struct hashtable {
     long size;
 #endif
     ulong_t (*hash)(const void*);
-    long (*comparePairs)(const pair_t*, const pair_t*);
+    long (*compareKeys)(const void*, const void*);
     long resizeRatio;
     long growthFactor;
     /* comparePairs should return <0 if before, 0 if equal, >0 if after */
@@ -179,20 +179,12 @@ TMhashtable_iter_next (TM_ARGDECL
  * hashtable_alloc
  * -- Returns NULL on failure
  * -- Negative values for resizeRatio or growthFactor select default values
- * -- Takes a key comparison function
  * =============================================================================
  */
 hashtable_t*
 hashtable_alloc (long initNumBucket,
                  ulong_t (*hash)(const void*),
                  long (*compareKeys)(const void*, const void*),
-                 long resizeRatio,
-                 long growthFactor);
-
-hashtable_t*
-hashtable_alloc_pairs (long initNumBucket,
-                 ulong_t (*hash)(const void*),
-                 long (*comparePairs)(const pair_t*, const pair_t*),
                  long resizeRatio,
                  long growthFactor);
 
@@ -208,7 +200,7 @@ hashtable_t*
 TMhashtable_alloc (TM_ARGDECL
                    long initNumBucket,
                    ulong_t (*hash)(const void*),
-                   long (*comparePairs)(const pair_t*, const pair_t*),
+                   long (*compareKeys)(const void*, const void*),
                    long resizeRatio,
                    long growthFactor);
 

@@ -1,6 +1,6 @@
 # ==============================================================================
 #
-# Makefile.stm
+# Makefile.STO
 #
 # ==============================================================================
 
@@ -9,8 +9,8 @@
 # Variables
 # ==============================================================================
 
-CFLAGS   += -DSTO#-DSTM -I$(STM)
-CPPFLAGS := $(CFLAGS)
+CFLAGS   += -DSTO #-DSTM -I$(STM)
+CXXFLAGS := $(CFLAGS)
 #LDFLAGS  += -L$(STM)
 #LIBS     += -ltl2
 
@@ -22,9 +22,6 @@ CPPFLAGS := $(CFLAGS)
 .PHONY: default
 default: $(PROG)
 
-.PHONY: clean
-clean:
-	$(RM) $(OBJS) $(PROG) $(OUTPUT)
 
 KVTREES = ../lib/sto/masstree-beta/query_masstree.o \
 	../lib/sto/masstree-beta/value_string.o ../lib/sto/masstree-beta/value_array.o ../lib/sto/masstree-beta/value_versioned_array.o \
@@ -44,11 +41,19 @@ masstree: ../lib/sto/masstree-beta/config.status
 ../lib/sto/masstree-beta/config.status: ../lib/sto/masstree-beta/configure
 	cd ../lib/sto/masstree-beta && ./configure @ac_configure_args@
 
+
+ALWAYSCXX = 1
+include ../common/Makefile.common
+
+
 $(PROG): $(OBJS) $(MASSTREE_OBJS)
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
 
-include ../common/Makefile.STO.common
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	-$(RM) -rf $(DEPSDIR) $(OBJDIR)
 
 
 # ==============================================================================

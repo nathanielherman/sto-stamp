@@ -77,11 +77,11 @@
 
 #ifdef STO
 #  include "list2.hh"
-#  include "map2.h"
 #else
 #  include "list.h"
-#  include "map.h"
 #endif
+// we just use AVLTREE for STO since map is non-transactional
+#include "map.h"
 
 #include "mesh.h"
 #include "queue.h"
@@ -96,7 +96,6 @@
 #include "tm.h"
 #include "types.h"
 #include "utility.h"
-
 
 struct mesh {
     element_t* rootElementPtr;
@@ -120,7 +119,7 @@ mesh_alloc ()
         meshPtr->initBadQueuePtr = queue_alloc(-1);
         assert(meshPtr->initBadQueuePtr);
         meshPtr->size = 0;
-        meshPtr->boundarySetPtr = SET_ALLOC(NULL, &element_listCompareEdge);
+        meshPtr->boundarySetPtr = SET_ALLOC(&element_edgeHash, &element_listCompareEdge);
         assert(meshPtr->boundarySetPtr);
     }
 
@@ -376,7 +375,7 @@ mesh_read (mesh_t* meshPtr, char* fileNamePrefix)
     long i;
     long numElement = 0;
 
-    MAP_T* edgeMapPtr = MAP_ALLOC(NULL, &element_listCompareEdge);
+    MAP_T* edgeMapPtr = MAP_ALLOC(NULL, &element_mapCompareEdge);
     assert(edgeMapPtr);
 
     /*
@@ -524,7 +523,7 @@ mesh_check (mesh_t* meshPtr, long expectedNumElement)
 
     searchQueuePtr = queue_alloc(-1);
     assert(searchQueuePtr);
-    visitedMapPtr = MAP_ALLOC(NULL, &element_listCompare);
+    visitedMapPtr = MAP_ALLOC(NULL, &element_mapCompare);
     assert(visitedMapPtr);
 
     /*
