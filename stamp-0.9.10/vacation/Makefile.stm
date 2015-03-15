@@ -8,8 +8,6 @@ include ../common/Defines.common.mk
 include ./Defines.common.mk
 include ../common/Makefile.stm
 
-CFLAGS += -DMAP_USE_HASHTABLE
-
 # ==============================================================================
 #
 # End of Makefile.stm

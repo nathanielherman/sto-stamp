@@ -5,7 +5,7 @@
 # ==============================================================================
 
 
-CFLAGS += -DLIST_NO_DUPLICATES
+CFLAGS += -DLIST_NO_DUPLICATES -DMAP_USE_HASHTABLE
 
 PROG := vacation
 
