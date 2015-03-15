@@ -17,7 +17,7 @@ static inline ulong_t default_hasher(const void *a) {
 class __EqCompare {
  public:
   typedef long (*intcompare)(const void*, const void*);
- __EqCompare(intcompare c) : comp(c ? c : default_table_comparator) {}
+  __EqCompare(intcompare c) : comp(c ? c : default_table_comparator) {}
   bool operator()(const void* a, const void* b) {
     return comp(a, b) == 0;
   }
