@@ -22,8 +22,6 @@ SRCS += \
 	$(LIB)/random.c \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
-#
-OBJS := ${SRCS:.c=.o}
 
 CFLAGS += -DUSE_EARLY_RELEASE
 

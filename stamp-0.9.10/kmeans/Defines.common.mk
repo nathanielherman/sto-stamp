@@ -9,17 +9,14 @@ CFLAGS += -DOUTPUT_TO_STDOUT
 
 PROG := kmeans
 
-SRCS += \
-	Clusters.c \
+SRCS += Clusters.c \
 	cluster.c \
 	common.c \
 	kmeans.c \
 	normal.c \
 	$(LIB)/mt19937ar.c \
 	$(LIB)/random.c \
-	$(LIB)/thread.c \
-#
-OBJS := ${SRCS:.c=.o}
+	$(LIB)/thread.c
 
 
 # ==============================================================================
