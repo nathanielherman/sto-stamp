@@ -461,6 +461,8 @@
 
 #elif defined(STO)
 
+#include <unistd.h>
+
 #  define TM_ARG                        __transaction, 
 #  define TM_ARG_ALONE                  __transaction
 #  define TM_ARGDECL                    Transaction& TM_ARG
@@ -468,7 +470,7 @@
 #  define TM_CALLABLE                   /* nothing */
 #  define TM_BEGIN()                    while (1) { try { Transaction& __transaction = Transaction::get_transaction();
 #  define TM_BEGIN_RO() TM_BEGIN()
-#  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
+#  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { /*usleep(rand() % 1000);*/ continue; } break; }
 #  define TM_RESTART() __transaction.abort()
 
 #  define TM_STARTUP(numThread)         /* nothing */
