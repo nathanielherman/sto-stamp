@@ -7,10 +7,10 @@ INCPATH = ../lib
 SYMBOLS = -DSTO -DLIST_NO_DUPLICATES
 CFLAGS += $(OPT) -I$(INCPATH) $(SYMBOLS)
 
-MAINSRC = list_test.cpp
+MAINSRC = list_test_race.cpp
 DEPSRC = ../lib/thread.c
 OBJS = $(MAINSRC:.cpp=.o) $(DEPSRC:.c=.o)
-TARGET = list_test
+TARGET = $(MAINSRC:.cpp=)
 
 %.o: %.cpp
 	$(CPP) $(CFLAGS) -c $< -o $@
