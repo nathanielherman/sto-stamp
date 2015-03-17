@@ -12,7 +12,7 @@ CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
 CXX      := g++ -std=c++11
 CXXFLAGS += $(CFLAGS)
-LD       := g++
+LD       = $(CXX) $(CXXFLAGS)
 LIBS     += -lpthread
 
 DEPSDIR  := .deps
