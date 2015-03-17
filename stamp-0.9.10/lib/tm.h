@@ -470,7 +470,7 @@
 #  define TM_CALLABLE                   /* nothing */
 #  define TM_BEGIN()                    while (1) { try { Transaction& __transaction = Transaction::get_transaction();
 #  define TM_BEGIN_RO() TM_BEGIN()
-#  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { /*usleep(rand() % 1000);*/ continue; } break; }
+#  define TM_END()                      __transaction.commit(); break; } catch (Transaction::Abort E) { /*usleep(rand() % 1000);*/ } }
 #  define TM_RESTART() __transaction.abort()
 
 #  define TM_STARTUP(numThread)         /* nothing */
