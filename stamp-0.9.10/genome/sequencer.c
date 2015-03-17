@@ -270,7 +270,7 @@ sequencer_run (void* argPtr)
     /*
      * Step 1: Remove duplicate segments
      */
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     long numThread = thread_getNumThread();
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
@@ -327,7 +327,7 @@ sequencer_run (void* argPtr)
     numUniqueSegment = hashtable_getSize(uniqueSegmentsPtr);
     entryIndex = 0;
 
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
         long num = uniqueSegmentsPtr->numBucket;
@@ -349,7 +349,7 @@ sequencer_run (void* argPtr)
     i_stop = uniqueSegmentsPtr->numBucket;
     entryIndex = 0;
 #endif /* !(HTM || STM) */
-
+	
     for (i = i_start; i < i_stop; i++) {
 
         list_t* chainPtr = uniqueSegmentsPtr->buckets[i];
@@ -364,7 +364,7 @@ sequencer_run (void* argPtr)
             long j;
             ulong_t startHash;
             bool_t status;
-
+		
             /* Find an empty constructEntries entry */
             TM_BEGIN();
             while (((void*)TM_SHARED_READ_P(constructEntries[entryIndex].segment)) != NULL) {
@@ -374,7 +374,7 @@ sequencer_run (void* argPtr)
             TM_SHARED_WRITE_P(constructEntryPtr->segment, segment);
             TM_END();
             entryIndex = (entryIndex + 1) % numUniqueSegment;
-
+		
             /*
              * Save hashes (sdbm algorithm) of segment substrings
              *
@@ -429,7 +429,7 @@ sequencer_run (void* argPtr)
         long index_start;
         long index_stop;
 
-#if defined(HTM) || defined(STM)
+#if defined(HTM) || defined(STM) || defined(STO)
         {
             /* Choose disjoint segments [index_start,index_stop) for each thread */
             long partitionSize = (numUniqueSegment + numThread/2) / numThread; /* with rounding */
