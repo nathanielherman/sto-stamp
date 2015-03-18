@@ -28,6 +28,9 @@ STM := ../../tl2
 
 LOSTM := ../../OpenTM/lostm
 
+-include ../common/userconfig.mk
+-include userconfig.mk
+
 
 # ==============================================================================
 #
