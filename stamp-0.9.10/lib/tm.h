@@ -491,10 +491,13 @@
 
 #  else /* !SIMULATOR */
 
+#include "sto/TransFree.hh"
+extern TransFree __free;
+
 #    define P_MALLOC(size)              malloc(size)
 #    define P_FREE(ptr)                 free(ptr)
 #    define TM_MALLOC(size)             malloc(size)
-#    define TM_FREE(ptr)                ({ void* __ptr = (ptr); Transaction::rcu_cleanup([__ptr] () { free(__ptr); }); })
+#    define TM_FREE(ptr)                ({ __free.transFree(TM_ARG (ptr)); })
 #   define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  endif /* !SIMULATOR */

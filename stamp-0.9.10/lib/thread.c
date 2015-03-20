@@ -77,12 +77,15 @@
 // HAX HAX HAX
 #ifdef STO
 #include "sto/GenericSTM.hh"
-#include "sto/Transaction.hh"
 #include "sto/MassTrans.hh"
+#include "sto/Transaction.hh"
+#include "sto/TransFree.hh"
+
 #include "tm.h"
 #include "list2.hh"
 #include "sto/Transaction.cc"
 GenericSTM __genstm;
+TransFree __free;
 
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
     *it = l->transIter(TM_ARG_ALONE);
