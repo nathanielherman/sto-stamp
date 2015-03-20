@@ -14,9 +14,9 @@ class ExtractTime:
         p = re.compile(pattern);
         m = p.search(line)
         if m != None:
-            print m.group().split()[3]
+            print m.group().split()[2]
     def process(self, line):
-        self.patternMatch(line, "Learn time = .*")
+        self.patternMatch(line, "Time = .*")
 
 def main(argv):
     filename = argv[0]
