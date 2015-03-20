@@ -26,33 +26,41 @@ public:
 };
 
 #ifdef LIST_NO_DUPLICATES
-typedef List<pair_t, false, __ListCompare> list_t;
+#ifdef LIST_OPACITY
+typedef List<pair_t, false, __ListCompare, true, true> list_t;
+#else 
+typedef List<pair_t, false, __ListCompare, true, false> list_t;
+#endif
 #else
-typedef List<pair_t, true, __ListCompare> list_t;
+#ifdef LIST_OPACITY
+typedef List<pair_t, true, __ListCompare, true, true> list_t;
+#else
+typedef List<pair_t, true, __ListCompare, true, false> list_t;
+#endif
 #endif
 
 typedef typename list_t::ListIter list_iter_t;
 
 #if LIST_OPACITY
-#define OPACITY_CHECK() TM_ARG_ALONE.check_reads()
+#define OPACITY_CHECK(list) ((list)->opacity_check(TM_ARG_ALONE))
 #else
-#define OPACITY_CHECK() 
+#define OPACITY_CHECK(list) 
 #endif
 
-#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); OPACITY_CHECK(); })
-#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); OPACITY_CHECK(); ret; })
-#define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext(TM_ARG_ALONE))->firstPtr; OPACITY_CHECK(); ret; })
+#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); OPACITY_CHECK(list); })
+#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); OPACITY_CHECK(list); ret; })
+#define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext(TM_ARG_ALONE))->firstPtr; OPACITY_CHECK(list); ret; })
 #define TMLIST_ALLOC(cmp) (new list_t(__ListCompare(cmp)))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
-#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); OPACITY_CHECK(); ret; })
+#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); OPACITY_CHECK(list); ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
-#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(); ret ? ret->firstPtr : NULL; })
-#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(); ret; })
-#define TMLIST_REMOVE(list, data) ({ auto ret = (list)->transDelete(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(); ret; })
+#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? ret->firstPtr : NULL; })
+#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
+#define TMLIST_REMOVE(list, data) ({ auto ret = (list)->transDelete(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
 
-#define TMLIST_FULL_ITER_NEXT(it, list) ({ auto ret = (it)->transNext(TM_ARG_ALONE); OPACITY_CHECK(); *ret; })
-#define TMLIST_FULL_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(); ret ? *ret : (pair_t){NULL, NULL}; })
-#define TMLIST_FULL_INSERT(list, data, seconddata) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, seconddata}); OPACITY_CHECK(); ret; })
+#define TMLIST_FULL_ITER_NEXT(it, list) ({ auto ret = (it)->transNext(TM_ARG_ALONE); OPACITY_CHECK(list); *ret; })
+#define TMLIST_FULL_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? *ret : (pair_t){NULL, NULL}; })
+#define TMLIST_FULL_INSERT(list, data, seconddata) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, seconddata}); OPACITY_CHECK(list); ret; })
 
 #define list_full_iter_next(it, list) ({ auto ret = (it)->next(); *ret; })
 #define list_full_find(list, data) ({ auto ret = (list)->find((pair_t){data, NULL}); ret ? *ret : (pair_t){NULL, NULL}; })

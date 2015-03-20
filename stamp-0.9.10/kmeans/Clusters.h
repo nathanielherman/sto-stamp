@@ -18,7 +18,7 @@ unsigned get_cluster_size(int nfeatures);
 #ifdef D 
 class Cluster: public Single<_Cluster*>{
 		public:
-				void install(TransItem& item) {
+      void install(TransItem& item, Transaction::tid_type) {
 						_Cluster* cluster_ptr = s_.read_value();
 						_Cluster* new_cluster_ptr = item.write_value<_Cluster*>();
 						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));

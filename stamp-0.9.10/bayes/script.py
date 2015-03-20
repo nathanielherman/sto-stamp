@@ -19,7 +19,7 @@ def run_benchmark(cmd, mode, nthreads):
     time_list = []
     std_list  = []
     for n in nthreads:
-        cmd[1] = '-p' + str(n)
+        cmd[1] = '-t' + str(n)
         time, std = run_experiment(cmd,t)
         time_list.append(time)
         std_list.append(std)
@@ -42,7 +42,7 @@ def printfmt_int(header, out, precision, width):
 if __name__ == "__main__":
     nthreads = [1,2,4,8,16]
     t = 1;
-    cmds = [['./bayes', '-v32', '-r2048', '-n12', '-p40', '-i2' '-e10', '-s1']]
+    cmds = [['./bayes', '-v32', '-r4096', '-n10', '-p40', '-i2', '-e8', '-s1']]
     for cmd in cmds:
         print cmd
         print printfmt_int('n', nthreads, 2, 8)

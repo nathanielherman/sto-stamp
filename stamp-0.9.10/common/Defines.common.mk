@@ -12,7 +12,7 @@ CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
 CXX      := g++ -std=c++11
 CXXFLAGS += $(CFLAGS)
-LD       := g++
+LD       = $(CXX) $(CXXFLAGS)
 LIBS     += -lpthread
 
 DEPSDIR  := .deps
@@ -27,6 +27,9 @@ LIB := ../lib
 STM := ../../tl2
 
 LOSTM := ../../OpenTM/lostm
+
+-include ../common/userconfig.mk
+-include userconfig.mk
 
 
 # ==============================================================================

@@ -9,7 +9,7 @@ import subprocess
 import multiprocessing
 
 nthreads_max = multiprocessing.cpu_count()
-yada_input_file = "ttimeu100000.2"
+yada_input_file = "ttimeu1000000.2"
 
 def makefile_name(mode):
 	m = "Makefile"
@@ -50,11 +50,24 @@ def extract_time(output):
 	time = re.search("(?<=Elapsed time"+20*" "+"= )[0-9]*\.[0-9]*", output).group(0)
 	return float(time)
 
+def exec_with_retries(args):
+	retries = 0
+	out = ""
+	while True:
+		try:
+			out = subprocess.check_output(args, stderr=subprocess.STDOUT)
+		except subprocess.CalledProcessError as e:
+			retries = retries + 1
+			print "  retry (%d)..." % retries
+			continue
+		else:
+			return out
+
 def run_series(trail, mode, records):
 	assert mode == "STO" or mode == "TL2" or mode == "SEQ"
 	assert trail >= 0
 
-	angle = 20.00
+	angle = 15.00
 	infile = "inputs/" + yada_input_file
 	nthreads = 1
 
@@ -71,7 +84,7 @@ def run_series(trail, mode, records):
 		out_original += (str(args)+"\n")
 
 		# run benchmark
-		out = subprocess.check_output(args, stderr=subprocess.STDOUT)
+		out = exec_with_retries(args)
 		
 		# register results
 		out_original += out
