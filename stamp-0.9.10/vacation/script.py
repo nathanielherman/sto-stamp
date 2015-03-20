@@ -40,18 +40,19 @@ def printfmt_int(header, out, precision, width):
     return string
 
 if __name__ == "__main__":
-    nthreads = [1,2,4,8,16,32]
+    nthreads = [1,2,4,8,16]
     t = 1;
-    cmds = ['./vacation -c1 -n2 -q90 -u98 -r1048576 -t4194304'.split(), 
-            './vacation -c1 -n4 -q60 -u90 -r1048576 -t4194304'.split(),]
+    #cmds = ['./vacation -c1 -n2 -q90 -u98 -r1048576 -t4194304'.split(), 
+    #        './vacation -c1 -n4 -q60 -u90 -r1048576 -t4194304'.split(),]
+    cmds = ['./vacation -c1 -n8 -q1 -u60 -r104857 -t4194304'.split(),]
 
     for cmd in cmds:
         print cmd
         print printfmt_int('n', nthreads, 4, 8)
         seq_time, seq_std = run_benchmark(cmd, 'seq', [1])
         print printfmt_double('seq', seq_time, 4, 8)
-        stm_time, stm_std = run_benchmark(cmd, 'stm', nthreads)
-        print printfmt_double('stm', stm_time, 4, 8)
+        #stm_time, stm_std = run_benchmark(cmd, 'stm', nthreads)
+        #print printfmt_double('stm', stm_time, 4, 8)
         sto_time, sto_std = run_benchmark(cmd, 'STO', nthreads)
         print printfmt_double('sto', sto_time, 4, 8)
 
