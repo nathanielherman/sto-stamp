@@ -79,7 +79,7 @@
 #include "sto/GenericSTM.hh"
 #include "sto/MassTrans.hh"
 #include "sto/Transaction.hh"
-#include "sto/TransFree.hh"
+#include "sto/TransAlloc.hh"
 
 #include "tm.h"
 #ifdef STO
@@ -87,7 +87,8 @@
 #endif
 #include "sto/Transaction.cc"
 GenericSTM __genstm;
-TransFree __free;
+TransAlloc __talloc;
+
 #ifdef STO
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
     *it = l->transIter(TM_ARG_ALONE);

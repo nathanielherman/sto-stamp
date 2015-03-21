@@ -491,13 +491,13 @@
 
 #  else /* !SIMULATOR */
 
-#include "sto/TransFree.hh"
-extern TransFree __free;
+#include "sto/TransAlloc.hh"
+extern TransAlloc __talloc;
 
 #    define P_MALLOC(size)              malloc(size)
 #    define P_FREE(ptr)                 free(ptr)
-#    define TM_MALLOC(size)             malloc(size)
-#    define TM_FREE(ptr)                ({ __free.transFree(TM_ARG (ptr)); })
+#    define TM_MALLOC(size)             ({ __talloc.transMalloc(TM_ARG (size)); })
+#    define TM_FREE(ptr)                ({ __talloc.transFree(TM_ARG (ptr)); })
 #   define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  endif /* !SIMULATOR */
