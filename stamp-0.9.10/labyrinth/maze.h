@@ -75,11 +75,7 @@
 
 #include "coordinate.h"
 #include "grid.h"
-#ifdef STO
-#include "list2.hh"
-#else
 #include "list.h"
-#endif
 #include "pair.h"
 #include "queue.h"
 #include "types.h"

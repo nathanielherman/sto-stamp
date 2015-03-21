@@ -90,7 +90,7 @@
 # include "STAMP_config.h"
 #endif
 
-#if defined(HASHTABLE_RESIZABLE) && (defined(HTM) || defined(STM) || defined(STO))
+#if defined(HASHTABLE_RESIZABLE) && (defined(HTM) || defined(STM) || defined(STO) || defined(GEN))
 #  warning "hash table resizing currently disabled for TM"
 #endif
 
@@ -625,7 +625,7 @@ TMhashtable_find (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr)
 }
 
 
-#if defined(HASHTABLE_RESIZABLE) && !(defined(HTM) || defined(STM) || defined(STO))
+#if defined(HASHTABLE_RESIZABLE) && !(defined(HTM) || defined(STM) || defined(STO) || defined(GEN))
 /* =============================================================================
  * rehash
  * =============================================================================
