@@ -99,7 +99,7 @@
 #  include "map.h"
 
 #  define SET_T                       MAP_T
-#  define SET_ALLOC(hash, cmp)        MAP_ALLOC(hash, (long int (*)(const pair_t*, const pair_t*))(cmp))
+#  define SET_ALLOC(hash, cmp)        MAP_ALLOC(hash, cmp)
 #  define SET_FREE(map)               MAP_FREE(map)
 
 #  define SET_CONTAINS(map, key)      MAP_CONTAINS(map, key)
@@ -109,6 +109,21 @@
 #  define TMSET_CONTAINS(map, key)    TMMAP_CONTAINS(map, key)
 #  define TMSET_INSERT(map, key)      TMMAP_INSERT(map, key, NULL)
 #  define TMSET_REMOVE(map, key)      TMMAP_REMOVE(map, key)
+
+#elif defined(SET_USE_HASHTABLE)
+
+#include "hashtable.h"
+
+#  define SET_T hashtable_t
+#  define SET_ALLOC(hash, cmp) hashtable_alloc(1000000, hash, cmp, 2, 2)
+#  define SET_FREE(set) hashtable_free(set)
+#  define SET_CONTAINS(set, key) hashtable_containsKey(set, (void*)key)
+#  define SET_INSERT(set, key) hashtable_insert(set, (void*)(key), (void*)NULL)
+#  define SET_REMOVE(set, key) hashtable_remove(set, (void*)key)
+
+#  define TMSET_CONTAINS(map, key)    TMhashtable_containsKey(TM_ARG  map, (void*)key)
+#  define TMSET_INSERT(map, key)      TMhashtable_insert(TM_ARG  map, (void*)key, (void*)NULL)
+#  define TMSET_REMOVE(map, key)      TMhashtable_remove(TM_ARG  map, (void*)key)
 
 #else
 

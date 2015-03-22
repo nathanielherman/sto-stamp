@@ -23,10 +23,9 @@ SRCS += \
 	$(LIB)/rbtree.c \
 	$(LIB)/thread.c \
 	$(LIB)/vector.c \
-#
-OBJS := ${SRCS:.c=.o}
+	$(LIB)/hashtable.c
 
-CFLAGS += -DMAP_USE_RBTREE
+CFLAGS += -DMAP_USE_HASHTABLE
 
 
 # ==============================================================================

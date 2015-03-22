@@ -4,8 +4,11 @@
 *~
 *#
 *.swp
-stamp-0.9.10/intruder/intruder
-stamp-0.9.10/kmeans/kmeans
-stamp-0.9.10/vacation/vacation
-/.deps
+userconfig.mk
+/stamp-0.9.10/genome/genome
+/stamp-0.9.10/intruder/intruder
+/stamp-0.9.10/kmeans/kmeans
+/stamp-0.9.10/vacation/vacation
+.deps
+obj
 tags

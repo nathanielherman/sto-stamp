@@ -81,7 +81,7 @@
 #include "tm.h"
 
 #include <assert.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 #include "hash.h"
 #include "hashtable.h"
@@ -149,9 +149,9 @@ hashSegment (const void* keyPtr)
  * =============================================================================
  */
 static long
-compareSegment (const pair_t* a, const pair_t* b)
+compareSegment (const void* a, const void* b)
 {
-    return strcmp((char*)(a->firstPtr), (char*)(b->firstPtr));
+    return strcmp((char*)a, (char*)b);
 }
 
 
@@ -270,7 +270,7 @@ sequencer_run (void* argPtr)
     /*
      * Step 1: Remove duplicate segments
      */
-#if defined(HTM) || defined(STM) || defined(STO)
+#if defined(HTM) || defined(STM) || defined(STO) || defined(GEN)
     long numThread = thread_getNumThread();
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
@@ -327,7 +327,7 @@ sequencer_run (void* argPtr)
     numUniqueSegment = hashtable_getSize(uniqueSegmentsPtr);
     entryIndex = 0;
 
-#if defined(HTM) || defined(STM) || defined(STO)
+#if defined(HTM) || defined(STM) || defined(STO) || defined(GEN)
     {
         /* Choose disjoint segments [i_start,i_stop) for each thread */
         long num = uniqueSegmentsPtr->numBucket;
@@ -352,14 +352,17 @@ sequencer_run (void* argPtr)
 
     for (i = i_start; i < i_stop; i++) {
 
+        // XXX: this is using the hashtable's linked list,
+        // so it has to make same assumptions that the hashtable
+        // does (i.e., formerly, that the list contained pairs,
+        // and now, that the list has a dataPtr and a secondaryDataPtr entry)
         list_t* chainPtr = uniqueSegmentsPtr->buckets[i];
         list_iter_t it;
         list_iter_reset(&it, chainPtr);
 
         while (list_iter_hasNext(&it, chainPtr)) {
-
             char* segment =
-                (char*)((pair_t*)list_iter_next(&it, chainPtr))->firstPtr;
+                (char*)(list_iter_next(&it, chainPtr));
             constructEntry_t* constructEntryPtr;
             long j;
             ulong_t startHash;
@@ -433,7 +436,7 @@ sequencer_run (void* argPtr)
         long index_start;
         long index_stop;
 
-#if defined(HTM) || defined(STM) || defined(STO)
+#if defined(HTM) || defined(STM) || defined(STO) || defined(GEN)
         {
             /* Choose disjoint segments [index_start,index_stop) for each thread */
             long partitionSize = (numUniqueSegment + numThread/2) / numThread; /* with rounding */

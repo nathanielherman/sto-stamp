@@ -80,7 +80,7 @@
 #include "vector.h"
 
 
-const unsigned long CACHE_LINE_SIZE = 32UL;
+#define CACHE_LINE_SIZE (32)
 
 
 /* =============================================================================

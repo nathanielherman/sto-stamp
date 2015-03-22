@@ -1,6 +1,6 @@
 # ==============================================================================
 #
-# Makefile.stm
+# Makefile.STO
 #
 # ==============================================================================
 
@@ -9,8 +9,8 @@
 # Variables
 # ==============================================================================
 
-CFLAGS   += -DSTO#-DSTM -I$(STM)
-CPPFLAGS := $(CFLAGS)
+CFLAGS   += -DSTO #-DSTM -I$(STM)
+CXXFLAGS := $(CFLAGS)
 #LDFLAGS  += -L$(STM)
 #LIBS     += -ltl2
 
@@ -22,33 +22,44 @@ CPPFLAGS := $(CFLAGS)
 .PHONY: default
 default: $(PROG)
 
-.PHONY: clean
-clean:
-	$(RM) $(OBJS) $(PROG) $(OUTPUT)
 
-KVTREES = ../lib/sto/masstree-beta/query_masstree.o \
-	../lib/sto/masstree-beta/value_string.o ../lib/sto/masstree-beta/value_array.o ../lib/sto/masstree-beta/value_versioned_array.o \
-	../lib/sto/masstree-beta/string_slice.o
+MASSTREE_SRCS = str.cc straccum.cc string.cc json.cc msgpack.cc clp.c compiler.cc kvrandom.cc
 
-MASSTREE_OBJS = ../lib/sto/masstree-beta/kvio.o ../lib/sto/masstree-beta/misc.o ../lib/sto/masstree-beta/checkpoint.o $(KVTREES) ../lib/sto/masstree-beta/libjson.a
+ifneq ($(NEED_MASSTREE),)
+MASSTREE_SRCS += \
+        query_masstree.cc \
+        value_string.cc value_array.cc value_versioned_array.cc string_slice.cc \
+        kvio.cc misc.cc checkpoint.cc kvthread.cc
+endif
 
-$(MASSTREE_OBJS): masstree ;
+MASSTREE_OBJS = $(patsubst %,$(OBJDIR)/%.o,$(basename $(notdir $(MASSTREE_SRCS))))
 
-.PHONY: masstree
-masstree: ../lib/sto/masstree-beta/config.status
+MASSTREE_CPPFLAGS = -I../lib/sto/masstree-beta -include ../lib/sto/masstree-beta/config.h
+
+../lib/sto/masstree-beta/config.h: ../lib/sto/masstree-beta/configure ../lib/sto/masstree-beta/configure.ac
 	$(MAKE) -C ../lib/sto/masstree-beta
 
-../lib/sto/masstree-beta/configure ../lib/sto/masstree-beta/config.h.in: ../lib/sto/masstree-beta/configure.ac
-	cd ../lib/sto/masstree-beta && autoreconf -i && touch config.h.in
+$(patsubst %.c,$(OBJDIR)/%.o,$(filter %.c,$(MASSTREE_SRCS))): \
+$(OBJDIR)/%.o: ../lib/sto/masstree-beta/%.c $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(MASSTREE_CPPFLAGS) $(DEPCFLAGS) -c $< -o $@
 
-../lib/sto/masstree-beta/config.status: ../lib/sto/masstree-beta/configure
-	cd ../lib/sto/masstree-beta && ./configure @ac_configure_args@
+$(patsubst %.cc,$(OBJDIR)/%.o,$(filter %.cc,$(MASSTREE_SRCS))): \
+$(OBJDIR)/%.o: ../lib/sto/masstree-beta/%.cc $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(MASSTREE_CPPFLAGS) $(DEPCFLAGS) -c $< -o $@
+
+
+ALWAYSCXX = 1
+include ../common/Makefile.common
+
 
 $(PROG): $(OBJS) $(MASSTREE_OBJS)
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
 
 
-include ../common/Makefile.STO.common
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	-$(RM) -rf $(DEPSDIR) $(OBJDIR)
 
 
 # ==============================================================================

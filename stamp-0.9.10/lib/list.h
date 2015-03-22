@@ -74,6 +74,7 @@
 #ifndef LIST_H
 #define LIST_H 1
 
+#include "pair.h"
 #include "tm.h"
 #include "types.h"
 
@@ -84,7 +85,9 @@ extern "C" {
 
 
 typedef struct list_node {
+    // only dataPtr is used for equality comparisons
     void* dataPtr;
+    void* secondaryDataPtr;
     struct list_node* nextPtr;
 } list_node_t;
 
@@ -138,6 +141,9 @@ TMlist_iter_hasNext (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr);
 void*
 list_iter_next (list_iter_t* itPtr, list_t* listPtr);
 
+pair_t
+list_full_iter_next (list_iter_t* itPtr, list_t* listPtr);
+
 
 /* =============================================================================
  * TMlist_iter_next
@@ -146,6 +152,10 @@ list_iter_next (list_iter_t* itPtr, list_t* listPtr);
 TM_CALLABLE
 void*
 TMlist_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr);
+
+TM_CALLABLE
+pair_t
+TMlist_full_iter_next (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr);
 
 
 /* =============================================================================
@@ -253,6 +263,9 @@ TMlist_getSize (TM_ARGDECL  list_t* listPtr);
 void*
 list_find (list_t* listPtr, void* dataPtr);
 
+pair_t
+list_full_find (list_t* listPtr, void* dataPtr);
+
 
 /* =============================================================================
  * TMlist_find
@@ -263,6 +276,10 @@ TM_CALLABLE
 void*
 TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr);
 
+TM_CALLABLE
+pair_t
+TMlist_full_find (TM_ARGDECL  list_t* listPtr, void* dataPtr);
+
 
 /* =============================================================================
  * list_insert
@@ -271,6 +288,9 @@ TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr);
  */
 bool_t
 list_insert (list_t* listPtr, void* dataPtr);
+
+bool_t
+list_full_insert (list_t* listPtr, void* dataPtr, void *secondDataPtr);
 
 
 /* =============================================================================
@@ -281,6 +301,9 @@ list_insert (list_t* listPtr, void* dataPtr);
 bool_t
 Plist_insert (list_t* listPtr, void* dataPtr);
 
+bool_t
+Plist_full_insert (list_t* listPtr, void* dataPtr, void *secondDataPtr);
+
 
 /* =============================================================================
  * TMlist_insert
@@ -290,6 +313,10 @@ Plist_insert (list_t* listPtr, void* dataPtr);
 TM_CALLABLE
 bool_t
 TMlist_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr);
+
+TM_CALLABLE
+bool_t
+TMlist_full_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr, void *secondDataPtr);
 
 
 /* =============================================================================
@@ -345,6 +372,9 @@ Plist_clear (list_t* listPtr);
 #define PLIST_REMOVE(list, data)        Plist_remove(list, data)
 #define PLIST_CLEAR(list)               Plist_clear(list)
 
+#define TMLIST_FULL_ITER_NEXT(it, list) TMlist_full_iter_next(TM_ARG it, list)
+#define TMLIST_FULL_FIND(list, data) TMlist_full_find(TM_ARG list, data)
+#define TMLIST_FULL_INSERT(list, data, seconddata) TMlist_full_insert(TM_ARG list, data, seconddata)
 
 #define TMLIST_ITER_RESET(it, list)     TMlist_iter_reset(TM_ARG  it, list)
 #define TMLIST_ITER_HASNEXT(it, list)   TMlist_iter_hasNext(TM_ARG  it, list)
@@ -356,7 +386,6 @@ Plist_clear (list_t* listPtr);
 #define TMLIST_FIND(list, data)         TMlist_find(TM_ARG  list, data)
 #define TMLIST_INSERT(list, data)       TMlist_insert(TM_ARG  list, data)
 #define TMLIST_REMOVE(list, data)       TMlist_remove(TM_ARG  list, data)
-
 
 #ifdef __cplusplus
 }

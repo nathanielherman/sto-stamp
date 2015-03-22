@@ -18,8 +18,8 @@ CFLAGS_OTM      += -I $(LIBOTM_DIR)
 CFLAGS          += -g -Wall -pthread
 CFLAGS          += -O3
 CFLAGS          += -I$(LIB)
-CPP             := g++
-CPPFLAGS        += $(CFLAGS)
+CXX             := g++
+CXXFLAGS        += $(CFLAGS)
 LD              := g++
 
 LIBOTM_STM      := $(LIBOTM_DIR)/libotm_stm.a

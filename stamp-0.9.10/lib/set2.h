@@ -21,6 +21,20 @@
 #  define TMSET_INSERT(map, key)      TMMAP_INSERT(map, key, NULL)
 #  define TMSET_REMOVE(map, key)      TMMAP_REMOVE(map, key)
 
+#elif defined(SET_USE_HASHTABLE)
+#include "sto_hashtable.h"
+#define SET_T STOHASHTABLE_T
+#define TMSET_CONTAINS TMSTOHASHTABLE_CONTAINS
+#define TMSET_INSERT(map, key) TMSTOHASHTABLE_INSERT(map, key, NULL)
+#define TMSET_REMOVE TMSTOHASHTABLE_REMOVE
+
+// Preventing double-definition
+#define SET_ALLOC STOHASHTABLE_ALLOC
+#define SET_FREE STOHASHTABLE_FREE
+#define SET_CONTAINS STOHASHTABLE_CONTAINS
+#define SET_INSERT(map, key) STOHASHTABLE_INSERT(map, key, NULL)
+#define SET_REMOVE STOHASHTABLE_REMOVE
+
 #else
 
 #  error "SET type is not specified"

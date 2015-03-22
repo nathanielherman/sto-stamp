@@ -350,7 +350,6 @@ element_listCompare (const void* aPtr, const void* bPtr)
     return element_compare(aElementPtr, bElementPtr);
 }
 
-
 /* =============================================================================
  * element_mapCompare
  *
@@ -360,10 +359,10 @@ element_listCompare (const void* aPtr, const void* bPtr)
 long
 element_mapCompare (const pair_t* aPtr, const pair_t* bPtr)
 {
-    element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
-    element_t* bElementPtr = (element_t*)(bPtr->firstPtr);
+  element_t* aElementPtr = (element_t*)(aPtr->firstPtr);
+  element_t* bElementPtr = (element_t*)(bPtr->firstPtr);
 
-    return element_compare(aElementPtr, bElementPtr);
+  return element_compare(aElementPtr, bElementPtr);
 }
 
 
@@ -559,11 +558,10 @@ element_listCompareEdge (const void* aPtr, const void* bPtr)
     return compareEdge(aEdgePtr, bEdgePtr);
 }
 
-
 /* =============================================================================
  * element_mapCompareEdge
  *
-  * For use in MAP_T
+ * For use in MAP_T
  * =============================================================================
  */
 long
@@ -575,6 +573,11 @@ element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr)
     return compareEdge(aEdgePtr, bEdgePtr);
 }
 
+ulong_t element_edgeHash(const void* a) {
+    // meh
+    const edge_t* e = (const edge_t*)a;
+    return coordinate_distance((coordinate_t*)e->firstPtr, (coordinate_t*)e->secondPtr);
+}
 
 /* =============================================================================
  * element_heapCompare

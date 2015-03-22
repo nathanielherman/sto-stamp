@@ -231,7 +231,7 @@ MAIN(argc, argv)
     totalTime += time;
 
     printf("\n\tcomputeGraph() completed execution.\n");
-    printf("\nTime taken for kernel 1 is %9.6f sec.\n", time);
+    printf("\nTime =  %9.6f sec.\n", time);
 
 #endif /* ENABLE_KERNEL1 */
 

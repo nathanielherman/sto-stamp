@@ -459,7 +459,9 @@
  *  =========================================================================
  */
 
-#elif defined(STO)
+#elif defined(STO) || defined(GEN)
+
+#include <unistd.h>
 
 #  define TM_ARG                        __transaction, 
 #  define TM_ARG_ALONE                  __transaction
@@ -468,13 +470,13 @@
 #  define TM_CALLABLE                   /* nothing */
 #  define TM_BEGIN()                    while (1) { try { Transaction& __transaction = Transaction::get_transaction();
 #  define TM_BEGIN_RO() TM_BEGIN()
-#  define TM_END()                      __transaction.commit(); } catch (Transaction::Abort E) { continue; } break; }
+#  define TM_END()                      if (__transaction.try_commit()) break; } catch (Transaction::Abort E) { /*usleep(rand() % 1000);*/ } }
 #  define TM_RESTART() __transaction.abort()
 
-#  define TM_STARTUP(numThread)         /* nothing */
+#  define TM_STARTUP(numThread)         ({ assert(numThread <= MAX_THREADS); pthread_t advancer; pthread_create(&advancer, NULL, Transaction::epoch_advancer, NULL); pthread_detach(advancer); })
 #  define TM_SHUTDOWN()                 STO_SHUTDOWN()
 
-#  define TM_THREAD_ENTER()             /* nothing */
+#  define TM_THREAD_ENTER()             ({ Transaction::threadid = thread_getId(); })
 #  define TM_THREAD_EXIT()              /* nothing */
 
 #  ifdef SIMULATOR
@@ -485,13 +487,18 @@
 #    define P_FREE(ptr)                 /* TODO: thread local free is non-trivial */
 #    define TM_MALLOC(size)             memory_get(thread_getId(), size)
 #    define TM_FREE(ptr)                /* TODO: thread local free is non-trivial */
+#    define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  else /* !SIMULATOR */
 
+#include "sto/TransAlloc.hh"
+extern TransAlloc __talloc;
+
 #    define P_MALLOC(size)              malloc(size)
 #    define P_FREE(ptr)                 free(ptr)
-#    define TM_MALLOC(size)             malloc(size)
-#    define TM_FREE(ptr)                /*free(ptr)*/
+#    define TM_MALLOC(size)             ({ __talloc.transMalloc(TM_ARG (size)); })
+#    define TM_FREE(ptr)                ({ __talloc.transFree(TM_ARG (ptr)); })
+#   define TM_EARLY_RELEASE(var)         /* nothing */
 
 #  endif /* !SIMULATOR */
 
@@ -588,7 +595,7 @@
 
 #endif /* !OTM */
 
-#elif defined(STO) /*  STO */
+#elif defined(STO) || defined(GEN) /*  STO */
 
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"

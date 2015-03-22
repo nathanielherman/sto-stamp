@@ -75,15 +75,21 @@
 #include "types.h"
 
 // HAX HAX HAX
-#ifdef STO
+#if defined(STO) || defined(GEN)
 #include "sto/GenericSTM.hh"
-#include "sto/Transaction.hh"
 #include "sto/MassTrans.hh"
+#include "sto/Transaction.hh"
+#include "sto/TransAlloc.hh"
+
 #include "tm.h"
+#ifdef STO
 #include "list2.hh"
+#endif
 #include "sto/Transaction.cc"
 GenericSTM __genstm;
+TransAlloc __talloc;
 
+#ifdef STO
 void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
     *it = l->transIter(TM_ARG_ALONE);
 }
@@ -91,6 +97,7 @@ void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
 void list_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->iter();
 }
+#endif
 
 kvepoch_t global_log_epoch = 0;
 volatile uint64_t globalepoch = 1;
@@ -103,12 +110,12 @@ void reportPerf(){
     thr tc = Transaction::tinfo_combined();
     printf("STO System Shutdown:\n"
 #if DETAILED_LOGGING
-           " read: %llu, write: %llu, searched: %llu\n"
+           " read: %llu, write: %llu, searched: %llu, check_read: %llu\n"
            " average set size: %llu, max set size: %llu\n"
 #endif
            " starts: %llu, aborts: %llu, commit time aborts: %llu\n",
 #if DETAILED_LOGGING
-           tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched),
+           tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched), tc.p(txp_total_check_read),
            tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
 #endif
            tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));

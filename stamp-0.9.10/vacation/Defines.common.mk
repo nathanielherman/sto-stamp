@@ -5,8 +5,7 @@
 # ==============================================================================
 
 
-CFLAGS += -DLIST_NO_DUPLICATES
-CFLAGS += -DMAP_USE_HASHTABLE
+CFLAGS += -DLIST_NO_DUPLICATES -DMAP_USE_HASHTABLE
 
 PROG := vacation
 
@@ -23,8 +22,6 @@ SRCS += \
 	$(LIB)/rbtree.c \
 	$(LIB)/thread.c \
 	$(LIB)/hashtable.c \
-#
-OBJS := ${SRCS:.c=.o}
 
 
 # ==============================================================================

@@ -107,7 +107,6 @@ element_compare (element_t* aElementPtr, element_t* bElementPtr);
 long
 element_listCompare (const void* aPtr, const void* bPtr);
 
-
 /* =============================================================================
  * element_mapCompare
  *
@@ -116,7 +115,6 @@ element_listCompare (const void* aPtr, const void* bPtr);
  */
 long
 element_mapCompare (const pair_t* aPtr, const pair_t* bPtr);
-
 
 /* =============================================================================
  * element_alloc
@@ -199,7 +197,6 @@ element_getEdge (element_t* elementPtr, long i);
 long
 element_listCompareEdge (const void* aPtr, const void* bPtr);
 
-
 /* =============================================================================
  * element_mapCompareEdge
  *
@@ -209,6 +206,8 @@ element_listCompareEdge (const void* aPtr, const void* bPtr);
 long
 element_mapCompareEdge (const pair_t* aPtr, const pair_t* bPtr);
 
+// hash an edge
+ulong_t element_edgeHash(const void* a);
 
 /* =============================================================================
  * element_heapCompare

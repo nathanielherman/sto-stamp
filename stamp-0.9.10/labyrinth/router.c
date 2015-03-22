@@ -77,7 +77,7 @@
 #include "router.h"
 #include "tm.h"
 #include "vector.h"
-
+#include "thread.h"
 
 typedef enum momentum {
     MOMENTUM_ZERO = 0,
@@ -387,8 +387,8 @@ router_solve (void* argPtr)
             break;
         }
 
-        coordinate_t* srcPtr = coordinatePairPtr->firstPtr;
-        coordinate_t* dstPtr = coordinatePairPtr->secondPtr;
+        coordinate_t* srcPtr = (coordinate_t*) coordinatePairPtr->firstPtr;
+        coordinate_t* dstPtr = (coordinate_t*) coordinatePairPtr->secondPtr;
 
         bool_t success = FALSE;
         vector_t* pointVectorPtr = NULL;

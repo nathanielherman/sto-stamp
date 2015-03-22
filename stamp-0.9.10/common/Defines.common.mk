@@ -10,10 +10,14 @@ OPT      := -O3
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
-CPP      := g++ -std=c++11
-CPPFLAGS += $(CFLAGS)
-LD       := g++
+CXX      := g++ -std=c++11
+CXXFLAGS += $(CFLAGS)
+LD       = $(CXX) $(CXXFLAGS)
 LIBS     += -lpthread
+
+DEPSDIR  := .deps
+OBJDIR   := obj
+DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
 # Remove these files when doing clean
 OUTPUT +=
@@ -23,6 +27,9 @@ LIB := ../lib
 STM := ../../tl2
 
 LOSTM := ../../OpenTM/lostm
+
+-include ../common/userconfig.mk
+-include userconfig.mk
 
 
 # ==============================================================================
