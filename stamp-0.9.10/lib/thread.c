@@ -112,13 +112,11 @@ void reportPerf(){
 #if DETAILED_LOGGING
            " read: %llu, write: %llu, searched: %llu, check_read: %llu\n"
            " average set size: %llu, max set size: %llu\n"
-#endif
-           " starts: %llu, aborts: %llu, commit time aborts: %llu\n",
-#if DETAILED_LOGGING
            tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched), tc.p(txp_total_check_read),
-           tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set),
+           tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set)
 #endif
-           tc.p(txp_total_starts), tc.p(txp_total_aborts), tc.p(txp_commit_time_aborts));
+	   );
+    Transaction::print_stats();
     printf("DON'T USE THIS RUN FOR BENCHMARKS--TURN OFF PERF_LOGGING in Transaction.hh\n");
 }
 #if 0
