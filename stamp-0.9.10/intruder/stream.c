@@ -83,7 +83,11 @@
 #endif
 
 #include "packet.h"
-#include "queue.h"
+#ifdef STO
+#  include "queue2.h"
+#else
+#  include "queue.h"
+#endif
 #include "random.h"
 #include "stream.h"
 #include "tm.h"
@@ -227,7 +231,7 @@ stream_generate (stream_t* streamPtr,
     detector_addPreprocessor(detectorPtr, &preprocessor_toLower);
 
     random_seed(randomPtr, seed);
-    queue_clear(packetQueuePtr);
+    //    queue_clear(packetQueuePtr);
 
     long range = '~' - ' ' + 1;
     assert(range > 0);
@@ -271,7 +275,7 @@ stream_generate (stream_t* streamPtr,
         splitIntoPackets(str, f, randomPtr, allocVectorPtr, packetQueuePtr);
     }
 
-    queue_shuffle(packetQueuePtr, randomPtr);
+    //XXX:    queue_shuffle(packetQueuePtr, randomPtr);
 
     detector_free(detectorPtr);
 
