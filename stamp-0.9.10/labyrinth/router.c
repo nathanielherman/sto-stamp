@@ -77,7 +77,7 @@
 #include "router.h"
 #include "tm.h"
 #include "vector.h"
-
+#include "thread.h"
 
 typedef enum momentum {
     MOMENTUM_ZERO = 0,

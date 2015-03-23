@@ -459,7 +459,7 @@
  *  =========================================================================
  */
 
-#elif defined(STO)
+#elif defined(STO) || defined(GEN)
 
 #include <unistd.h>
 
@@ -595,7 +595,7 @@ extern TransAlloc __talloc;
 
 #endif /* !OTM */
 
-#elif defined(STO) /*  STO */
+#elif defined(STO) || defined(GEN) /*  STO */
 
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"
