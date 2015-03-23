@@ -77,13 +77,13 @@
 // HAX HAX HAX
 #ifdef STO
 #include "sto/GenericSTM.hh"
-#include "sto/MassTrans.hh"
 #include "sto/Transaction.hh"
 #include "sto/TransAlloc.hh"
 
 #include "tm.h"
 #include "list2.hh"
 #include "sto/Transaction.cc"
+#include "sto/MassTrans.cc"
 GenericSTM __genstm;
 TransAlloc __talloc;
 
@@ -94,11 +94,6 @@ void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
 void list_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->iter();
 }
-
-kvepoch_t global_log_epoch = 0;
-volatile uint64_t globalepoch = 1;
-kvtimestamp_t initial_timestamp;
-volatile bool recovering = false;
 
 #if PERF_LOGGING
 void reportPerf(){

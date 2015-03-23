@@ -27,8 +27,7 @@ MASSTREE_SRCS = str.cc straccum.cc string.cc json.cc msgpack.cc clp.c compiler.c
 
 ifneq ($(NEED_MASSTREE),)
 MASSTREE_SRCS += \
-        query_masstree.cc \
-        value_string.cc value_array.cc value_versioned_array.cc string_slice.cc \
+        string_slice.cc \
         kvio.cc misc.cc checkpoint.cc kvthread.cc
 endif
 
