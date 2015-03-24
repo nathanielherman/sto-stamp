@@ -1,0 +1,16 @@
+stm
+./kmeans -p1 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
+45.4763 
+Std dev = 0.000
+./kmeans -p2 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
+24.7144 
+Std dev = 0.000
+./kmeans -p4 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
+12.8573 
+Std dev = 0.000
+./kmeans -p8 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
+6.66501 
+Std dev = 0.000
+./kmeans -p16 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
+3.93666 
+Std dev = 0.000
