@@ -55,7 +55,7 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); OPACITY_CHECK(list); ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
 #define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? ret->firstPtr : NULL; })
-#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
+#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, NULL}); if (!ret) OPACITY_CHECK(list); ret; })
 #define TMLIST_REMOVE(list, data) ({ auto ret = (list)->transDelete(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
 
 #define TMLIST_FULL_ITER_NEXT(it, list) ({ auto ret = (it)->transNext(TM_ARG_ALONE); OPACITY_CHECK(list); *ret; })
