@@ -1,0 +1,36 @@
+seq
+./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
+52.983397 
+Std dev = 0.000
+stm
+./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
+53.725961 
+Std dev = 0.000
+./labyrinth -t2 -i inputs/random-x1024-y1024-z15-n64.txt
+40.568502 
+Std dev = 0.000
+./labyrinth -t4 -i inputs/random-x1024-y1024-z15-n64.txt
+29.825484 
+Std dev = 0.000
+./labyrinth -t8 -i inputs/random-x1024-y1024-z15-n64.txt
+27.068332 
+Std dev = 0.000
+./labyrinth -t16 -i inputs/random-x1024-y1024-z15-n64.txt
+27.933702 
+Std dev = 0.000
+gen
+./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
+54.009722 
+Std dev = 0.000
+./labyrinth -t2 -i inputs/random-x1024-y1024-z15-n64.txt
+28.271577 
+Std dev = 0.000
+./labyrinth -t4 -i inputs/random-x1024-y1024-z15-n64.txt
+14.276815 
+Std dev = 0.000
+./labyrinth -t8 -i inputs/random-x1024-y1024-z15-n64.txt
+9.383433 
+Std dev = 0.000
+./labyrinth -t16 -i inputs/random-x1024-y1024-z15-n64.txt
+8.960799 
+Std dev = 0.000
