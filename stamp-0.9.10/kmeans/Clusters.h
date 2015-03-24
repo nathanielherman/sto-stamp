@@ -18,12 +18,12 @@ unsigned get_cluster_size(int nfeatures);
 #ifdef D 
 class Cluster: public Single<_Cluster*>{
 		public:
-      void install(TransItem& item, Transaction::tid_type) {
+      void install(TransItem& item, const Transaction& t) {
 						_Cluster* cluster_ptr = s_.read_value();
 						_Cluster* new_cluster_ptr = item.write_value<_Cluster*>();
 						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
 						cluster_ptr->centers = (float *)((char *)cluster_ptr + sizeof(_Cluster));
-						Versioning::inc_version(s_.version());
+						TransactionTid::inc_invalid_version(s_.version());
 					//	printf("cluter len %d\n", s_.read_value()->centers_len);
 				}
 
