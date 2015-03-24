@@ -77,7 +77,11 @@
 #include "grid.h"
 #include "list.h"
 #include "pair.h"
+#ifdef STO
+#include "queue2.h"
+#else
 #include "queue.h"
+#endif
 #include "types.h"
 #include "vector.h"
 

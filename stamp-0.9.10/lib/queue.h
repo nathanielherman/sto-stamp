@@ -76,6 +76,7 @@
 #include "random.h"
 #include "tm.h"
 #include "types.h"
+#include "queue_common.h"
 
 
 #ifdef __cplusplus

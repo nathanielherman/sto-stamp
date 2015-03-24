@@ -73,7 +73,11 @@
 #include <stdlib.h>
 #include "coordinate.h"
 #include "grid.h"
+#ifdef STO
+#include "queue2.h"
+#else
 #include "queue.h"
+#endif
 #include "router.h"
 #include "tm.h"
 #include "vector.h"
