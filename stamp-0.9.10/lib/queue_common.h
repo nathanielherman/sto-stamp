@@ -1,3 +1,3 @@
 #pragma once
 
-#define QUEUE_SIZE 50000000
+#define QUEUE_SIZE 20000000
