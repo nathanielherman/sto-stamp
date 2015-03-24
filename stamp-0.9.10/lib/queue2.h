@@ -1,13 +1,17 @@
 #pragma once
 
 #include "sto/Queue.hh"
+#include "random.h"
+#include <random>
 
-#define queue_t Queue<void*, 10000000>
+#define queue_t Queue<void*, 50000000>
 
 #define queue_alloc(c) (new queue_t)
 #define queue_free(q) /*TODO*/
 #define queue_push(q, d) ({ (q)->push((d)); true; })
 #define queue_pop(q) (q)->pop()
+// TODO: seed
+#define queue_shuffle(q, r) ({ (q)->shuffle(std::default_random_engine(1)); })
 
 #define TMQUEUE_ALLOC(c) queue_alloc(c)
 #define TMQUEUE_FREE(q) /*TODO*/

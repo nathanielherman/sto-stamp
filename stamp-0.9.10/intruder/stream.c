@@ -275,7 +275,7 @@ stream_generate (stream_t* streamPtr,
         splitIntoPackets(str, f, randomPtr, allocVectorPtr, packetQueuePtr);
     }
 
-    //XXX:    queue_shuffle(packetQueuePtr, randomPtr);
+    queue_shuffle(packetQueuePtr, randomPtr);
 
     detector_free(detectorPtr);
 

@@ -106,7 +106,7 @@ void reportPerf(){
     printf("STO System Shutdown:\n"
 #if DETAILED_LOGGING
            " read: %llu, write: %llu, searched: %llu, check_read: %llu\n"
-           " average set size: %llu, max set size: %llu\n"
+           " average set size: %llu, max set size: %llu\n",
            tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched), tc.p(txp_total_check_read),
            tc.p(txp_total_n)/tc.p(txp_total_starts), tc.p(txp_max_set)
 #endif
