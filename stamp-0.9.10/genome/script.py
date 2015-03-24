@@ -50,7 +50,7 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [1,2,4,8,16]
     t = 5;
-    cmds = [['./bayes','-t1', '-v32', '-r4096', '-n10', '-p40', '-i2', '-e9', '-s1']]
+    cmds = [['./genome','-t1', '-g65536', '-s256', '-n33554432']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")

@@ -9,7 +9,7 @@ def run_experiment(cmd, t):
     time = []
     for i in range(t):
         out = subprocess.check_output(cmd)
-        out = re.search("(?<=Time = )[0-9]*\.[0-9]*", out).group(0)
+        out = re.search("(?<=Elapsed time    = )[0-9]*\.[0-9]*", out).group(0)
         time.append(float(out))
         file.write(out + " ")
     file.write("\n")
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [1,2,4,8,16]
     t = 5;
-    cmds = [['./bayes','-t1', '-v32', '-r4096', '-n10', '-p40', '-i2', '-e9', '-s1']]
+    cmds = [['./intruder','-t1', '-a10', '-l2048', '-n10000', '-s1']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
