@@ -3,8 +3,9 @@
 #include "sto/Queue.hh"
 #include "random.h"
 #include <random>
+#include "queue_common.h"
 
-#define queue_t Queue<void*, 50000000>
+#define queue_t Queue<void*, QUEUE_SIZE>
 
 #define queue_alloc(c) (new queue_t)
 #define queue_free(q) /*TODO*/

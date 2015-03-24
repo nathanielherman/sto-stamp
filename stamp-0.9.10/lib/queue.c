@@ -76,6 +76,7 @@
 #include "tm.h"
 #include "types.h"
 #include "queue.h"
+#include "queue_common.h"
 
 
 struct queue {
@@ -98,6 +99,8 @@ queue_t*
 queue_alloc (long initCapacity)
 {
     queue_t* queuePtr = (queue_t*)malloc(sizeof(queue_t));
+
+    initCapacity = QUEUE_SIZE;
 
     if (queuePtr) {
         long capacity = ((initCapacity < 2) ? 2 : initCapacity);
