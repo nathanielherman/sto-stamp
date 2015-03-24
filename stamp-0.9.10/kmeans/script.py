@@ -50,15 +50,15 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [1,2,4,8,16]
     t = 5;
-    cmds = [['./kmeans','-m160', '-n160', '-t0.01', '-i', 'inputs/random-n262144-d32-c16.txt']]
+    cmds = [['./kmeans','-p1', '-m160', '-n160', '-t0.01', '-i', 'inputs/random-n262144-d32-c16.txt']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
-        #seq_time = run_benchmark(cmd, 'seq', [1])
-        #out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
+        seq_time = run_benchmark(cmd, 'seq', [1])
+        out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
         #stm_time = run_benchmark(cmd, 'stm', nthreads)
         #out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
         sto_time = run_benchmark(cmd, 'STO', nthreads)
         out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
-	#gen_time = run_benchmark(cmd, 'gen', nthreads)
-	#out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
+	gen_time = run_benchmark(cmd, 'gen', nthreads)
+	out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")

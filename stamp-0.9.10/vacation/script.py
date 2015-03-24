@@ -26,7 +26,7 @@ def run_experiment(cmd, t):
     time = []
     for i in range(t):
         while (True) :
-            out = timeout_command(cmd, 60)
+            out = timeout_command(cmd, 300)
             if not  out == None:
                 break
             print "Timed out ", cmd
@@ -71,7 +71,8 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [1,2,4,8,16]
     t = 5;
-    cmds = ['./vacation -c1 -n8 -q1 -u60 -r104857 -t4194304'.split(),]
+    #cmds = ['./vacation -c1 -n8 -q1 -u60 -r104857 -t4194304'.split(),]
+    cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")

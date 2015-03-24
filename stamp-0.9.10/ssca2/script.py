@@ -49,7 +49,7 @@ if __name__ == "__main__":
     file = open("tmp.txt", 'w')
     out_file = open("results.txt", 'w')
     nthreads = [1,2,4,8,16]
-    t = 1;
+    t = 5;
     cmds = [['./ssca2','-t1', '-s21', '-i1.0', '-u1.0', '-l3', '-p3']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")

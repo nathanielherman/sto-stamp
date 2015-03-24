@@ -58,5 +58,7 @@ if __name__ == "__main__":
         out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
         stm_time = run_benchmark(cmd, 'stm', nthreads)
         out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
-	gen_time = run_benchmark(cmd, 'gen', nthreads)
+	sto_time = run_benchmark(cmd, 'STO', nthreads)
+        out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
+        gen_time = run_benchmark(cmd, 'gen', nthreads)
 	out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
