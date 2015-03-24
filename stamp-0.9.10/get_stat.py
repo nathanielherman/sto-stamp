@@ -43,7 +43,7 @@ def run_sto(bench, config, ver):
   subprocess.check_output(['make', '-f', 'Makefile.' + ver], stderr=subprocess.STDOUT)
   cmd = ['./' + bench]
   cmd.extend(config.split())
-  out = subprocess.check_output(cmd)
+  out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
   #print out
   starts = re.search("(?<=starts: )[0-9]*", out).group(0)
   reads = re.search("(?<=read: )[0-9]*", out).group(0)
@@ -77,18 +77,17 @@ def printfmt_int(bench, type, out, width):
 if __name__ == "__main__":
   print "Make sure to run this with detailed logging enabled in both STO and tl2"
   width = 15
-  configs = {'bayes' : '-v32 -r4096 -n10 -p40 -i2 -e8 -s1', \
-  'genome' : '-g16384 -s64 -n16777216', \
-  'intruder' : '-a10 -l128 -n262144 -s1', \
-  'kmeans' : '-m40 -n40 -t0.00001 -i inputs/random-n65536-d32-c16.txt', \
-  'labyrinth' : '-i inputs/random-x512-y512-z7-n512.txt', \
-  'ssca2' : '-s20 -i1.0 -u1.0 -l3 -p3', \
-  'vacation' : '-n2 -q90 -u98 -r1048576 -t4194304', \
-  'yada' : '-a15 -i inputs/ttimeu1000000.2' }
+  configs = {'bayes' : '-t1 -v32 -r4096 -n10 -p40 -i2 -e9 -s1', \
+  'genome' : '-t1 -g65536 -s256 -n33554432', \
+  'intruder' : '-t1 -a10 -l2048 -n10000 -s1', \
+  'kmeans' : '-p1 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt', \
+  'labyrinth' : '-t1 -i inputs/random-x1024-y1024-z15-n64.txt', \
+  'ssca2' : '-t1 -s21 -i1.0 -u1.0 -l3 -p3', \
+  'vacation' : '-c1 -n2 -q90 -u98 -r4194304 -t16777216'}
   
   
-  bench = ['bayes', 'genome', 'intruder', 'kmeans', 'vacation', 'labyrinth', 'ssca2', 'yada']
-  excSto = ['labyrinth', 'ssca2', 'yada']
+  bench = ['bayes', 'genome', 'intruder', 'kmeans', 'vacation', 'labyrinth', 'ssca2']
+  excSto = ['ssca2']
   print  printfmt_int("bench", "type", ['starts', 'reads', 'writes', 'search', 'check_reads', 'avg_set', 'max_set', 'avg_rset', 'max_rset'], width)
           
   for b in bench:
