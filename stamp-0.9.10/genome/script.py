@@ -112,7 +112,7 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [4,16]
     t = 5;
-    cmds = [['./genome','-t1', '-g65536', '-s256', '-n33554432']]
+    cmds = [['./genome','-t1', '-g16384', '-s64', '-n16777216']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
