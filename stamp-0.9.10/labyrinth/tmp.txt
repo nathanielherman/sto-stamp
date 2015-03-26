@@ -1,36 +1,39 @@
 seq
-./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
-52.983397 
-Std dev = 0.000
+./labyrinth -t1 -i inputs/random-x512-y512-z7-n512.txt
+54.443701 54.440475 54.437320 54.412695 54.449075 
+Std dev = 0.013
+min = 54.413
+max = 54.449
 stm
-./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
-53.725961 
-Std dev = 0.000
-./labyrinth -t2 -i inputs/random-x1024-y1024-z15-n64.txt
-40.568502 
-Std dev = 0.000
-./labyrinth -t4 -i inputs/random-x1024-y1024-z15-n64.txt
-29.825484 
-Std dev = 0.000
-./labyrinth -t8 -i inputs/random-x1024-y1024-z15-n64.txt
-27.068332 
-Std dev = 0.000
-./labyrinth -t16 -i inputs/random-x1024-y1024-z15-n64.txt
-27.933702 
-Std dev = 0.000
+./labyrinth -t4 -i inputs/random-x512-y512-z7-n512.txt
+17.750886 17.315632 17.493742 20.080960 20.518543 
+Std dev = 1.376
+min = 17.316
+max = 20.519
+./labyrinth -t16 -i inputs/random-x512-y512-z7-n512.txt
+8.876455 8.857291 8.311830 8.864395 8.714184 
+Std dev = 0.215
+min = 8.312
+max = 8.876
+STO
+./labyrinth -t4 -i inputs/random-x512-y512-z7-n512.txt
+11.961189 11.829073 11.958982 12.095392 12.070287 
+Std dev = 0.095
+min = 11.829
+max = 12.095
+./labyrinth -t16 -i inputs/random-x512-y512-z7-n512.txt
+5.305424 5.277481 5.449016 5.329826 5.379888 
+Std dev = 0.061
+min = 5.277
+max = 5.449
 gen
-./labyrinth -t1 -i inputs/random-x1024-y1024-z15-n64.txt
-54.009722 
-Std dev = 0.000
-./labyrinth -t2 -i inputs/random-x1024-y1024-z15-n64.txt
-28.271577 
-Std dev = 0.000
-./labyrinth -t4 -i inputs/random-x1024-y1024-z15-n64.txt
-14.276815 
-Std dev = 0.000
-./labyrinth -t8 -i inputs/random-x1024-y1024-z15-n64.txt
-9.383433 
-Std dev = 0.000
-./labyrinth -t16 -i inputs/random-x1024-y1024-z15-n64.txt
-8.960799 
-Std dev = 0.000
+./labyrinth -t4 -i inputs/random-x512-y512-z7-n512.txt
+16.253671 16.122554 16.171974 15.993787 16.205883 
+Std dev = 0.089
+min = 15.994
+max = 16.254
+./labyrinth -t16 -i inputs/random-x512-y512-z7-n512.txt
+6.987948 6.964082 6.940724 7.057904 6.821260 
+Std dev = 0.077
+min = 6.821
+max = 7.058
