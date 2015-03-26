@@ -15,6 +15,7 @@ def run_experiment(cmd, t):
     file.write("\n")
     file.write("Std dev = " + "%.3f" % (numpy.std(time)))
     file.write("\n")
+    print numpy.median(time), numpy.amin(time), numpy.amax(time)
     return (numpy.median(time))
 
 def run_benchmark(cmd, mode, nthreads):
@@ -48,8 +49,8 @@ def printfmt_int(header, out, precision, width):
 if __name__ == "__main__":
     file = open("tmp.txt", 'w')
     out_file = open("results.txt", 'w')
-    nthreads = [1,2,4,8,16]
-    t = 1;
+    nthreads = [4,16]
+    t = 5;
     cmds = [['./kmeans', '-p1', '-m160', '-n160', '-t0.01', '-i', 'inputs/random-n262144-d32-c16.txt']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
