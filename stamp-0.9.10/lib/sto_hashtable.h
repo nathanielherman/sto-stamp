@@ -36,7 +36,7 @@ class __EqCompare {
 #define STOHASHTABLE_ALLOC(hash, cmp) (new STOHASHTABLE_T(STOHASHTABLE_SIZE, (hash) || (cmp) ? (hash) : default_hasher, __EqCompare(cmp)))
 #define STOHASHTABLE_FREE(map) (delete map)
 // XXX: THIS IS PROBABLY HURTING PERF SOMEWHERE
-#define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; Transaction __transaction; ___ret = OP; __transaction.commit(); ___ret;})
+#define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; TRANSACTION { ___ret = OP; } RETRY(true); ___ret;})
 #define STOHASHTABLE_CONTAINS(map, key) __TRANS_WRAP(TMSTOHASHTABLE_CONTAINS(map, key), bool)
 #define STOHASHTABLE_FIND(map, key) __TRANS_WRAP(TMSTOHASHTABLE_FIND(map, key), void*)
 #define STOHASHTABLE_INSERT(map, key, data) __TRANS_WRAP(TMSTOHASHTABLE_INSERT(map, key, data), bool)
