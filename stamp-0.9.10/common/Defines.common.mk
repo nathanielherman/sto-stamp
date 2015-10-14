@@ -10,6 +10,7 @@ OPT      := -O3
 CFLAGS   += -g -Wall -pthread
 CFLAGS   += $(OPT)
 CFLAGS   += -I$(LIB)
+CFLAGS   += -I$(MASSDIR)
 CXX      := g++ -std=c++11
 CXXFLAGS += $(CFLAGS)
 LD       = $(CXX) $(CXXFLAGS)
@@ -23,6 +24,7 @@ DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 OUTPUT +=
 
 LIB := ../lib
+MASSDIR := ../lib/sto/masstree-beta
 
 STM := ../../tl2
 
