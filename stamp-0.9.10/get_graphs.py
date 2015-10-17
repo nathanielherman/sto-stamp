@@ -33,67 +33,65 @@ def permute(l) :
     new_l.append(l[i])
   return new_l
 
-
 results_ = [  # t = 4
-            [ {'seq' :    22.51, 'sto' :    8.334, 'stm' :    8.424, 'gen' :    6.063}, #bayes
-             {'seq' :    6.391, 'sto' :    1.652, 'stm' :     2.31, 'gen' :    13.14}, #genome
-             {'seq' : 78.84, 'sto' : 28.59 , 'stm' : 161.1, 'gen' : 270.25}, #intruder
-             {'seq' : 29.4, 'sto' : 13.59, 'sto1' : 13.68, 'stm' : 16.26, 'gen' : 28.46}, #vacation
-             {'seq' : 3.17, 'sto' : 4.15, 'sto1' : 3.65, 'stm' : 14.23, 'gen' : 29.2}, #vacation2
-             {'seq' :    30.72, 'sto' :    8.741, 'stm'  : 15.08, 'gen' :    21.51}, #kmeans
-             {'seq' :    54.44, 'sto' :    11.96, 'stm' :    17.75, 'gen' :    16.17}, #labyrinth
-             {'seq' :    34.86, 'stm' :    21.14, 'gen' :    19.22}], #ssca2
+            [ {'seq' :    22.5, 'sto' :    6.092, 'stm' :    6.194, 'gen' :    7.019}, #bayes --
+             {'seq' :    6.394, 'sto' :    1.631, 'stm' :    2.288, 'gen' :    12.21}, #genome --
+             {'seq' : 78.77, 'sto' : 28.62 , 'stm' : 162.7, 'gen' : 270.3}, #intruder --
+             {'seq' : 29.44, 'sto' : 13.82, 'sto1' : 14.5, 'stm' : 16.24, 'gen' : 28.93}, #vacation --
+             {'seq' : 3.164, 'sto' : 4.357, 'sto1' : 4.156, 'stm' : 13.22, 'gen' : 29.89}, #vacation2 --
+             {'seq' :    19.92, 'sto' :    5.037, 'stm'  : 7.539, 'gen' :    11.58}, #kmeans --
+             {'seq' :    54.43, 'sto' :    12.15, 'stm' :    17.52, 'gen' :    16.22}, #labyrinth --
+             {'seq' :    34.94, 'stm' :    21.27, 'gen' :    20.69}], #ssca2 --
               #t = 16
-            [ {'seq' :    22.51, 'sto' :    5.394, 'stm' :    7.442, 'gen' :    16.35}, #bayes
-             {'seq' :    6.391, 'sto' :   0.6042, 'stm' :    1.234, 'gen' :    12.59}, #genome
-             {'seq' : 78.84, 'sto' : 11.26, 'stm' : 153.0, 'gen' : 276.2}, #intruder
-             {'seq' : 29.4, 'sto' : 5.79, 'sto1' : 5.77, 'stm' : 7.58, 'gen' : 23.98}, #vacation
-             {'seq' : 3.17, 'sto' : 2.43, 'sto1' : 1.54, 'stm' : 16.85, 'gen' : 32.98}, #vacation2
-             {'seq' :    30.72, 'sto' :    2.852, 'stm' : 4.60, 'gen' :    8.947}, #kmeans
-             {'seq' :    54.44, 'sto' :     5.33, 'stm' :    8.857, 'gen' :    6.964}, #labyrinth
-             {'seq' :    34.86, 'stm' :    10.13, 'gen' :    10.05}] #ssca2
+            [ {'seq' :    22.5, 'sto' :    3.824, 'stm' :    5.591, 'gen' :    9.639}, #bayes --
+             {'seq' :    6.394, 'sto' :    0.6364, 'stm' :    1.255, 'gen' :    11.35}, #genome --
+             {'seq' : 78.77, 'sto' : 11.1, 'stm' : 145.1, 'gen' : 279.0}, #intruder --
+             {'seq' : 29.44, 'sto' : 5.795, 'sto1' : 5.943, 'stm' : 7.774, 'gen' : 24.65}, #vacation --
+             {'seq' : 3.164, 'sto' : 2.406, 'sto1' : 1.805, 'stm' : 15.98, 'gen' : 33.8}, #vacation2 --
+             {'seq' :    19.92, 'sto' :    1.722, 'stm' : 2.309, 'gen' :    5.144}, #kmeans --
+             {'seq' :    54.43, 'sto' :     5.431, 'stm' :    9.074, 'gen' :    7.111}, #labyrinth --
+             {'seq' :    34.94, 'stm' :    10.12, 'gen' :    10.09}] #ssca2 --
             ]
 
 
 min_ = [  # t = 4
-          [ {'seq' :    22.51, 'sto' :    6.779, 'stm' :    5.441, 'gen' :    4.347}, #bayes
-            {'seq' :    6.391, 'sto' :    1.626, 'stm' :     2.28, 'gen' :    11.69}, #genome
-             {'seq' : 78.84, 'sto' : 28.53, 'stm' : 147.53, 'gen' : 270.18}, #intruder
-             {'seq' : 29.4, 'sto' : 13.49, 'sto1' : 13.56, 'stm' : 16.20, 'gen' : 28.37}, #vacation
-             {'seq' : 3.17, 'sto' : 4.13, 'sto1' : 3.45, 'stm' : 14.03, 'gen' : 29.11}, #vacation2
-             {'seq' :    30.72, 'sto' :    8.613, 'stm' : 14.53, 'gen' :    21.29}, #kmeans
-             {'seq' :    54.44, 'sto' :    11.83, 'stm' :    17.32, 'gen' :    15.99}, #labyrinth
-             {'seq' :    34.86, 'stm' :    21.11, 'gen' :    19.09}], #ssca2
+          [ {'seq' :    22.5, 'sto' :    4.89, 'stm' :    3.896, 'gen' :    4.103}, #bayes --
+            {'seq' :    6.394, 'sto' :    1.627, 'stm' :    2.267, 'gen' :    11.9}, #genome --
+             {'seq' : 78.77, 'sto' : 28.57, 'stm' : 157.5, 'gen' : 269.6}, #intruder --
+             {'seq' : 29.44, 'sto' : 13.7, 'sto1' : 14.18, 'stm' : 16.19, 'gen' : 28.82}, #vacation --
+             {'seq' : 3.164, 'sto' : 4.319, 'sto1' : 4.151, 'stm' : 13.15, 'gen' : 29.8}, #vacation2 --
+             {'seq' :    19.92, 'sto' :    4.599, 'stm' : 7.172, 'gen' :    11.37}, #kmeans --
+             {'seq' :    54.43, 'sto' :    12.08, 'stm' :    16.88, 'gen' :    15.92}, #labyrinth --
+             {'seq' :    34.94, 'stm' :    21.25, 'gen' :    20.38}], #ssca2 --
             #t = 16
-            [ {'seq' :    22.51, 'sto' :    3.049, 'stm' :    4.667, 'gen' :    4.163}, #bayes
-             {'seq' :    6.391, 'sto' :   0.5849, 'stm' :    1.217, 'gen' :    12.25}, #genome
-             {'seq' : 78.84, 'sto' : 11.20, 'stm' : 146.58, 'gen' : 275.86}, #intruder
-             {'seq' : 29.4, 'sto' : 5.13, 'sto1' : 4.72, 'stm' : 6.41, 'gen' : 23.83}, #vacation
-             {'seq' : 3.17, 'sto' : 2.34, 'sto1' : 1.48, 'stm' : 16.53, 'gen' : 32.74}, #vacation2
-             {'seq' :    30.72, 'sto' :     2.74, 'stm' : 4.59, 'gen' :    8.627}, #kmeans
-             {'seq' :    54.44, 'sto' :    5.277, 'stm' :    8.312, 'gen' :    6.821},#labyrinth
-             {'seq' :    34.86, 'stm' :     10.1, 'gen' :    10.02}] #ssca2
+            [ {'seq' :    22.5, 'sto' :    3.191, 'stm' :    5.519, 'gen' :    7.22}, #bayes --
+             {'seq' :    6.394, 'sto' :    0.5884, 'stm' :    1.229, 'gen' :    10.76}, #genome --
+             {'seq' : 78.77, 'sto' : 11.06, 'stm' : 139.7, 'gen' : 276.9}, #intruder --
+             {'seq' : 29.44, 'sto' : 5.078, 'sto1' : 4.867, 'stm' : 6.818, 'gen' : 24.59}, #vacation --
+             {'seq' : 3.164, 'sto' : 2.254, 'sto1' : 1.694, 'stm' : 15.71, 'gen' : 33.54}, #vacation2 --
+             {'seq' :    19.91, 'sto' :     1.456, 'stm' : 2.126, 'gen' :    4.151}, #kmeans --
+             {'seq' :    54.43, 'sto' :    5.356, 'stm' :    8.524, 'gen' :    6.889},#labyrinth --
+             {'seq' :    34.94, 'stm' :     10.11, 'gen' :    10.02}] #ssca2 --
             ]
 max_ = [  # t = 4
-            [ {'seq' :    22.51, 'sto' :    10.19, 'stm' :    12.37, 'gen' :    12.66}, #bayes
-             {'seq' :    6.391, 'sto' :    1.679, 'stm' :    2.363, 'gen' :    21.18}, #genome
-             {'seq' : 78.84, 'sto' : 28.69, 'stm' : 189.59, 'gen' : 271.83}, #intruder
-             {'seq' : 29.4, 'sto' : 13.85, 'sto1' : 13.73, 'stm' : 16.42, 'gen' : 28.56}, #vacation
-             {'seq' : 3.17, 'sto' : 4.16, 'sto1' : 3.75, 'stm' : 15.37, 'gen' : 29.27}, #vacation2
-             {'seq' :    30.72, 'sto' :    8.939, 'stm' : 15.10, 'gen' :    22.13}, #kmeans
-             {'seq' :    54.44, 'sto' :     12.1, 'stm' :    20.52, 'gen' :    16.25}, #labyrinth
-             {'seq' :    34.86, 'stm' :    21.26, 'gen' :    19.71}], #ssca2
+            [ {'seq' :    22.5, 'sto' :    8.06, 'stm' :    12.4, 'gen' :    12.49}, #bayes --
+             {'seq' :    6.394, 'sto' :    1.726, 'stm' :    2.296, 'gen' :    12.37}, #genome --
+             {'seq' : 78.77, 'sto' : 28.68, 'stm' : 172.5, 'gen' : 272.0}, #intruder --
+             {'seq' : 29.44, 'sto' : 13.87, 'sto1' : 14.56, 'stm' : 16.43, 'gen' : 29.18}, #vacation --
+             {'seq' : 3.164, 'sto' : 4.53, 'sto1' : 4.169, 'stm' : 13.92, 'gen' : 29.98}, #vacation2 --
+             {'seq' :    19.92, 'sto' :    5.87, 'stm' : 8.181, 'gen' :    11.82}, #kmeans --
+             {'seq' :    54.43, 'sto' :     12.28, 'stm' :    21.21, 'gen' :    16.57}, #labyrinth --
+             {'seq' :    34.94, 'stm' :    21.61, 'gen' :    20.83}], #ssca2 --
             #t = 16
-            [ {'seq' :    22.51, 'sto' :    12.09, 'stm' :    16.79, 'gen' :    18.37}, #bayes
-             {'seq' :    6.391, 'sto' :   0.7125, 'stm' :     1.27, 'gen' :    15.92}, #genome
-             {'seq' : 78.84, 'sto' : 11.37, 'stm' : 169.54, 'gen' : 278.4}, #intruder
-             {'seq' : 29.4, 'sto' : 6.07, 'sto1' : 6.22, 'stm' : 9.98, 'gen' : 24.27}, #vacation
-             {'seq' : 3.17, 'sto' : 2.46, 'sto1' : 1.66, 'stm' : 17.39, 'gen' : 33.14}, #vacation2
-             {'seq' :    30.72, 'sto' :    2.854, 'stm' : 4.78, 'gen' :    10.78}, #kmeans
-             {'seq' :    54.44, 'sto' :    5.449, 'stm' :    8.876, 'gen' :    7.058}, #labyrinth
-             {'seq' :    34.86, 'stm' :     10.2, 'gen' :    10.26}] #ssca2
+            [ {'seq' :    22.5, 'sto' :    6.237, 'stm' :    24.92, 'gen' :    17.96}, #bayes --
+             {'seq' :    6.394, 'sto' :     0.6701, 'stm' :    1.314, 'gen' :    13.3}, #genome --
+             {'seq' : 78.77, 'sto' : 11.11, 'stm' : 147.8, 'gen' : 279.5}, #intruder --
+             {'seq' : 29.44, 'sto' : 6.277, 'sto1' : 7.117, 'stm' : 9.275, 'gen' : 25.17}, #vacation --
+             {'seq' : 3.164, 'sto' : 2.445, 'sto1' : 2.419, 'stm' : 16.28, 'gen' : 34.09}, #vacation2 --
+             {'seq' :    19.92, 'sto' :    1.916, 'stm' : 2.509, 'gen' :    5.812}, #kmeans --
+             {'seq' :    54.43, 'sto' :    5.543, 'stm' :    9.318, 'gen' :    7.387}, #labyrinth --
+             {'seq' :    34.94, 'stm' :     10.16, 'gen' :    10.1}] #ssca2 --
             ]
-
 
 
 
