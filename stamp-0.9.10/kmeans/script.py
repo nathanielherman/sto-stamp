@@ -39,8 +39,11 @@ def run_experiment(cmd, t):
     return (numpy.median(time), numpy.amin(time), numpy.amax(time))
 
 def run_benchmark(cmd, mode, nthreads):
-    subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
-    subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
+    if mode == 'stm':
+        cmd[0] = './kmeans-tl2'
+    else:
+        subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
+        subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
     file.write(mode)
     file.write("\n")
     time_list = []
@@ -52,6 +55,7 @@ def run_benchmark(cmd, mode, nthreads):
         time_list.append(time)
         min_list.append(min)
         max_list.append(max)
+    cmd[0] = './kmeans'
     return (time_list, min_list, max_list )
        
 def printfmt_double(header, out, precision, width):
@@ -68,12 +72,14 @@ def printfmt_int(header, out, precision, width):
         string += "{0:{width}}".format(a, width=width)
     return string
 
-def print_(precision, width, i, seq_time,  sto_time, sto_min, sto_max, gen_time, gen_min, gen_max):
+def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max):
     string = ""
     string += "{'seq' : "
     string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
     string += ", 'sto' : "
     string += "{0:{width}.{precision}}".format(sto_time[i], precision=precision, width=width)
+    string += ", 'stm' : "
+    string += "{0:{width}.{precision}}".format(stm_time[i], precision=precision, width=width)
     string += ", 'gen' : "
     string += "{0:{width}.{precision}}".format(gen_time[i], precision=precision, width=width)
     string += "}"
@@ -84,6 +90,8 @@ def print_(precision, width, i, seq_time,  sto_time, sto_min, sto_max, gen_time,
     string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
     string += ", 'sto' : "
     string += "{0:{width}.{precision}}".format(sto_min[i], precision=precision, width=width)
+    string += ", 'stm' : "
+    string += "{0:{width}.{precision}}".format(stm_min[i], precision=precision, width=width)
     string += ", 'gen' : "
     string += "{0:{width}.{precision}}".format(gen_min[i], precision=precision, width=width)
     string += "}"
@@ -94,6 +102,8 @@ def print_(precision, width, i, seq_time,  sto_time, sto_min, sto_max, gen_time,
     string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
     string += ", 'sto' : "
     string += "{0:{width}.{precision}}".format(sto_max[i], precision=precision, width=width)
+    string += ", 'stm' : "
+    string += "{0:{width}.{precision}}".format(stm_max[i], precision=precision, width=width)
     string += ", 'gen' : "
     string += "{0:{width}.{precision}}".format(gen_max[i], precision=precision, width=width)
     string += "}"
@@ -107,18 +117,18 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [4,16]
     t = 5;
-    cmds = [['./kmeans','-p1', '-m160', '-n160', '-t0.01', '-i', 'inputs/random-n262144-d32-c16.txt']]
+    cmds = [['./kmeans','-p1', '-m160', '-n160', '-t0.001', '-i', 'inputs/random-n65536-d32-c16.txt']]
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
         seq_time, seq_min, seq_max = run_benchmark(cmd, 'seq', [1])
         out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
-        #stm_time = run_benchmark(cmd, 'stm', nthreads)
-        #out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
+        stm_time, stm_min, stm_max = run_benchmark(cmd, 'stm', nthreads)
+        out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
         sto_time, sto_min, sto_max = run_benchmark(cmd, 'STO', nthreads)
         out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
-	gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
-	out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
+        gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
+        out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
 
-        out_file.write(print_(4, 8, 0, seq_time, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
-        out_file.write(print_(4, 8, 1, seq_time, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
+        out_file.write(print_(4, 8, 0, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
+        out_file.write(print_(4, 8, 1, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
