@@ -5,13 +5,6 @@
 #ifndef MAP_H
 #define MAP_H 1
 
-#ifdef MAP_USE_RBTREE
-#define MAP_USE_TREE
-#endif
-
-#undef MAP_USE_TREE
-
-
 #ifdef MAP_USE_TREE
 #include "sto/MassTrans.hh"
 // masstree
@@ -39,6 +32,17 @@
 #define MAP_FIND STOHASHTABLE_FIND
 #define MAP_INSERT STOHASHTABLE_INSERT
 #define MAP_REMOVE STOHASHTABLE_REMOVE
+
+// Map implemented as Transactional RBTree
+#elif defined(MAP_USE_RBTREE)
+#include "sto/RBTree.hh"
+#define MAP_T RBTree<void*, void*>
+
+#define TMMAP_CONTAINS(map, key) (map->count(key) != 0)
+#define TMMAP_FIND(map, key) ({void *val = NULL; if(map->count(key) != 0) {val = (*map)[key];} val;})
+// XXX really stupid insert semantics
+#define TMMAP_INSERT(map, key, data) ({bool found = (map->count(key) != 0); (*map)[key] = data; !found;})
+#define TMMAP_REMOVE(map, key) (map->erase(key))
 
 #endif
 
