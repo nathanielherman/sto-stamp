@@ -25,7 +25,7 @@ SRCS += \
 	$(LIB)/vector.c \
 	$(LIB)/hashtable.c
 
-CFLAGS += -DMAP_USE_HASHTABLE
+CFLAGS += -DMAP_USE_RBTREE
 
 
 # ==============================================================================

@@ -38,11 +38,19 @@
 #include "sto/RBTree.hh"
 #define MAP_T RBTree<void*, void*>
 
+#define MAP_ALLOC(hash, cmp) (new MAP_T())
+#define MAP_FREE(map) (delete map)
+
 #define TMMAP_CONTAINS(map, key) (map->count(key) != 0)
 #define TMMAP_FIND(map, key) ({void *val = NULL; if(map->count(key) != 0) {val = (*map)[key];} val;})
 // XXX really stupid insert semantics
 #define TMMAP_INSERT(map, key, data) ({bool found = (map->count(key) != 0); (*map)[key] = data; !found;})
 #define TMMAP_REMOVE(map, key) (map->erase(key))
+
+#define MAP_INSERT(map, key, data) (map->nontrans_insert(key, data))
+#define MAP_CONTAINS(map, key) (map->nontrans_contains(key))
+#define MAP_REMOVE(map, key) (map->nontrans_remove(key))
+#define MAP_FIND(map, key) (map->nontrans_find(key))
 
 #endif
 
