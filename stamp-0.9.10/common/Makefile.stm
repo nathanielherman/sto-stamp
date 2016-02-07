@@ -23,6 +23,8 @@ LIBS     += -ltl2
 default: $(PROG)
 
 
+
+ALWAYSCXX=1
 include ../common/Makefile.common
 
 
