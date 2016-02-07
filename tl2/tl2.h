@@ -96,8 +96,11 @@ void*    TxAlloc       (Thread*, size_t);
 void     TxFree        (Thread*, void*);
 
 
-
-
+typedef void (*Callback)(void*, void*);
+// nate: added for boosting
+// we'll call callback with the two void* arguments
+void TxPostCommitHook(Thread*, Callback, void*, void*);
+void TxAbortHook(Thread*, Callback, void*, void*);
 
 
 

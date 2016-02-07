@@ -158,6 +158,19 @@ typedef struct _HashLog {
 } HashLog;
 #endif
 
+typedef struct {
+    Callback callback;
+    void* context1;
+    void* context2;
+} _Callback;
+
+// who doesn't love writing a resizeable vector
+typedef struct {
+    _Callback *callbacks;
+    size_t size;
+    size_t capacity;
+} _CallbackVector;
+
 struct _Thread {
     long UniqID;
     volatile long Mode;
@@ -192,7 +205,37 @@ struct _Thread {
     long TxST;
     long TxLD;
 #endif /* TL2_STATS */
+#ifdef TL2_COMMIT_HOOKS
+    _CallbackVector commitCallbacks;
+    _CallbackVector abortCallbacks;
+#endif
 };
+
+void callback_vector_grow(_CallbackVector *vec) {
+  size_t newcap = vec->capacity * 2;
+  _Callback *newalloc = realloc(vec->callbacks, newcap*sizeof(*newalloc));
+  vec->callbacks = newalloc;
+  vec->capacity = newcap;
+}
+
+void callback_vector_init(_CallbackVector *vec) {
+  vec->size = 0;
+  vec->capacity = 2;
+  // ends up with capacity of 4
+  callback_vector_grow(vec);
+}
+
+void callback_vector_add(_CallbackVector *vec, _Callback c) {
+  if (vec->size == vec->capacity) {
+    callback_vector_grow(vec);
+  }
+  vec->callbacks[vec->size] = c;
+  vec->size++;
+}
+
+void callback_vector_empty(_CallbackVector *vec) {
+  vec->size = 0;
+}
 
 
 /* #############################################################################
@@ -1190,6 +1233,11 @@ TxInitThread (Thread* t, long id)
 #ifdef TL2_EAGER
     t->tmpLockEntry.Owner = t;
 #endif /* TL2_EAGER */
+
+#ifdef TL2_COMMIT_HOOKS
+    callback_vector_init(&t->commitCallbacks);
+    callback_vector_init(&t->abortCallbacks);
+#endif
 }
 
 
@@ -1229,6 +1277,11 @@ txReset (Thread* Self)
 
 #ifdef TL2_EAGER
     Self->maxv = 0;
+#endif
+
+#ifdef TL2_COMMIT_HOOKS
+    callback_vector_empty(&Self->commitCallbacks);
+    callback_vector_empty(&Self->abortCallbacks);
 #endif
 }
 
@@ -1791,6 +1844,13 @@ TxAbort (Thread* Self)
         WriteBackReverse(&Self->LocalUndo);
     }
 
+#ifdef TL2_COMMIT_HOOKS
+    for (int i = 0; i < Self->abortCallbacks.size; i++) {
+      _Callback cb = Self->abortCallbacks.callbacks[i];
+      cb.callback(cb.context1, cb.context2);
+    }
+#endif
+
     Self->Retries++;
     Self->Aborts++;
 
@@ -2330,6 +2390,13 @@ TxCommit (Thread* Self)
             Self->wrSet.numLog--;
         }
 #endif
+
+#ifdef TL2_COMMIT_HOOKS
+        for (int i = 0; i < Self->commitCallbacks.size; i++) {
+          _Callback cb = Self->commitCallbacks.callbacks[i];
+          cb.callback(cb.context1, cb.context2);
+        }
+#endif
         PROF_STM_COMMIT_END();
         PROF_STM_SUCCESS();
         return 1;
@@ -2399,7 +2466,19 @@ TxFree (Thread* Self, void* ptr)
 #  endif /* !TL2_EAGER */
 }
 
+void TxPostCommitHook(Thread* t, Callback callback, void *context1, void *context2) {
+#ifdef TL2_COMMIT_HOOKS
+  _Callback cb = {callback, context1, context2};
+  callback_vector_add(&t->commitCallbacks, cb);
+#endif
+}
 
+void TxAbortHook(Thread* t, Callback callback, void *context1, void *context2) {
+#ifdef TL2_COMMIT_HOOKS
+  _Callback cb = {callback, context1, context2};
+  callback_vector_add(&t->abortCallbacks, cb);
+#endif
+}
 
 
 /* =============================================================================
