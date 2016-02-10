@@ -51,7 +51,7 @@
 
 
 
-
+__thread Thread *CurrentSelf;
 
 static void txSterilize (void*, size_t);
 
@@ -1205,6 +1205,7 @@ TxInitThread (Thread* t, long id)
 {
     /* CCM: so we can access TL2's thread metadata in signal handlers */
     pthread_setspecific(global_key_self, (void*)t);
+    CurrentSelf = t;
 
     memset(t, 0, sizeof(*t));     /* Default value for most members */
 

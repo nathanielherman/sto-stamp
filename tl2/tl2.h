@@ -103,6 +103,8 @@ void TxPostCommitHook(Thread*, Callback, void*, void*);
 void TxAbortHook(Thread*, Callback, void*, void*);
 
 
+extern __thread Thread *CurrentSelf;
+
 
 #ifdef __cplusplus
 }

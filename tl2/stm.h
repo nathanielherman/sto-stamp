@@ -23,6 +23,7 @@
 #define STM_THREAD_T                    Thread
 #define STM_SELF                        Self
 #define STM_RO_FLAG                     ROFlag
+#define STM_CUR_SELF                    CurrentSelf
 
 #define STM_MALLOC(size)                TxAlloc(STM_SELF, size)
 #define STM_FREE(ptr)                   TxFree(STM_SELF, ptr)
