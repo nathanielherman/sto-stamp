@@ -1,4 +1,4 @@
-#ifndef STO
+#if !defined(STO) && !defined(BOOSTING)
 #error "STO required to use map2.h"
 #endif
 

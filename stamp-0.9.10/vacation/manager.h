@@ -73,7 +73,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H 1
 
-#if defined(STO) && !defined(GTM)
+#if (defined(STO) && !defined(GTM)) || defined(BOOSTING)
 #define map2
 #endif
 
