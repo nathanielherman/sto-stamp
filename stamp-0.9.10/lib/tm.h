@@ -78,6 +78,10 @@
 # include "STAMP_config.h"
 #endif
 
+#ifdef BOOSTING
+#include "sto/Boosting.hh"
+#endif
+
 /* =============================================================================
  * Simulator Specific Interface
  *
@@ -420,8 +424,13 @@
 #      define TM_STARTUP(numThread)     STM_STARTUP()
 #      define TM_SHUTDOWN()             STM_SHUTDOWN()
 
-#      define TM_THREAD_ENTER()         TM_ARGDECL_ALONE = STM_NEW_THREAD(); \
-                                        STM_INIT_THREAD(TM_ARG_ALONE, thread_getId())
+#      ifdef BOOSTING
+#        define TM_THREAD_ENTER()         TM_ARGDECL_ALONE = STM_NEW_THREAD(); \
+    STM_INIT_THREAD(TM_ARG_ALONE, thread_getId()); boosting_setThreadID(thread_getId());
+#      else
+#        define TM_THREAD_ENTER()         TM_ARGDECL_ALONE = STM_NEW_THREAD(); \
+                                             STM_INIT_THREAD(TM_ARG_ALONE, thread_getId());
+#      endif
 #      define TM_THREAD_EXIT()          STM_FREE_THREAD(TM_ARG_ALONE)
 
 #      define P_MALLOC(size)            malloc(size)
@@ -444,8 +453,13 @@
 
 #  else /* !OTM */
 
-#    define TM_BEGIN()                  STM_BEGIN_WR()
-#    define TM_BEGIN_RO()               STM_BEGIN_RD()
+#    ifdef BOOSTING
+#      define TM_BEGIN()                  STM_BEGIN_WR(); boosting_txStartHook()
+#      define TM_BEGIN_RO()               STM_BEGIN_RD(); boosting_txStartHook()
+#    else
+#      define TM_BEGIN()                  STM_BEGIN_WR()
+#      define TM_BEGIN_RO()               STM_BEGIN_RD()
+#    endif
 #    define TM_END()                    STM_END()
 #    define TM_RESTART()                STM_RESTART()
 

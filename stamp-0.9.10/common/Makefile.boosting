@@ -1,0 +1,51 @@
+# ==============================================================================
+#
+# Makefile.boosting
+#
+# ==============================================================================
+
+
+# ==============================================================================
+# Variables
+# ==============================================================================
+
+CFLAGS   += -DSTM -DBOOSTING -I$(STM)
+CXXFLAGS := $(CFLAGS)
+LDFLAGS  += -L$(STM)
+LIBS     += -ltl2
+
+
+# ==============================================================================
+# Rules
+# ==============================================================================
+
+.PHONY: default
+default: $(PROG)
+
+
+
+ALWAYSCXX=1
+include ../common/Makefile.common
+
+BOOSTING_OBJS = $(OBJDIR)/Boosting.o
+
+$(OBJDIR)/Boosting.o: ../lib/sto/Boosting.cc $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
+
+$(OBJDIR)/Boosting.o: \
+$(OBJDIR)/%.o: ../lib/sto/%.cc $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	$(RM) -rf $(DEPSDIR) $(OBJDIR)
+
+$(PROG): $(OBJS) $(BOOSTING_OBJS)
+	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
+
+# ==============================================================================
+#
+# End of Makefile.boosting
+#
+# ==============================================================================
