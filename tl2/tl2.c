@@ -162,6 +162,7 @@ typedef struct {
     Callback callback;
     void* context1;
     void* context2;
+    void* context3;
 } _Callback;
 
 // who doesn't love writing a resizeable vector
@@ -1843,7 +1844,7 @@ TxAbort (Thread* Self)
 #ifdef TL2_COMMIT_HOOKS
     for (int i = 0; i < Self->abortCallbacks.size; i++) {
       _Callback cb = Self->abortCallbacks.callbacks[i];
-      cb.callback(cb.context1, cb.context2);
+      cb.callback(cb.context1, cb.context2, cb.context3);
     }
 #endif
 #ifdef TL2_COMMIT_HOOKS
@@ -2395,7 +2396,7 @@ TxCommit (Thread* Self)
 #ifdef TL2_COMMIT_HOOKS
         for (int i = 0; i < Self->commitCallbacks.size; i++) {
           _Callback cb = Self->commitCallbacks.callbacks[i];
-          cb.callback(cb.context1, cb.context2);
+          cb.callback(cb.context1, cb.context2, cb.context3);
         }
 #endif
 #ifdef TL2_COMMIT_HOOKS
@@ -2471,16 +2472,16 @@ TxFree (Thread* Self, void* ptr)
 #  endif /* !TL2_EAGER */
 }
 
-void TxPostCommitHook(Thread* t, Callback callback, void *context1, void *context2) {
+void TxPostCommitHook(Thread* t, Callback callback, void *context1, void *context2, void *context3) {
 #ifdef TL2_COMMIT_HOOKS
-  _Callback cb = {callback, context1, context2};
+  _Callback cb = {callback, context1, context2, context3};
   callback_vector_add(&t->commitCallbacks, cb);
 #endif
 }
 
-void TxAbortHook(Thread* t, Callback callback, void *context1, void *context2) {
+void TxAbortHook(Thread* t, Callback callback, void *context1, void *context2, void *context3) {
 #ifdef TL2_COMMIT_HOOKS
-  _Callback cb = {callback, context1, context2};
+  _Callback cb = {callback, context1, context2, context3};
   callback_vector_add(&t->abortCallbacks, cb);
 #endif
 }
