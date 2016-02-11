@@ -46,7 +46,7 @@ class __EqCompare {
 
 
 // Preventing double-definition
-#define STOHASHTABLE_ALLOC(hash, cmp) (new STOHASHTABLE_T(STOHASHTABLE_SIZE, (hash) || (cmp) ? (hash) : default_hasher, __EqCompare(cmp)))
+#define STOHASHTABLE_ALLOC(hash, cmp) (new STOHASHTABLE_T(STOHASHTABLE_SIZE, (hash != NULL) || (cmp != NULL) ? (hash) : default_hasher, __EqCompare(cmp)))
 #define STOHASHTABLE_FREE(map) (delete map)
 #ifdef BOOSTING
 #define STOHASHTABLE_CONTAINS(map, key) ({ void* val; bool ret = map->read((void*)key, val); ret; })
