@@ -29,9 +29,6 @@ include ../common/Makefile.common
 
 BOOSTING_OBJS = $(OBJDIR)/Boosting.o
 
-$(OBJDIR)/Boosting.o: ../lib/sto/Boosting.cc $(BUILDSTAMP)
-	$(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
-
 $(OBJDIR)/Boosting.o: \
 $(OBJDIR)/%.o: ../lib/sto/%.cc $(BUILDSTAMP)
 	$(CXX) $(CXXFLAGS) $(DEPCFLAGS) -c $< -o $@
