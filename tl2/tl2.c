@@ -41,7 +41,7 @@
 #  error TL2_OPTIM_HASHLOG must be defined for TL2_RESIZE_HASHLOG
 #endif
 
-
+#define TL2_COMMIT_HOOKS
 
 
 
@@ -1279,11 +1279,6 @@ txReset (Thread* Self)
 #ifdef TL2_EAGER
     Self->maxv = 0;
 #endif
-
-#ifdef TL2_COMMIT_HOOKS
-    callback_vector_empty(&Self->commitCallbacks);
-    callback_vector_empty(&Self->abortCallbacks);
-#endif
 }
 
 
@@ -1851,6 +1846,11 @@ TxAbort (Thread* Self)
       cb.callback(cb.context1, cb.context2);
     }
 #endif
+#ifdef TL2_COMMIT_HOOKS
+    callback_vector_empty(&Self->commitCallbacks);
+    callback_vector_empty(&Self->abortCallbacks);
+#endif
+
 
     Self->Retries++;
     Self->Aborts++;
@@ -2397,6 +2397,10 @@ TxCommit (Thread* Self)
           _Callback cb = Self->commitCallbacks.callbacks[i];
           cb.callback(cb.context1, cb.context2);
         }
+#endif
+#ifdef TL2_COMMIT_HOOKS
+        callback_vector_empty(&Self->commitCallbacks);
+        callback_vector_empty(&Self->abortCallbacks);
 #endif
         PROF_STM_COMMIT_END();
         PROF_STM_SUCCESS();
