@@ -95,6 +95,8 @@ enum {
 
 typedef long bool_t;
 
+#define STAMP_HASHTABLE_SIZE (1<<20)
+
 
 #ifdef __cplusplus
 }

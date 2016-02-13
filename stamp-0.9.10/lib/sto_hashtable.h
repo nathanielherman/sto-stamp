@@ -28,7 +28,7 @@ class __EqCompare {
   intcompare comp;
 };
 
-#define STOHASHTABLE_SIZE 1000000
+#define STOHASHTABLE_SIZE STAMP_HASHTABLE_SIZE
 
 #ifdef BOOSTING
 #define STOHASHTABLE_T TransHashtable<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare>

@@ -77,7 +77,7 @@
 #  include "hashtable.h"
 
 #  define MAP_T                       hashtable_t
-#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(1000000, hash, cmp, 2, 2)
+#  define MAP_ALLOC(hash, cmp)        hashtable_alloc(STAMP_HASHTABLE_SIZE, hash, cmp, 2, 2)
 #  define MAP_FREE(map)               hashtable_free(map)
 #  define MAP_CONTAINS(map, key)      hashtable_containsKey(map, (void*)(key))
 #  define MAP_FIND(map, key)          hashtable_find(map, (void*)(key))
