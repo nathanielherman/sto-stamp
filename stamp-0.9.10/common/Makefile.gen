@@ -9,7 +9,7 @@
 # Variables
 # ==============================================================================
 
-CFLAGS   += -DGEN #-DSTM -I$(STM)
+CFLAGS   += -DGEN -I../lib/sto/masstree-beta
 CXXFLAGS := $(CFLAGS)
 #LDFLAGS  += -L$(STM)
 #LIBS     += -ltl2

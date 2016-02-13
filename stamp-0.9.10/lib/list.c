@@ -739,7 +739,7 @@ TMlist_full_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr, void* secondaryD
 
     nodePtr->nextPtr = currPtr;
     TM_SHARED_WRITE_P(prevPtr->nextPtr, nodePtr);
-    TM_SHARED_WRITE_P(listPtr->size, (void*)((long)TM_SHARED_READ_P(listPtr->size) + 1));
+    TM_SHARED_WRITE(listPtr->size, ((long)TM_SHARED_READ_P(listPtr->size) + 1));
 
     return TRUE;
 }
@@ -823,7 +823,7 @@ TMlist_remove (TM_ARGDECL  list_t* listPtr, void* dataPtr)
         TM_SHARED_WRITE_P(prevPtr->nextPtr, TM_SHARED_READ_P(nodePtr->nextPtr));
         TM_SHARED_WRITE_P(nodePtr->nextPtr, (struct list_node*)NULL);
         TMfreeNode(TM_ARG  nodePtr);
-        TM_SHARED_WRITE_P(listPtr->size, (void*)((long)TM_SHARED_READ_P(listPtr->size) - 1));
+        TM_SHARED_WRITE(listPtr->size, ((long)TM_SHARED_READ_P(listPtr->size) - 1));
         assert(listPtr->size >= 0);
         return TRUE;
     }

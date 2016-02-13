@@ -55,7 +55,7 @@ class __EqCompare {
 #define STOHASHTABLE_REMOVE(map, key) ({ map->remove((void *)key); })
 #else
 // should probably just use the non-txnal methods here too
-#define __TRANS_WRAP(OP, TYPE) ({TYPE ___ret; Transaction __transaction; ___ret = OP; __transaction.commit(); ___ret;})
+#define __TRANS_WRAP(OP, TYPE) ({  TYPE ___ret; TransactionGuard __t; ___ret = OP; ___ret; })
 #define STOHASHTABLE_CONTAINS(map, key) __TRANS_WRAP(TMSTOHASHTABLE_CONTAINS(map, key), bool)
 #define STOHASHTABLE_FIND(map, key) __TRANS_WRAP(TMSTOHASHTABLE_FIND(map, key), void*)
 #define STOHASHTABLE_INSERT(map, key, data) __TRANS_WRAP(TMSTOHASHTABLE_INSERT(map, key, data), bool)

@@ -477,15 +477,15 @@
 
 #include <unistd.h>
 
-#  define TM_ARG                        __transaction, 
-#  define TM_ARG_ALONE                  __transaction
-#  define TM_ARGDECL                    Transaction& TM_ARG
-#  define TM_ARGDECL_ALONE              Transaction& TM_ARG_ALONE
+#  define TM_ARG                        /**/
+#  define TM_ARG_ALONE                  /**/
+#  define TM_ARGDECL                    /**/
+#  define TM_ARGDECL_ALONE              /**/
 #  define TM_CALLABLE                   /* nothing */
-#  define TM_BEGIN()                    while (1) { try { Transaction& __transaction = Transaction::get_transaction();
+#  define TM_BEGIN()                    TRANSACTION {
 #  define TM_BEGIN_RO() TM_BEGIN()
-#  define TM_END()                      if (__transaction.try_commit()) break; } catch (Transaction::Abort E) { /*usleep(rand() % 1000);*/ } }
-#  define TM_RESTART() __transaction.abort()
+#  define TM_END()                      } RETRY(true)
+#  define TM_RESTART() Sto::abort()
 
 #  define TM_STARTUP(numThread)         ({ assert(numThread <= MAX_THREADS); pthread_t advancer; pthread_create(&advancer, NULL, Transaction::epoch_advancer, NULL); pthread_detach(advancer); })
 #  define TM_SHUTDOWN()                 ({ STO_SHUTDOWN(); Transaction::run_epochs = false; usleep(1000); })
