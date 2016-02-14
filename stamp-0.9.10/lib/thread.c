@@ -89,16 +89,6 @@
 GenericSTM __genstm;
 TransAlloc __talloc;
 
-#ifdef STO
-void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l) {
-    *it = l->transIter(TM_ARG_ALONE);
-}
-
-void list_iter_reset(list_iter_t* it, list_t* l) {
-    *it = l->iter();
-}
-#endif
-
 #if PERF_LOGGING
 void reportPerf(){
     using thr = threadinfo_t;
@@ -129,6 +119,19 @@ void reportPerf(){
 }
 #endif
 
+#endif /* STO || GEN */
+
+#if defined(STO) || defined(BOOSTING)
+#ifdef BOOSTING
+#include "list2.hh"
+#endif
+void TMlist_iter_reset(list_iter_t* it, list_t* l) {
+    *it = l->transIter();
+}
+
+void list_iter_reset(list_iter_t* it, list_t* l) {
+    *it = l->iter();
+}
 #endif
 
 static THREAD_LOCAL_T    global_threadId;

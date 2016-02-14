@@ -1,13 +1,17 @@
 #pragma once
 
-#ifndef STO
+#if !defined(STO) && !defined(BOOSTING)
 #error "STO required to use list2.hh"
 #endif
 
 #include "pair.h"
 #include "tm.h"
+#ifdef BOOSTING
+#include "sto/Boosting_list.hh"
+#else
 #include "sto/Transaction.hh"
 #include "sto/List.hh"
+#endif
 
 #define LIST_OPACITY 1
 
@@ -25,42 +29,35 @@ public:
   realcompare comp;
 };
 
-#ifdef LIST_NO_DUPLICATES
-#ifdef LIST_OPACITY
-typedef List<pair_t, false, __ListCompare, true, true> list_t;
-#else 
-typedef List<pair_t, false, __ListCompare, true, false> list_t;
-#endif
+#ifdef BOOSTING
+typedef TransList<pair_t, !LIST_NO_DUPLICATES, __ListCompare, true> list_t;
+typedef list_t::inner_list_t::ListIter list_iter_t;
 #else
-#ifdef LIST_OPACITY
-typedef List<pair_t, true, __ListCompare, true, true> list_t;
-#else
-typedef List<pair_t, true, __ListCompare, true, false> list_t;
-#endif
-#endif
-
+typedef List<pair_t, !LIST_NO_DUPLICATES, __ListCompare, true, LIST_OPACITY> list_t;
 typedef typename list_t::ListIter list_iter_t;
+#endif
 
-#if LIST_OPACITY
+
+#if LIST_OPACITY && STO
 #define OPACITY_CHECK(list) ((list)->opacity_check(TM_ARG_ALONE))
 #else
 #define OPACITY_CHECK(list) 
 #endif
 
-#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset(TM_ARG (it), (list)); OPACITY_CHECK(list); })
-#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(TM_ARG_ALONE); OPACITY_CHECK(list); ret; })
-#define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext(TM_ARG_ALONE))->firstPtr; OPACITY_CHECK(list); ret; })
+#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset((it), (list)); OPACITY_CHECK(list); })
+#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(); OPACITY_CHECK(list); ret; })
+#define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext())->firstPtr; OPACITY_CHECK(list); ret; })
 #define TMLIST_ALLOC(cmp) (new list_t(__ListCompare(cmp)))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
-#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(TM_ARG_ALONE); OPACITY_CHECK(list); ret; })
+#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(); OPACITY_CHECK(list); ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
-#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? ret->firstPtr : NULL; })
-#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, NULL}); if (!ret) OPACITY_CHECK(list); ret; })
-#define TMLIST_REMOVE(list, data) ({ auto ret = (list)->transDelete(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
+#define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind( (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? ret->firstPtr : NULL; })
+#define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert( (pair_t){data, NULL}); if (!ret) OPACITY_CHECK(list); ret; })
+#define TMLIST_REMOVE(list, data) ({ auto ret = (list)->transDelete( (pair_t){data, NULL}); OPACITY_CHECK(list); ret; })
 
-#define TMLIST_FULL_ITER_NEXT(it, list) ({ auto ret = (it)->transNext(TM_ARG_ALONE); OPACITY_CHECK(list); *ret; })
-#define TMLIST_FULL_FIND(list, data) ({ auto ret = (list)->transFind(TM_ARG (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? *ret : (pair_t){NULL, NULL}; })
-#define TMLIST_FULL_INSERT(list, data, seconddata) ({ auto ret = (list)->transInsert(TM_ARG (pair_t){data, seconddata}); OPACITY_CHECK(list); ret; })
+#define TMLIST_FULL_ITER_NEXT(it, list) ({ auto ret = (it)->transNext(); OPACITY_CHECK(list); *ret; })
+#define TMLIST_FULL_FIND(list, data) ({ auto ret = (list)->transFind( (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? *ret : (pair_t){NULL, NULL}; })
+#define TMLIST_FULL_INSERT(list, data, seconddata) ({ auto ret = (list)->transInsert( (pair_t){data, seconddata}); OPACITY_CHECK(list); ret; })
 
 #define list_full_iter_next(it, list) ({ auto ret = (it)->next(); *ret; })
 #define list_full_find(list, data) ({ auto ret = (list)->find((pair_t){data, NULL}); ret ? *ret : (pair_t){NULL, NULL}; })
@@ -88,5 +85,5 @@ typedef typename list_t::ListIter list_iter_t;
 #define Plist_free PLIST_FREE
 
 // Defined in thread.c
-extern void TMlist_iter_reset(TM_ARGDECL list_iter_t* it, list_t* l);
+extern void TMlist_iter_reset( list_iter_t* it, list_t* l);
 extern void list_iter_reset(list_iter_t* it, list_t* l);

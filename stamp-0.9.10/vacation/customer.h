@@ -73,7 +73,7 @@
 #ifndef CUSTOMER_H
 #define CUSTOMER_H 1
 
-#if defined(STO) && !defined(GTM)
+#if (defined(STO) && !defined(GTM)) || defined(BOOSTING)
 #define list2
 #endif
 
