@@ -1842,7 +1842,8 @@ TxAbort (Thread* Self)
     }
 
 #ifdef TL2_COMMIT_HOOKS
-    for (int i = 0; i < Self->abortCallbacks.size; i++) {
+    int i;
+    for (i = 0; i < Self->abortCallbacks.size; i++) {
       _Callback cb = Self->abortCallbacks.callbacks[i];
       cb.callback(cb.context1, cb.context2, cb.context3);
     }
@@ -2394,7 +2395,8 @@ TxCommit (Thread* Self)
 #endif
 
 #ifdef TL2_COMMIT_HOOKS
-        for (int i = 0; i < Self->commitCallbacks.size; i++) {
+	int i;
+        for (i = 0; i < Self->commitCallbacks.size; i++) {
           _Callback cb = Self->commitCallbacks.callbacks[i];
           cb.callback(cb.context1, cb.context2, cb.context3);
         }
