@@ -38,15 +38,21 @@ typedef typename list_t::ListIter list_iter_t;
 #endif
 
 
-#if LIST_OPACITY && STO
+#if LIST_OPACITY && defined(STO)
 #define OPACITY_CHECK(list) ((list)->opacity_check(TM_ARG_ALONE))
 #else
 #define OPACITY_CHECK(list) 
 #endif
 
+#ifdef BOOSTING
+#define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset((it), (list)); OPACITY_CHECK(list); })
+#define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->hasNext(); OPACITY_CHECK(list); ret; })
+#define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->next())->firstPtr; OPACITY_CHECK(list); ret; })
+#else
 #define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset((it), (list)); OPACITY_CHECK(list); })
 #define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(); OPACITY_CHECK(list); ret; })
 #define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext())->firstPtr; OPACITY_CHECK(list); ret; })
+#endif
 #define TMLIST_ALLOC(cmp) (new list_t(__ListCompare(cmp)))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
 #define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(); OPACITY_CHECK(list); ret; })
