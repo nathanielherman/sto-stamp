@@ -12,3 +12,4 @@ userconfig.mk
 .deps
 obj
 tags
+.DS_Store
