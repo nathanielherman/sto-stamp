@@ -36,16 +36,21 @@
 // Map implemented as Transactional RBTree
 #elif defined(MAP_USE_RBTREE)
 #include "sto/RBTree.hh"
+
+#if BM_VACATION
+#define MAP_T RBTree<long, void*>
+#else
 #define MAP_T RBTree<void*, void*>
+#endif
 
 #define MAP_ALLOC(hash, cmp) (new MAP_T())
 #define MAP_FREE(map) (delete map)
 
-#define TMMAP_CONTAINS(map, key) ({bool found = (map->count(key) != 0); Sto::check_opacity(); found;})
-#define TMMAP_FIND(map, key) ({void *val = NULL; if(map->count(key) != 0) {val = (*map)[key];} Sto::check_opacity(); val;})
+#define TMMAP_CONTAINS(map, key) ({bool found = (map->count(key) > 0); Sto::check_opacity(); found;})
+#define TMMAP_FIND(map, key) ({void *val = NULL; if(map->count(key) > 0) {val = (*map)[key];} Sto::check_opacity(); val;})
 // XXX really stupid insert semantics
-#define TMMAP_INSERT(map, key, data) ({bool found = (map->count(key) != 0); if(!found) {(*map)[key] = data;} Sto::check_opacity(); !found;})
-#define TMMAP_REMOVE(map, key) ({bool erased = (map->erase(key) != 0); Sto::check_opacity(); erased;})
+#define TMMAP_INSERT(map, key, data) ({bool found = (map->count(key) > 0); if(!found) {(*map)[key] = data;} Sto::check_opacity(); !found;})
+#define TMMAP_REMOVE(map, key) ({bool erased = (map->erase(key) > 0); Sto::check_opacity(); erased;})
 
 #define MAP_INSERT(map, key, data) (map->nontrans_insert(key, data))
 #define MAP_CONTAINS(map, key) (map->nontrans_contains(key))

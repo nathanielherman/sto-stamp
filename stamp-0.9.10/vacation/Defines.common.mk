@@ -5,7 +5,7 @@
 # ==============================================================================
 
 
-CFLAGS += -DLIST_NO_DUPLICATES -DMAP_USE_HASHTABLE
+CFLAGS += -DLIST_NO_DUPLICATES -DMAP_USE_RBTREE -DBM_VACATION
 
 PROG := vacation
 
