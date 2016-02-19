@@ -13,8 +13,11 @@ def run_experiment(cmd, t):
     return (numpy.mean(time), numpy.std(time))
 
 def run_benchmark(cmd, mode, nthreads):
-    subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
-    subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
+    if mode == 'stm':
+        cmd[0] = './kmeans-tl2'
+    else:
+        subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
+        subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
    
     time_list = []
     std_list  = []
@@ -23,6 +26,8 @@ def run_benchmark(cmd, mode, nthreads):
         time, std = run_experiment(cmd,t)
         time_list.append(time)
         std_list.append(std)
+
+    cmd[0] = './kmeans'
     return (time_list, std_list)
        
 def printfmt_double(header, out, precision, width):

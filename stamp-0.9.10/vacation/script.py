@@ -116,8 +116,8 @@ if __name__ == "__main__":
     out_file = open("results.txt", 'w')
     nthreads = [4,16]
     t = 5;
-    #cmds = ['./vacation -c1 -n8 -q1 -u60 -r104857 -t4194304'.split()]
-    cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']]
+    #cmds = [['./vacation', '-c1', '-n8', '-q1', '-u60', '-r104857', '-t4194304']] #high
+    cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']] #low
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
         sto_time, sto_min, sto_max = run_benchmark(cmd, 'STO', nthreads)
         out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
-	gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
-	out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
+        gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
+        out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
         out_file.write(print_(4, 8, 0, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
         out_file.write(print_(4, 8, 1, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))

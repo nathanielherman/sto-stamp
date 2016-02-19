@@ -1,28 +1,39 @@
 seq
-./kmeans -p1 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
-30.7286 30.6901 30.7362 30.7051 30.7231 
-Std dev = 0.017
-min = 30.690
-max = 30.736
+./kmeans -p1 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+19.923 19.9604 19.9214 19.9612 19.9197 
+Std dev = 0.019
+min = 19.920
+max = 19.961
+stm
+./kmeans-tl2 -p4 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+8.18092 7.33321 7.55903 7.53889 7.17221 
+Std dev = 0.343
+min = 7.172
+max = 8.181
+./kmeans-tl2 -p16 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+2.50871 2.39641 2.12596 2.3086 2.21429 
+Std dev = 0.134
+min = 2.126
+max = 2.509
 STO
-./kmeans -p4 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
-8.61877 8.74061 8.76443 8.93948 8.61331 
-Std dev = 0.119
-min = 8.613
-max = 8.939
-./kmeans -p16 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
-2.85291 2.74047 2.85191 2.85355 2.8493 
-Std dev = 0.045
-min = 2.740
-max = 2.854
+./kmeans -p4 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+5.87048 4.59855 5.03732 5.45375 4.96242 
+Std dev = 0.438
+min = 4.599
+max = 5.870
+./kmeans -p16 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+1.72325 1.5325 1.72182 1.45587 1.91574 
+Std dev = 0.162
+min = 1.456
+max = 1.916
 gen
-./kmeans -p4 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
-21.373 21.2868 21.5079 22.1281 21.5843 
-Std dev = 0.295
-min = 21.287
-max = 22.128
-./kmeans -p16 -m160 -n160 -t0.01 -i inputs/random-n262144-d32-c16.txt
-8.97547 8.73194 8.94665 10.7843 8.62685 
-Std dev = 0.796
-min = 8.627
-max = 10.784
+./kmeans -p4 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+11.5812 11.3838 11.814 11.3668 11.8211 
+Std dev = 0.198
+min = 11.367
+max = 11.821
+./kmeans -p16 -m160 -n160 -t0.001 -i inputs/random-n65536-d32-c16.txt
+5.14431 5.48995 5.81229 4.58335 4.1505 
+Std dev = 0.602
+min = 4.151
+max = 5.812
