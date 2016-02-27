@@ -123,7 +123,7 @@ class reservation_t: public SingleElem<_reservation_t>{
 				}
 
 				bool_t reservation_addToTotal_seq(long num){
-						_reservation_t _reservation = read();
+						_reservation_t _reservation = unsafe_read();
 						if (_reservation.numFree + num < 0){
 								return FALSE;
 						}
@@ -153,7 +153,7 @@ class reservation_t: public SingleElem<_reservation_t>{
 				}
 
 				bool_t reservation_make_seq(){
-						_reservation_t _reservation = read();
+						_reservation_t _reservation = unsafe_read();
 						long numFree = _reservation.numFree;
 
 						if (numFree < 1) {
@@ -185,7 +185,7 @@ class reservation_t: public SingleElem<_reservation_t>{
 				}
 				
 				bool_t reservation_cancel_seq (){
-						_reservation_t _reservation = read();
+						_reservation_t _reservation = unsafe_read();
 						long numUsed = _reservation.numUsed;
 
 						if (numUsed < 1) {
@@ -218,7 +218,7 @@ class reservation_t: public SingleElem<_reservation_t>{
 								return FALSE;
 						}
 						
-						_reservation_t _reservation = read();
+						_reservation_t _reservation = unsafe_read();
 						_reservation.price = newPrice;
 
 						write(_reservation);
@@ -239,7 +239,7 @@ class reservation_t: public SingleElem<_reservation_t>{
 				}
 
 				inline void checkReservation_seq(){
-						_reservation_t _reservation = read();
+						_reservation_t _reservation = unsafe_read();
 
 						assert(_reservation.numUsed >= 0);
 						assert(_reservation.numFree >= 0);
@@ -258,11 +258,11 @@ class reservation_t: public SingleElem<_reservation_t>{
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
 		reservationPtr->transRead(TM_ARG_ALONE).numTotal
 #define TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) \
-		reservationPtr->read().numTotal
+		reservationPtr->unsafe_read().numTotal
 #define TM_RESERVATION_SHARED_READ_USED(reservationPtr) \
 		reservationPtr->transRead(TM_ARG_ALONE).numUsed
 #define TM_RESERVATION_SEQ_READ_USED(reservationPtr) \
-		reservationPtr->read().numUsed
+		reservationPtr->unsafe_read().numUsed
 #define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
 		reservationPtr->transRead(TM_ARG_ALONE).numFree
 #define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \

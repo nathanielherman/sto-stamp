@@ -489,7 +489,7 @@
 
 #  define TM_STARTUP(numThread)         ({ assert(numThread <= MAX_THREADS); pthread_t advancer; pthread_create(&advancer, NULL, Transaction::epoch_advancer, NULL); pthread_detach(advancer); })
 #  define TM_SHUTDOWN()                 ({ STO_SHUTDOWN(); Transaction::run_epochs = false; usleep(1000); })
-#  define TM_THREAD_ENTER()             ({ TThread::id = thread_getId(); })
+#  define TM_THREAD_ENTER()             ({ TThread::set_id(thread_getId()); })
 #  define TM_THREAD_EXIT()              /* nothing */
 
 #  ifdef SIMULATOR

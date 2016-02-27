@@ -55,7 +55,7 @@ typedef typename list_t::ListIter list_iter_t;
 #endif
 #define TMLIST_ALLOC(cmp) (new list_t(__ListCompare(cmp)))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
-#define TMLIST_GETSIZE(list) ({ auto ret = (list)->transSize(); OPACITY_CHECK(list); ret; })
+#define TMLIST_GETSIZE(list) ({ auto ret = (list)->size(); OPACITY_CHECK(list); ret; })
 #define TMLIST_ISEMPTY(list) (TMLIST_GETSIZE(list) == 0)
 #define TMLIST_FIND(list, data) ({ auto ret = (list)->transFind( (pair_t){data, NULL}); OPACITY_CHECK(list); ret ? ret->firstPtr : NULL; })
 #define TMLIST_INSERT(list, data) ({ auto ret = (list)->transInsert( (pair_t){data, NULL}); if (!ret) OPACITY_CHECK(list); ret; })
