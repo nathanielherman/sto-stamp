@@ -15,7 +15,7 @@
 #define TMMAP_INSERT(map, key, data) map->transInsert(TM_ARG key, data)
 #define TMMAP_REMOVE(map, key) ({ map->transDelete(TM_ARG key); })
 
-#elif defined(MAP_USE_HASHTABLE)
+#elif defined(MAP_USE_HASHTABLE) || defined(BOOSTING)
 // XXX: if you really want to use the default hashtable, just include map.h instead of map2.h
 #include "sto_hashtable.h"
 // we do this so we can easily use the same methods for sets
@@ -34,7 +34,7 @@
 #define MAP_REMOVE STOHASHTABLE_REMOVE
 
 // Map implemented as Transactional RBTree
-#elif defined(MAP_USE_RBTREE)
+#elif defined(MAP_USE_RBTREE) && defined(STO)
 #include "sto/RBTree.hh"
 
 #if BM_VACATION

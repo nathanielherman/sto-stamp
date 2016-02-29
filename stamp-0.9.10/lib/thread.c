@@ -124,6 +124,8 @@ void reportPerf(){
 #if defined(STO) || defined(BOOSTING)
 #ifdef BOOSTING
 #include "list2.hh"
+// eh, not really used but need it to be linked.
+__thread int TThread::the_id;
 #endif
 void TMlist_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->transIter();
