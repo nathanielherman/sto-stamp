@@ -31,7 +31,11 @@ class __EqCompare {
 #define STOHASHTABLE_SIZE STAMP_HASHTABLE_SIZE
 
 #ifdef BOOSTING
+#if defined(MAP_USE_HASHTABLE)
 #define STOHASHTABLE_T TransMap<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare>
+#elif defined(MAP_USE_RBTREE)
+#define STOHASHTABLE_T TransMap<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare, RBTree<void*, void*>>
+#endif
 #define TMSTOHASHTABLE_CONTAINS(map, key) ({ void* val; bool ret = map->transGet((void *)key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMSTOHASHTABLE_FIND(map, key) ({ void *val = NULL; map->transGet((void *)key, val); /*TM_ARG_ALONE.check_reads();*/ val; })
 #define TMSTOHASHTABLE_INSERT(map, key, data) ({ auto ret = map->transInsert((void *) key, (void *)data); /*TM_ARG_ALONE.check_reads();*/ ret; })
@@ -48,7 +52,11 @@ class __EqCompare {
 // Preventing double-definition
 #define STOHASHTABLE_FREE(map) (delete map)
 #ifdef BOOSTING
+#if defined(MAP_USE_HASHTABLE)
 #define STOHASHTABLE_ALLOC(hash, cmp) ({ auto h = ((hash) != NULL) || ((cmp) != NULL) ? (hash) : default_hasher; auto c = __EqCompare(cmp); auto ret = new STOHASHTABLE_T(STOHASHTABLE_T::map_type(STOHASHTABLE_SIZE, h, c), STOHASHTABLE_SIZE, h, c); ret; })
+#elif defined(MAP_USE_RBTREE)
+#define STOHASHTABLE_ALLOC(hash, cmp) ({ auto h = ((hash) != NULL) || ((cmp) != NULL) ? (hash) : default_hasher; auto c = __EqCompare(cmp); auto ret = new STOHASHTABLE_T(STOHASHTABLE_T::map_type(), STOHASHTABLE_SIZE, h, c); ret; })
+#endif
 #define STOHASHTABLE_CONTAINS(map, key) ({ void* val; bool ret = map->read((void*)key, val); ret; })
 #define STOHASHTABLE_FIND(map, key) ({ void *val = NULL; map->read((void *)key, val); val; })
 #define STOHASHTABLE_INSERT(map, key, data) ({ auto ret = map->insert((void *) key, (void *)data); ret; })
