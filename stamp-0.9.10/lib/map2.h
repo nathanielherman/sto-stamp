@@ -47,9 +47,9 @@
 #define MAP_FREE(map) (delete map)
 
 #define TMMAP_CONTAINS(map, key) ({bool found = (map->count(key) > 0); Sto::check_opacity(); found;})
-#define TMMAP_FIND(map, key) ({void *val = NULL; if(map->count(key) > 0) {val = (*map)[key];} Sto::check_opacity(); val;})
+#define TMMAP_FIND(map, key) ({void *val = map->stamp_find(key); Sto::check_opacity(); val;})
 // XXX really stupid insert semantics
-#define TMMAP_INSERT(map, key, data) ({bool found = (map->count(key) > 0); if(!found) {(*map)[key] = data;} Sto::check_opacity(); !found;})
+#define TMMAP_INSERT(map, key, data) ({bool inserted = map->stamp_insert(key, data); Sto::check_opacity(); inserted;})
 #define TMMAP_REMOVE(map, key) ({bool erased = (map->erase(key) > 0); Sto::check_opacity(); erased;})
 
 #define MAP_INSERT(map, key, data) (map->nontrans_insert(key, data))

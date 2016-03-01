@@ -79,6 +79,7 @@
 #include "sto/GenericSTM.hh"
 #include "sto/Transaction.hh"
 #include "sto/TransAlloc.hh"
+#include "sto/Packer.cc"
 
 #include "tm.h"
 #ifdef STO
