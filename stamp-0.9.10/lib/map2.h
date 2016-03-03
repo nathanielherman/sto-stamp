@@ -38,9 +38,9 @@
 #include "sto/RBTree.hh"
 
 #if BM_VACATION
-#define MAP_T RBTree<long, void*>
+#define MAP_T RBTree<long, void*, /* GlobalSize */false>
 #else
-#define MAP_T RBTree<void*, void*>
+#define MAP_T RBTree<void*, void*, /* GlobalSize */false>
 #endif
 
 #define MAP_ALLOC(hash, cmp) (new MAP_T())
