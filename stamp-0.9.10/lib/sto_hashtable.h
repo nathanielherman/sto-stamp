@@ -34,7 +34,7 @@ class __EqCompare {
 #if defined(MAP_USE_HASHTABLE)
 #define STOHASHTABLE_T TransMap<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare>
 #elif defined(MAP_USE_RBTREE)
-#define STOHASHTABLE_T TransMap<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare, RBTree<void*, void*>>
+#define STOHASHTABLE_T TransMap<void*, void*, STOHASHTABLE_SIZE, ulong_t (*)(const void*), __EqCompare, RBTree<void*, void*, false>>
 #endif
 #define TMSTOHASHTABLE_CONTAINS(map, key) ({ void* val; bool ret = map->transGet((void *)key, val); /*TM_ARG_ALONE.check_reads();*/ ret; })
 #define TMSTOHASHTABLE_FIND(map, key) ({ void *val = NULL; map->transGet((void *)key, val); /*TM_ARG_ALONE.check_reads();*/ val; })
