@@ -102,7 +102,7 @@ if __name__ == "__main__":
     name = ""
     if len(sys.argv) > 2 and sys.argv[2] == 'boosting':
         name = "-boosting"
-    types = ['stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO', 'gen'] 
+    types = ['seq', 'stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO', 'gen'] 
     file = open("tmp%s.txt" % name, 'w')
     out_file = open("results.txt", 'w')
     nthreads = [4, 16]
