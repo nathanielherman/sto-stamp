@@ -86,6 +86,7 @@
 #include "list2.hh"
 #endif
 #include "sto/Transaction.cc"
+#include "sto/TRcu.cc"
 #include "sto/MassTrans.cc"
 GenericSTM __genstm;
 TransAlloc __talloc;
