@@ -76,7 +76,7 @@
 
 // HAX HAX HAX
 #if defined(STO) || defined(GEN)
-#include "sto/GenericSTM.hh"
+#include "sto/TGeneric.hh"
 #include "sto/Transaction.hh"
 #include "sto/TransAlloc.hh"
 #include "sto/Packer.cc"
@@ -88,7 +88,7 @@
 #include "sto/Transaction.cc"
 #include "sto/TRcu.cc"
 #include "sto/MassTrans.cc"
-GenericSTM __genstm;
+TGeneric __genstm;
 TransAlloc __talloc;
 
 #if PERF_LOGGING

@@ -610,18 +610,18 @@ extern TransAlloc __talloc;
 
 #elif defined(STO) || defined(GEN) /*  STO */
 
-#include "sto/GenericSTM.hh"
+#include "sto/TGeneric.hh"
 #include "sto/Transaction.hh"
 
-extern GenericSTM __genstm;
+extern TGeneric __genstm;
 
-#  define TM_SHARED_READ(var)           (__genstm.transRead(TM_ARG &var))
-#  define TM_SHARED_READ_P(var)         (__genstm.transRead(TM_ARG &var))
-#  define TM_SHARED_READ_F(var)         (__genstm.transRead(TM_ARG &var))
+#  define TM_SHARED_READ(var)           (__genstm.read(TM_ARG &var))
+#  define TM_SHARED_READ_P(var)         (__genstm.read(TM_ARG &var))
+#  define TM_SHARED_READ_F(var)         (__genstm.read(TM_ARG &var))
 
-#  define TM_SHARED_WRITE(var, val)     ({__genstm.transWrite(TM_ARG &var, (__typeof__(var))val); var;})
-#  define TM_SHARED_WRITE_P(var, val)   ({__genstm.transWrite(TM_ARG &var, val); var;})
-#  define TM_SHARED_WRITE_F(var, val)   ({__genstm.transWrite(TM_ARG &var, val); var;})
+#  define TM_SHARED_WRITE(var, val)     ({__genstm.write(TM_ARG &var, (__typeof__(var))val); var;})
+#  define TM_SHARED_WRITE_P(var, val)   ({__genstm.write(TM_ARG &var, val); var;})
+#  define TM_SHARED_WRITE_F(var, val)   ({__genstm.write(TM_ARG &var, val); var;})
 
 #  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
 #  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
