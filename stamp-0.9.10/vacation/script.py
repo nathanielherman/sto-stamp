@@ -3,6 +3,7 @@
 import subprocess
 import numpy
 import re
+import sys
 
 def timeout_command(cmd, timeout):
     """call shell-command and either return its output or kill it
@@ -71,63 +72,53 @@ def printfmt_int(header, out, precision, width):
         string += "{0:{width}}".format(a, width=width)
     return string
 
-def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max):
-    string = ""
-    string += "{'seq' : "
-    string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
-    string += ", 'sto' : "
-    string += "{0:{width}.{precision}}".format(sto_time[i], precision=precision, width=width)
-    string += ", 'stm' : "
-    string += "{0:{width}.{precision}}".format(stm_time[i], precision=precision, width=width)
-    string += ", 'gen' : "
-    string += "{0:{width}.{precision}}".format(gen_time[i], precision=precision, width=width)
-    string += "}"
+def print_(precision, width, i, seq_time, tuples, types):
+    def seq_string():
+        string = "{"
+        if seq_time:
+            string += "'seq' : "
+            string += "{0:{width}.{precision}}, ".format(seq_time[0], precision=precision, width=width)
+        return string
 
-    string += "\n"
+    for elem in zip(*tuples):
+        string = seq_string()
+        for data, bench in zip(elem, types):
+            string += "'%s' : " % bench
+            string += "{0:{width}.{precision}}".format(data[i], precision=precision, width=width)
+            if types.index(bench) != len(types)-1:
+                string += ", "
+        string += "}"
+        string += "\n"
 
-    string += "{'seq' : "
-    string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
-    string += ", 'sto' : "
-    string += "{0:{width}.{precision}}".format(sto_min[i], precision=precision, width=width)
-    string += ", 'stm' : "
-    string += "{0:{width}.{precision}}".format(stm_min[i], precision=precision, width=width)
-    string += ", 'gen' : "
-    string += "{0:{width}.{precision}}".format(gen_min[i], precision=precision, width=width)
-    string += "}"
-
-    string += "\n"
-
-    string += "{'seq' : "
-    string += "{0:{width}.{precision}}".format(seq_time[0], precision=precision, width=width)
-    string += ", 'sto' : "
-    string += "{0:{width}.{precision}}".format(sto_max[i], precision=precision, width=width)
-    string += ", 'stm' : "
-    string += "{0:{width}.{precision}}".format(stm_max[i], precision=precision, width=width)
-    string += ", 'gen' : "
-    string += "{0:{width}.{precision}}".format(gen_max[i], precision=precision, width=width)
-    string += "}"
-    string += "\n"
     return string
 
 
-
 if __name__ == "__main__":
-    file = open("tmp.txt", 'w')
+    if len(sys.argv) > 1 and sys.argv[1] == 'high':
+        cmds = [['./vacation', '-c1', '-n8', '-q1', '-u60', '-r104857', '-t4194304']] #high
+    else:
+        #cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']]
+        cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r1048576', '-t4194304']] #low
+    name = ""
+    if len(sys.argv) > 2 and sys.argv[2] == 'boosting':
+        name = "-boosting"
+    types = ['stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO', 'gen'] 
+    file = open("tmp%s.txt" % name, 'w')
     out_file = open("results.txt", 'w')
-    nthreads = [4,16]
+    nthreads = [4, 16]
     t = 5;
-    #cmds = [['./vacation', '-c1', '-n8', '-q1', '-u60', '-r104857', '-t4194304']] #high
-    cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']] #low
     for cmd in cmds:
         out_file.write(" ".join(cmd) + "\n")
-        out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
-        seq_time, seq_min, seq_max = run_benchmark(cmd, 'seq', [1])
-        out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
-        stm_time, stm_min, stm_max = run_benchmark(cmd, 'stm', nthreads)
-        out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
-        sto_time, sto_min, sto_max = run_benchmark(cmd, 'STO', nthreads)
-        out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
-        gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
-        out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
-        out_file.write(print_(4, 8, 0, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
-        out_file.write(print_(4, 8, 1, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
+        out_file.write(printfmt_int('n', nthreads, 2, 10) + "\n")
+        tuples = []
+        seq_time = None
+        for bench in types:
+            threads = [1] if bench == 'seq' else nthreads
+            time_, min_, max_ = run_benchmark(cmd, bench, threads)
+            if bench == 'seq':
+                seq_time = time_
+            else:
+                tuples.append((time_, min_, max_))
+            out_file.write(printfmt_double(bench, time_, 4, 10) + "\n")
+        for i in xrange(len(nthreads)):
+            out_file.write(print_(4, 8, i, seq_time, tuples, [bench for bench in types if bench != 'seq']))
