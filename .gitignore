@@ -3,6 +3,7 @@
 *.a
 *~
 *#
+*.dSYM
 *.swp
 userconfig.mk
 /stamp-0.9.10/genome/genome
