@@ -80,14 +80,15 @@ def print_(precision, width, i, seq_time, tuples, types):
             string += "{0:{width}.{precision}}, ".format(seq_time[0], precision=precision, width=width)
         return string
 
+    string = ""
     for elem in zip(*tuples):
-        string = seq_string()
+        string += seq_string()
         for data, bench in zip(elem, types):
             string += "'%s' : " % bench
             string += "{0:{width}.{precision}}".format(data[i], precision=precision, width=width)
             if types.index(bench) != len(types)-1:
                 string += ", "
-        string += "}"
+        string += "},"
         string += "\n"
 
     return string
@@ -120,5 +121,9 @@ if __name__ == "__main__":
             else:
                 tuples.append((time_, min_, max_))
             out_file.write(printfmt_double(bench, time_, 4, 10) + "\n")
+        out_file.write("[\n[\n")
         for i in xrange(len(nthreads)):
+            out_file.write("[\n")
             out_file.write(print_(4, 8, i, seq_time, tuples, [bench for bench in types if bench != 'seq']))
+            out_file.write("],\n")
+        out_file.write("],\n]\n")
