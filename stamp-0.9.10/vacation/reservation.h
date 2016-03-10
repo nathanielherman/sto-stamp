@@ -106,7 +106,8 @@ typedef struct reservation {
 class reservation_t: public TObject {
     static constexpr int total_key = 0;
     static constexpr int free_key = 1;
-    static constexpr int price_key = 2;
+    static constexpr int used_key = 2;
+    static constexpr int price_key = 3;
 public:
     typedef _reservation_t T;
     typedef TWrapped<_reservation_t> WT;
@@ -116,14 +117,14 @@ public:
     typedef TIntRangeProxy<count_type> count_proxy;
 
     reservation_t(_reservation_t* rptr) {
+        c_[used_key].access() = rptr->numUsed;
         c_[free_key].access() = rptr->numFree;
         c_[total_key].access() = rptr->numTotal;
         c_[price_key].access() = rptr->price;
     }
 
     T nontrans_read() const {
-        count_type f = c_[free_key].access(), t = c_[total_key].access();
-        return T{ 0, t - f, f, t, c_[price_key].access() };
+        return T{ 0, c_[used_key].access(), c_[free_key].access(), c_[total_key].access(), c_[price_key].access() };
     }
 
     /* transaciton methods */
@@ -133,8 +134,10 @@ public:
     }
 
     count_proxy used() const {
-        TransProxy item = my_item(total_key), item2 = my_item(free_key);
-        return count_proxy(&ip(item), iorig(item), idelta(item) - iorig(item2) - idelta(item2));
+        TransProxy item = my_item(used_key);
+        return count_proxy(&ip(item), iorig(item), idelta(item));
+        //TransProxy titem = my_item(total_key), fitem = my_item(free_key);
+        //return count_proxy(&ip(titem), iorig(titem), idelta(titem) - iorig(fitem) - idelta(fitem));
     }
 
     count_proxy free() const {
@@ -144,7 +147,7 @@ public:
 
     count_type price() const {
         TransProxy item = Sto::item(this, price_key);
-        return item.has_write() ? item.write_value<count_type>() : c_[price_key].read(item, vers_);
+        return item.has_write() ? item.write_value<count_type>() : c_[price_key].read(item, price_vers_);
     }
 
     bool_t reservation_addToTotal(TM_ARGDECL int num){
@@ -168,6 +171,7 @@ public:
         if (free() < 1)
             return FALSE;
         update(free_key, -1);
+        update(used_key, 1);
         return TRUE;
     }
 
@@ -175,6 +179,7 @@ public:
         if (c_[free_key].access() < 1)
             return FALSE;
         c_[free_key].access() -= 1;
+        c_[used_key].access() += 1;
         checkReservation_seq();
         return TRUE;
     }
@@ -183,6 +188,7 @@ public:
         if (used() < 1)
             return FALSE;
         update(free_key, 1);
+        update(used_key, -1);
         return TRUE;
     }
 
@@ -190,6 +196,7 @@ public:
         if (c_[free_key].access() >= c_[total_key].access())
             return FALSE;
         c_[free_key].access() += 1;
+        c_[used_key].access() -= 1;
         checkReservation_seq();
         return TRUE;
     }
@@ -210,14 +217,18 @@ public:
     }
 
 
-    bool lock(TransItem&, Transaction&) {
-        if (!vers_.is_locked_here())
+    bool lock(TransItem& item, Transaction&) {
+        if (item.key<int>() == price_key)
+            price_vers_.lock();
+        else if (!vers_.is_locked_here())
             vers_.lock();
         return true;
     }
 
-    void unlock(TransItem&) {
-        if (vers_.is_locked_here()) {
+    void unlock(TransItem& item) {
+        if (item.key<int>() == price_key)
+            price_vers_.unlock();
+        else if (vers_.is_locked_here()) {
             checkReservation_seq();
             vers_.unlock();
         }
@@ -232,23 +243,51 @@ public:
      }
 
     bool check(const TransItem& item, const Transaction&) {
-        return item.check_version(vers_);
+        if (item.key<int>() == price_key)
+            return item.check_version(price_vers_);
+        else
+            return item.check_version(vers_);
     }
 
     void install(TransItem& item, const Transaction& txn) {
         int key = item.key<int>();
-        if (key == price_key)
+        if (key == price_key) {
             c_[key].write(item.write_value<count_type>());
-        else {
+            price_vers_.set_version(txn.commit_tid());
+        } else {
             pred_type wval = item.write_value<pred_type>();
             c_[key].write(c_[key].access() + wval.second - wval.first);
+            vers_.set_version(txn.commit_tid());
         }
-        vers_.set_version(txn.commit_tid());
+    }
+
+    void print(std::ostream& w, const TransItem& item) const {
+        w << "{Reservation " << (void*) this;
+        int key = item.key<int>();
+        if (key == price_key) {
+            w << ".price";
+            if (item.has_read())
+                w << " r" << item.read_value<version_type>();
+            if (item.has_write())
+                w << " =" << item.write_value<count_type>();
+        } else {
+            w << (key == total_key ? ".total" : (key == used_key ? ".used" : ".free"));
+            if (item.has_read())
+                w << " r" << item.read_value<version_type>();
+            else if (item.has_predicate())
+                w << " P" << item.predicate_value<pred_type>();
+            if (item.has_write()) {
+                auto& p = item.xwrite_value<pred_type>();
+                w << " Δ" << (p.second - p.first);
+            }
+        }
+        w << "}";
     }
 
 private:
+    TWrapped<count_type> c_[4];
     version_type vers_;
-    TWrapped<count_type> c_[3];
+    version_type price_vers_;
 
     TransProxy my_item(int key) const {
         auto item = Sto::item(this, key);

@@ -86,6 +86,10 @@
  */
 
 TM_CALLABLE
+static int
+queryExists (TM_ARGDECL  MAP_T* tablePtr, long id);
+
+TM_CALLABLE
 static long 
 queryNumFree (TM_ARGDECL  MAP_T* tablePtr, long id);
 
@@ -511,6 +515,15 @@ queryNumFree (TM_ARGDECL  MAP_T* tablePtr, long id)
     return numFree;
 }
 
+static int
+queryExists (TM_ARGDECL  MAP_T* tablePtr, long id)
+{
+    reservation_t* reservationPtr;
+
+    reservationPtr = (reservation_t*)TMMAP_FIND(tablePtr, id);
+    return reservationPtr != NULL;
+}
+
 
 /* =============================================================================
  * queryPrice
@@ -544,6 +557,12 @@ manager_queryCar (TM_ARGDECL  manager_t* managerPtr, long carId)
     return queryNumFree(TM_ARG  managerPtr->carTablePtr, carId);
 }
 
+int
+manager_queryCarExists (TM_ARGDECL  manager_t* managerPtr, long carId)
+{
+    return queryExists(TM_ARG  managerPtr->carTablePtr, carId);
+}
+
 
 /* =============================================================================
  * manager_queryCarPrice
@@ -570,6 +589,12 @@ manager_queryRoom (TM_ARGDECL  manager_t* managerPtr, long roomId)
     return queryNumFree(TM_ARG  managerPtr->roomTablePtr, roomId);
 }
 
+int
+manager_queryRoomExists (TM_ARGDECL  manager_t* managerPtr, long carId)
+{
+    return queryExists(TM_ARG  managerPtr->roomTablePtr, carId);
+}
+
 
 /* =============================================================================
  * manager_queryRoomPrice
@@ -594,6 +619,12 @@ long
 manager_queryFlight (TM_ARGDECL  manager_t* managerPtr, long flightId)
 {
     return queryNumFree(TM_ARG  managerPtr->flightTablePtr, flightId);
+}
+
+int
+manager_queryFlightExists (TM_ARGDECL  manager_t* managerPtr, long carId)
+{
+    return queryExists(TM_ARG  managerPtr->flightTablePtr, carId);
 }
 
 

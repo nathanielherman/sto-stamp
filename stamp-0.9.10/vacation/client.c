@@ -200,17 +200,17 @@ client_run (void* argPtr)
                     long price = -1;
                     switch (t) {
                         case RESERVATION_CAR:
-                            if (MANAGER_QUERY_CAR(managerPtr, id) >= 0) {
+                            if (MANAGER_CAR_EXISTS(managerPtr, id)) {
                                 price = MANAGER_QUERY_CAR_PRICE(managerPtr, id);
                             }
                             break;
                         case RESERVATION_FLIGHT:
-                            if (MANAGER_QUERY_FLIGHT(managerPtr, id) >= 0) {
+                            if (MANAGER_FLIGHT_EXISTS(managerPtr, id)) {
                                 price = MANAGER_QUERY_FLIGHT_PRICE(managerPtr, id);
                             }
                             break;
                         case RESERVATION_ROOM:
-                            if (MANAGER_QUERY_ROOM(managerPtr, id) >= 0) {
+                            if (MANAGER_ROOM_EXISTS(managerPtr, id)) {
                                 price = MANAGER_QUERY_ROOM_PRICE(managerPtr, id);
                             }
                             break;

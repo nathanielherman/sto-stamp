@@ -243,6 +243,10 @@ manager_deleteCustomer (TM_ARGDECL  manager_t* managerPtr, long customerId);
 long
 manager_queryCar (TM_ARGDECL  manager_t* managerPtr, long carId);
 
+int manager_queryCarExists(TM_ARGDECL  manager_t* managerPtr, long carId);
+int manager_queryRoomExists(TM_ARGDECL  manager_t* managerPtr, long carId);
+int manager_queryFlightExists(TM_ARGDECL  manager_t* managerPtr, long carId);
+
 
 /* =============================================================================
  * manager_queryCarPrice
@@ -394,14 +398,20 @@ manager_cancelFlight (TM_ARGDECL
     manager_deleteCustomer(TM_ARG  mgr, id)
 #define MANAGER_QUERY_CAR(mgr, id) \
     manager_queryCar(TM_ARG  mgr, id)
+#define MANAGER_CAR_EXISTS(mgr, id) \
+    manager_queryCarExists(TM_ARG  mgr, id)
 #define MANAGER_QUERY_CAR_PRICE(mgr, id) \
     manager_queryCarPrice(TM_ARG  mgr, id)
 #define MANAGER_QUERY_ROOM(mgr, id) \
     manager_queryRoom(TM_ARG  mgr, id)
+#define MANAGER_ROOM_EXISTS(mgr, id) \
+    manager_queryRoomExists(TM_ARG  mgr, id)
 #define MANAGER_QUERY_ROOM_PRICE(mgr, id) \
     manager_queryRoomPrice(TM_ARG  mgr, id)
 #define MANAGER_QUERY_FLIGHT(mgr, id) \
     manager_queryFlight(TM_ARG  mgr, id)
+#define MANAGER_FLIGHT_EXISTS(mgr, id) \
+    manager_queryFlightExists(TM_ARG  mgr, id)
 #define MANAGER_QUERY_FLIGHT_PRICE(mgr, id) \
     manager_queryFlightPrice(TM_ARG  mgr, id)
 #define MANAGER_QUERY_CUSTOMER_BILL(mgr, id) \
