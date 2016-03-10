@@ -105,9 +105,8 @@ typedef struct reservation {
 #if defined(reservation2) && defined(VACATION_PREDICATES)
 class reservation_t: public TObject {
     static constexpr int total_key = 0;
-    static constexpr int used_key = 1;
-    static constexpr int free_key = 2;
-    static constexpr int price_key = 3;
+    static constexpr int free_key = 1;
+    static constexpr int price_key = 2;
 public:
     typedef _reservation_t T;
     typedef TWrapped<_reservation_t> WT;
@@ -117,14 +116,14 @@ public:
     typedef TIntRangeProxy<count_type> count_proxy;
 
     reservation_t(_reservation_t* rptr) {
-        c_[used_key].access() = rptr->numUsed;
         c_[free_key].access() = rptr->numFree;
         c_[total_key].access() = rptr->numTotal;
         c_[price_key].access() = rptr->price;
     }
 
     T nontrans_read() const {
-        return T{ 0, c_[used_key].access(), c_[free_key].access(), c_[total_key].access(), c_[price_key].access() };
+        count_type f = c_[free_key].access(), t = c_[total_key].access();
+        return T{ 0, t - f, f, t, c_[price_key].access() };
     }
 
     /* transaciton methods */
@@ -134,8 +133,8 @@ public:
     }
 
     count_proxy used() const {
-        TransProxy item = my_item(used_key);
-        return count_proxy(&ip(item), iorig(item), idelta(item));
+        TransProxy item = my_item(total_key), item2 = my_item(free_key);
+        return count_proxy(&ip(item), iorig(item), idelta(item) - iorig(item2) - idelta(item2));
     }
 
     count_proxy free() const {
@@ -169,7 +168,6 @@ public:
         if (free() < 1)
             return FALSE;
         update(free_key, -1);
-        update(used_key, 1);
         return TRUE;
     }
 
@@ -177,7 +175,6 @@ public:
         if (c_[free_key].access() < 1)
             return FALSE;
         c_[free_key].access() -= 1;
-        c_[used_key].access() += 1;
         checkReservation_seq();
         return TRUE;
     }
@@ -186,15 +183,13 @@ public:
         if (used() < 1)
             return FALSE;
         update(free_key, 1);
-        update(used_key, -1);
         return TRUE;
     }
 
     bool_t reservation_cancel_seq (){
-        if (c_[used_key].access() < 1)
+        if (c_[free_key].access() >= c_[total_key].access())
             return FALSE;
         c_[free_key].access() += 1;
-        c_[used_key].access() -= 1;
         checkReservation_seq();
         return TRUE;
     }
@@ -253,7 +248,7 @@ public:
 
 private:
     version_type vers_;
-    TWrapped<count_type> c_[4];
+    TWrapped<count_type> c_[3];
 
     TransProxy my_item(int key) const {
         auto item = Sto::item(this, key);
@@ -286,11 +281,9 @@ private:
     }
 
     inline void checkReservation_seq(){
-        assert(c_[used_key].access() >= 0);
+        assert(c_[free_key].access() <= c_[total_key].access());
         assert(c_[free_key].access() >= 0);
         assert(c_[total_key].access() >= 0);
-        assert((c_[used_key].access() + c_[free_key].access()) ==
-               (c_[total_key].access()));
         assert(c_[price_key].access() >= 0);
     }
 };
