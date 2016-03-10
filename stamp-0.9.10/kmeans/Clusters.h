@@ -8,31 +8,31 @@
 #define CACHE_LINE_SIZE 64
 
 typedef struct _Cluster{
-		int nfeatures;
-		int centers_len;
-		float *centers;
+    int nfeatures;
+    int centers_len;
+    float centers[1];
 } _Cluster;
 
-unsigned get_cluster_size(int nfeatures);
+inline unsigned get_cluster_size(int nfeatures) {
+    return (sizeof(_Cluster) + (nfeatures - 1) * sizeof(float) + CACHE_LINE_SIZE - 1) & ~size_t(CACHE_LINE_SIZE - 1);
+}
 
-#ifdef D 
-class Cluster: public Single<_Cluster*>{
-		public:
-      void install(TransItem& item, const Transaction& t) {
-						_Cluster* cluster_ptr = s_.read_value();
-						_Cluster* new_cluster_ptr = item.write_value<_Cluster*>();
-						memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
-						cluster_ptr->centers = (float *)((char *)cluster_ptr + sizeof(_Cluster));
-						TransactionTid::inc_invalid_version(s_.version());
-					//	printf("cluter len %d\n", s_.read_value()->centers_len);
-				}
-
+#ifdef D
+class Cluster: public Single<_Cluster*> {
+ public:
+    void install(TransItem& item, const Transaction& txn) {
+        _Cluster* cluster_ptr = v_.access();
+        _Cluster* new_cluster_ptr = item.write_value<_Cluster*>();
+        memcpy(cluster_ptr, new_cluster_ptr, get_cluster_size(cluster_ptr->nfeatures));
+        vers_.set_version_unlock(txn.commit_tid());
+        item.clear_needs_unlock();
+    }
 };
 
 template<typename T>
 struct CacheLineStorage {
-		public:
-				 T data __attribute__ ((aligned (CACHE_LINE_SIZE)));
+  public:
+    T data __attribute__ ((aligned (CACHE_LINE_SIZE)));
 };
 #else
 #define Cluster _Cluster

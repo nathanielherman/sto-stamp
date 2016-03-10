@@ -5,7 +5,7 @@
 # ==============================================================================
 
 
-CFLAGS += -DLIST_NO_DUPLICATES
+CFLAGS += -DLIST_NO_DUPLICATES=1
 CFLAGS += -DCHUNK_STEP1=12
 
 PROG := genome

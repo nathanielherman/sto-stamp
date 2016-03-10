@@ -2,7 +2,7 @@
  *
  * list.h
  * -- Sorted singly linked list
- * -- Options: -DLIST_NO_DUPLICATES (default: allow duplicates)
+ * -- Options: -DLIST_NO_DUPLICATES=1 (default: allow duplicates)
  *
  * =============================================================================
  *

@@ -539,6 +539,12 @@ main ()
 #endif /* TEST_RESERVATION */
 
 
+#ifdef reservation2
+std::ostream& operator<<(std::ostream& w, const _reservation_t& r) {
+    return w << "<used" << r.numUsed << ",free" << r.numFree << ",total" << r.numTotal << ",price" << r.price << ">";
+}
+#endif
+
 /* =============================================================================
  *
  * End of reservation.c

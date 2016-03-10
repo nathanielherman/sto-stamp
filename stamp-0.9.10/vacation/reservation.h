@@ -102,6 +102,10 @@ typedef struct reservation {
     int price;
 } _reservation_t;
 
+#ifdef reservation2
+std::ostream& operator<<(std::ostream& w, const _reservation_t& r);
+#endif
+
 #if defined(reservation2) && defined(VACATION_PREDICATES)
 class reservation_t: public TObject {
     static constexpr int total_key = 0;

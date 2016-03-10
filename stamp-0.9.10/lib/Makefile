@@ -65,7 +65,7 @@ test_bitmap:
 
 .PHONY: test_hashtable
 test_hashtable: CFLAGS += -DTEST_HASHTABLE
-test_hashtable: CFLAGS += -DHASHTABLE_RESIZABLE -DLIST_NO_DUPLICATES
+test_hashtable: CFLAGS += -DHASHTABLE_RESIZABLE -DLIST_NO_DUPLICATES=1
 test_hashtable:
 	$(CC) $(CFLAGS) hashtable.c list.c pair.c memory.c -o $@
 

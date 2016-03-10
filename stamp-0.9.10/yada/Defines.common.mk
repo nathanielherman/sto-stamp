@@ -5,7 +5,7 @@
 # ==============================================================================
 
 
-CFLAGS += -DLIST_NO_DUPLICATES
+CFLAGS += -DLIST_NO_DUPLICATES=1
 # Note that changing this will break things. AVLTREE expects a pair comparison
 # function so if you change to a different structure you must change all
 # MAP_ALLOC's to pass the listCompare function rather than the mapCompare function

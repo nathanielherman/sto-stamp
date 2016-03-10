@@ -29,11 +29,17 @@ public:
   realcompare comp;
 };
 
-#ifdef BOOSTING
-typedef TransList<pair_t, !LIST_NO_DUPLICATES, __ListCompare, true> list_t;
+#if defined(BOOSTING) && LIST_NO_DUPLICATES
+typedef TransList<pair_t, false, __ListCompare, true> list_t;
 typedef list_t::inner_list_t::ListIter list_iter_t;
+#elif defined(BOOSTING)
+typedef TransList<pair_t, true, __ListCompare, true> list_t;
+typedef list_t::inner_list_t::ListIter list_iter_t;
+#elif LIST_NO_DUPLICATES
+typedef List<pair_t, false, __ListCompare, true, LIST_OPACITY> list_t;
+typedef typename list_t::ListIter list_iter_t;
 #else
-typedef List<pair_t, !LIST_NO_DUPLICATES, __ListCompare, true, LIST_OPACITY> list_t;
+typedef List<pair_t, true, __ListCompare, true, LIST_OPACITY> list_t;
 typedef typename list_t::ListIter list_iter_t;
 #endif
 

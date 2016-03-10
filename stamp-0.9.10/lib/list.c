@@ -2,7 +2,7 @@
  *
  * list.c
  * -- Sorted singly linked list
- * -- Options: -DLIST_NO_DUPLICATES (default: allow duplicates)
+ * -- Options: -DLIST_NO_DUPLICATES=1 (default: allow duplicates)
  *
  * =============================================================================
  *
@@ -645,7 +645,7 @@ list_full_insert (list_t* listPtr, void* dataPtr, void* secondaryDataPtr)
     prevPtr = findPrevious(listPtr, dataPtr);
     currPtr = prevPtr->nextPtr;
 
-#ifdef LIST_NO_DUPLICATES
+#if LIST_NO_DUPLICATES
     if ((currPtr != NULL) &&
         listPtr->compare(currPtr->dataPtr, dataPtr) == 0) {
         return FALSE;
@@ -685,7 +685,7 @@ Plist_full_insert (list_t* listPtr, void* dataPtr, void* secondaryDataPtr)
     prevPtr = findPrevious(listPtr, dataPtr);
     currPtr = prevPtr->nextPtr;
 
-#ifdef LIST_NO_DUPLICATES
+#if LIST_NO_DUPLICATES
     if ((currPtr != NULL) &&
         listPtr->compare(currPtr->dataPtr, dataPtr) == 0) {
         return FALSE;
@@ -725,7 +725,7 @@ TMlist_full_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr, void* secondaryD
     prevPtr = TMfindPrevious(TM_ARG  listPtr, dataPtr);
     currPtr = (list_node_t*)TM_SHARED_READ_P(prevPtr->nextPtr);
 
-#ifdef LIST_NO_DUPLICATES
+#if LIST_NO_DUPLICATES
     if ((currPtr != NULL) &&
         listPtr->compare(currPtr->dataPtr, dataPtr) == 0) {
         return FALSE;
@@ -913,7 +913,7 @@ int
 main ()
 {
     list_t* listPtr;
-#ifdef LIST_NO_DUPLICATES
+#if LIST_NO_DUPLICATES
     long data1[] = {3, 1, 4, 1, 5, -1};
 #else
     long data1[] = {3, 1, 4, 5, -1};

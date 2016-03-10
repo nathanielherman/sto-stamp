@@ -4,7 +4,7 @@ CFLAGS = -std=c++11 -g -Wall
 LDFLAGS = -lpthread
 OPT = -O3
 INCPATH = ../lib
-SYMBOLS = -DSTO -DLIST_NO_DUPLICATES
+SYMBOLS = -DSTO -DLIST_NO_DUPLICATES=1
 CFLAGS += $(OPT) -I$(INCPATH) $(SYMBOLS)
 
 MAINSRC = list_test_race.cpp
