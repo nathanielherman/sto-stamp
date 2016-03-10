@@ -28,10 +28,14 @@ def run_experiment(cmd, t):
     for i in range(t):
         while (True) :
             out = timeout_command(cmd, 120)
-            if not  out == None:
-                break
-            print "Timed out ", cmd
-        out = re.search("(?<=Time = )[0-9]*\.[0-9]*", out).group(0)
+            if out == None:
+                print "Timed out ", cmd
+                continue
+            r = re.search("(?<=Time = )[0-9]*\.[0-9]*", out)
+            if r == None:
+                continue
+            out = r.group(0);
+            break
         time.append(float(out))
         file.write(out + " ")
     file.write("\n")
@@ -103,7 +107,7 @@ if __name__ == "__main__":
     name = ""
     if len(sys.argv) > 2 and sys.argv[2] == 'boosting':
         name = "-boosting"
-    types = ['seq', 'stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO', 'gen'] 
+    types = ['seq', 'stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO'] 
     file = open("tmp%s.txt" % name, 'w')
     out_file = open("results.txt", 'w')
     nthreads = [4, 16]
