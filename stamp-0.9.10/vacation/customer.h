@@ -96,7 +96,7 @@ typedef _customer_t customer_t;
 #define TM_CUSTOMER_SEQ_ALLOC(_customerPtr) _customerPtr
 #define TM_CUSTOMER_SHARED_READ_INFO(customerPtr) \
         (list_t*)TM_SHARED_READ(customerPtr->reservationInfoListPtr)
-#define TM_CUSTOMER_FREE(customerPtr) TM_FREE(customerPtr) 
+#define TM_CUSTOMER_FREE(customerPtr) TM_FREE(customerPtr)
 
 /* =============================================================================
  * customer_alloc

@@ -237,9 +237,9 @@ addReservation_seq (MAP_T* tablePtr, long id, long num, long price)
         reservationPtr = reservation_alloc_seq(id, num, price);
         assert(reservationPtr != NULL);
         status = MAP_INSERT(tablePtr, id, reservationPtr);
-				assert((reservation_t*)MAP_FIND(tablePtr, id));
+        assert((reservation_t*)MAP_FIND(tablePtr, id));
         assert(status);
-				assert(MAP_FIND(tablePtr, id));
+        assert(MAP_FIND(tablePtr, id));
     } else {
         /* Update existing reservation */
         if (!reservation_addToTotal_seq(reservationPtr, num)) {

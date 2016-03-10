@@ -494,7 +494,7 @@ private:
 #ifdef reservation2
 /* alloc and free */
 #define TM_RESERVATION_ALLOC(_reservationPtr) new reservation_t(_reservationPtr)
-#define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr)
+#define TM_RESERVATION_FREE(reservationPtr) Transaction::rcu_delete(reservationPtr)
 
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
     reservationPtr->total()
