@@ -80,6 +80,7 @@
 #include "types.h"
 #ifdef reservation2
 #include "sto/TBox.hh"
+#include "sto/TIntRange.hh"
 #endif
 
 typedef enum reservation_type {
@@ -101,7 +102,199 @@ typedef struct reservation {
     int price;
 } _reservation_t;
 
-#ifdef reservation2
+#if defined(reservation2) && defined(VACATION_PREDICATES)
+class reservation_t: public TObject {
+    static constexpr int total_key = 0;
+    static constexpr int used_key = 1;
+    static constexpr int free_key = 2;
+    static constexpr int price_key = 3;
+public:
+    typedef _reservation_t T;
+    typedef TWrapped<_reservation_t> WT;
+    typedef WT::version_type version_type;
+    typedef int count_type;
+    typedef TIntRange<count_type> pred_type;
+    typedef TIntRangeProxy<count_type> count_proxy;
+
+    reservation_t(_reservation_t* rptr) {
+        c_[used_key].access() = rptr->numUsed;
+        c_[free_key].access() = rptr->numFree;
+        c_[total_key].access() = rptr->numTotal;
+        c_[price_key].access() = rptr->price;
+    }
+
+    T nontrans_read() const {
+        return T{ 0, c_[used_key].access(), c_[free_key].access(), c_[total_key].access(), c_[price_key].access() };
+    }
+
+    /* transaciton methods */
+    count_proxy total() const {
+        TransProxy item = my_item(total_key);
+        return count_proxy(&ip(item), iorig(item), idelta(item));
+    }
+
+    count_proxy used() const {
+        TransProxy item = my_item(used_key);
+        return count_proxy(&ip(item), iorig(item), idelta(item));
+    }
+
+    count_proxy free() const {
+	TransProxy item = my_item(free_key);
+	return count_proxy(&ip(item), iorig(item), idelta(item));
+    }
+
+    count_type price() const {
+        TransProxy item = Sto::item(this, price_key);
+        return item.has_write() ? item.write_value<count_type>() : c_[price_key].read(item, vers_);
+    }
+
+    bool_t reservation_addToTotal(TM_ARGDECL int num){
+        if (free() < -num)
+            return FALSE;
+        update(total_key, num);
+        update(free_key, num);
+        return TRUE;
+    }
+
+    bool_t reservation_addToTotal_seq(int num){
+        if (c_[free_key].access() < -num)
+            return FALSE;
+        c_[total_key].access() += num;
+        c_[free_key].access() += num;
+        checkReservation_seq();
+        return TRUE;
+    }
+
+    bool_t reservation_make(TM_ARGDECL_ALONE){
+        if (free() < 1)
+            return FALSE;
+        update(free_key, -1);
+        update(used_key, 1);
+        return TRUE;
+    }
+
+    bool_t reservation_make_seq(){
+        if (c_[free_key].access() < 1)
+            return FALSE;
+        c_[free_key].access() -= 1;
+        c_[used_key].access() += 1;
+        checkReservation_seq();
+        return TRUE;
+    }
+
+    bool_t reservation_cancel (TM_ARGDECL_ALONE){
+        if (used() < 1)
+            return FALSE;
+        update(free_key, 1);
+        update(used_key, -1);
+        return TRUE;
+    }
+
+    bool_t reservation_cancel_seq (){
+        if (c_[used_key].access() < 1)
+            return FALSE;
+        c_[free_key].access() += 1;
+        c_[used_key].access() -= 1;
+        checkReservation_seq();
+        return TRUE;
+    }
+
+    bool_t reservation_update_price (TM_ARGDECL int newPrice){
+        if (newPrice < 0)
+            return FALSE;
+        Sto::item(this, price_key).add_write(newPrice);
+        return TRUE;
+    }
+
+    bool_t reservation_update_price_seq (int newPrice){
+        if (newPrice < 0)
+            return FALSE;
+        c_[price_key].access() = newPrice;
+        checkReservation_seq();
+        return TRUE;
+    }
+
+
+    bool lock(TransItem&, Transaction&) {
+        if (!vers_.is_locked_here())
+            vers_.lock();
+        return true;
+    }
+
+    void unlock(TransItem&) {
+        if (vers_.is_locked_here()) {
+            checkReservation_seq();
+            vers_.unlock();
+        }
+    }
+
+    bool check_predicate(TransItem& item, Transaction& txn, bool committing) {
+        TransProxy p(txn, item);
+        int key = item.key<int>();
+        pred_type pred = item.predicate_value<pred_type>();
+        count_type value = committing ? c_[key].read(p, vers_) : c_[key].snapshot(p, vers_);
+        return pred.verify(value);
+     }
+
+    bool check(const TransItem& item, const Transaction&) {
+        return item.check_version(vers_);
+    }
+
+    void install(TransItem& item, const Transaction& txn) {
+        int key = item.key<int>();
+        if (key == price_key)
+            c_[key].write(item.write_value<count_type>());
+        else {
+            pred_type wval = item.write_value<pred_type>();
+            c_[key].write(c_[key].access() + wval.second - wval.first);
+        }
+        vers_.set_version(txn.commit_tid());
+    }
+
+private:
+    version_type vers_;
+    TWrapped<count_type> c_[4];
+
+    TransProxy my_item(int key) const {
+        auto item = Sto::item(this, key);
+        if (!item.has_predicate()) {
+            item.set_predicate(pred_type::unconstrained());
+            count_type c = c_[key].snapshot(item, vers_);
+            item.template xwrite_value<pred_type>() = pred_type{c, c};
+        }
+        return item;
+    }
+    static pred_type& ip(TransProxy item) {
+        return item.predicate_value<pred_type>();
+    }
+    static count_type& icur(TransProxy item) {
+        return item.xwrite_value<pred_type>().second;
+    }
+    static count_type& iorig(TransProxy item) {
+        return item.xwrite_value<pred_type>().first;
+    }
+    static count_type idelta(TransProxy item) {
+        pred_type& info = item.xwrite_value<pred_type>();
+        return info.second - info.first;
+    }
+    void update(int key, count_type delta) {
+        TransProxy item = my_item(key);
+        pred_type wval = item.xwrite_value<pred_type>();
+        wval.second += delta;
+        item.add_write(wval);
+        ip(item).observe_ge(wval.first - wval.second); // can't go below 0
+    }
+
+    inline void checkReservation_seq(){
+        assert(c_[used_key].access() >= 0);
+        assert(c_[free_key].access() >= 0);
+        assert(c_[total_key].access() >= 0);
+        assert((c_[used_key].access() + c_[free_key].access()) ==
+               (c_[total_key].access()));
+        assert(c_[price_key].access() >= 0);
+    }
+};
+#elif defined(reservation2)
 class reservation_t {
 public:
     reservation_t(_reservation_t* _reservationPtr)
@@ -260,7 +453,9 @@ private:
     }
 
 };
+#endif
 
+#ifdef reservation2
 /* alloc and free */
 #define TM_RESERVATION_ALLOC(_reservationPtr) new reservation_t(_reservationPtr)
 #define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr)

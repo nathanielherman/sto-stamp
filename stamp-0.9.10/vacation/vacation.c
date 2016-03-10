@@ -440,10 +440,12 @@ MAIN(argc, argv)
 #endif
     GOTO_REAL();
     TIMER_READ(stop);
-#ifdef reservation2
+#ifdef VACATION_PREDICATES
+    printf("reservation2+predicates done.\n");
+#elif defined(reservation2)
     printf("reservation2 done.\n");
 #else
-    printf("!reservation2 done.\n");
+    printf("done.\n");
 #endif
     printf("Time = %0.6lf\n",
            TIMER_DIFF_SECONDS(start, stop));
