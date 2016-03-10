@@ -93,8 +93,7 @@ TransAlloc __talloc;
 
 #if PERF_LOGGING
 void reportPerf(){
-    using thr = threadinfo_t;
-    thr tc = Transaction::tinfo_combined();
+    txp_counters tc = Transaction::txp_counters_combined();
     printf("STO System Shutdown:\n"
 #if DETAILED_LOGGING
            " read: %llu, write: %llu, searched: %llu, check_read: %llu\n"
