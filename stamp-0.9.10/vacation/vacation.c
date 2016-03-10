@@ -440,7 +440,11 @@ MAIN(argc, argv)
 #endif
     GOTO_REAL();
     TIMER_READ(stop);
-    puts("done.");
+#ifdef reservation2
+    printf("reservation2 done.\n");
+#else
+    printf("!reservation2 done.\n");
+#endif
     printf("Time = %0.6lf\n",
            TIMER_DIFF_SECONDS(start, stop));
     fflush(stdout);
