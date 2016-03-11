@@ -250,7 +250,7 @@ public:
         TransProxy p(txn, item);
         int key = item.key<int>();
         pred_type pred = item.predicate_value<pred_type>();
-        count_type value = committing ? c_[key].read(p, vers_) : c_[key].snapshot(p, vers_);
+        count_type value = c_[key].wait_snapshot(p, vers_, committing);
         return pred.verify(value);
      }
 
@@ -305,7 +305,7 @@ private:
         auto item = Sto::item(this, key);
         if (!item.has_predicate()) {
             item.set_predicate(pred_type::unconstrained());
-            count_type c = c_[key].snapshot(item, vers_);
+            count_type c = c_[key].wait_snapshot(item, vers_, false);
             item.template xwrite_value<pred_type>() = pred_type{c, c};
         }
         return item;
