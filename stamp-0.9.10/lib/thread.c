@@ -91,11 +91,11 @@
 TGeneric __genstm;
 TransAlloc __talloc;
 
-#if PERF_LOGGING
+#if STO_PROFILE_COUNTERS
 void reportPerf(){
     txp_counters tc = Transaction::txp_counters_combined();
     printf("STO System Shutdown:\n"
-#if DETAILED_LOGGING
+#if STO_PROFILE_COUNTERS > 1
            " read: %llu, write: %llu, searched: %llu, check_read: %llu\n"
            " average set size: %llu, max set size: %llu\n",
            tc.p(txp_total_r), tc.p(txp_total_w), tc.p(txp_total_searched), tc.p(txp_total_check_read),
@@ -103,7 +103,7 @@ void reportPerf(){
 #endif
 	   );
     Transaction::print_stats();
-    printf("DON'T USE THIS RUN FOR BENCHMARKS--TURN OFF PERF_LOGGING in Transaction.hh\n");
+    printf("DON'T USE THIS RUN FOR BENCHMARKS--TURN OFF STO_PROFILE_COUNTERS\n");
 }
 #if 0
 class ReportPerf_class {
