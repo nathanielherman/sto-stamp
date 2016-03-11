@@ -493,8 +493,10 @@ private:
 
 #ifdef reservation2
 /* alloc and free */
-#define TM_RESERVATION_ALLOC(_reservationPtr) new reservation_t(_reservationPtr)
-#define TM_RESERVATION_FREE(reservationPtr) Transaction::rcu_delete(reservationPtr)
+#define SEQ_RESERVATION_ALLOC(_reservationPtr) (new reservation_t(_reservationPtr))
+#define TM_RESERVATION_ALLOC(_reservationPtr) SEQ_RESERVATION_ALLOC(_reservationPtr)
+// XXX(nate) doesn't work yet: __talloc.transNew<reservation_t>(_reservationPtr)
+#define TM_RESERVATION_FREE(reservationPtr) __talloc.transDelete(reservationPtr)
 
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
     reservationPtr->total()
@@ -511,6 +513,7 @@ private:
 
 #else
 typedef _reservation_t reservation_t;
+#define SEQ_RESERVATION_ALLOC(_reservationPtr) _reservationPtr
 #define TM_RESERVATION_ALLOC(_reservationPtr) _reservationPtr
 #define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr)
 

@@ -216,7 +216,7 @@ reservation_alloc_seq (long id, int numTotal, int price)
         checkReservation_seq(_reservationPtr);
     }
 
-    return TM_RESERVATION_ALLOC(_reservationPtr);
+    return SEQ_RESERVATION_ALLOC(_reservationPtr);
 }
 
 _reservation_t* copy_reservation(TM_ARGDECL _reservation_t * _reservationPtr){
