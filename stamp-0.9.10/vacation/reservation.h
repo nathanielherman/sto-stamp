@@ -94,6 +94,7 @@ typedef struct reservation_info {
     reservation_type_t type; long id; int price; /* holds price at time reservation was made */
 } reservation_info_t;
 
+#ifdef reservation2
 typedef struct reservation {
     long id;
     int numUsed;
@@ -102,8 +103,15 @@ typedef struct reservation {
     int price;
 } _reservation_t;
 
-#ifdef reservation2
 std::ostream& operator<<(std::ostream& w, const _reservation_t& r);
+#else
+typedef struct reservation {
+    long id;
+    long numUsed;
+    long numFree;
+    long numTotal;
+    long price;
+} _reservation_t;
 #endif
 
 #if defined(reservation2) && defined(VACATION_PREDICATES)
