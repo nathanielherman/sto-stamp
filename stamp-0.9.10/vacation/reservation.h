@@ -529,7 +529,6 @@ private:
 /* alloc and free */
 #define SEQ_RESERVATION_ALLOC(_reservationPtr) (new reservation_t(_reservationPtr))
 #define TM_RESERVATION_ALLOC(_reservationPtr) __talloc.transNew<reservation_t>(_reservationPtr)
-//SEQ_RESERVATION_ALLOC(_reservationPtr)
 #define TM_RESERVATION_FREE(reservationPtr) __talloc.transDelete(reservationPtr)
 
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
@@ -552,19 +551,19 @@ typedef _reservation_t reservation_t;
 #define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr)
 
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numTotal)
+    ((long) TM_SHARED_READ(reservationPtr->numTotal))
 #define TM_RESERVATION_SEQ_READ_TOTAL(reservationPtr) \
 		reservationPtr->numTotal
 #define TM_RESERVATION_SHARED_READ_USED(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numUsed)
+    ((long) TM_SHARED_READ(reservationPtr->numUsed))
 #define TM_RESERVATION_SEQ_READ_USED(reservationPtr) \
 		reservationPtr->numUsed
+#define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
+    ((long) TM_SHARED_READ(reservationPtr->numFree))
 #define TM_RESERVATION_SEQ_READ_FREE(reservationPtr) \
 		reservationPtr->numFree
-#define TM_RESERVATION_SHARED_READ_FREE(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->numFree)
 #define TM_RESERVATION_SHARED_READ_PRICE(reservationPtr) \
-		TM_SHARED_READ(reservationPtr->price)
+    ((long) TM_SHARED_READ(reservationPtr->price))
 #endif
 /* =============================================================================
  * reservation_info_alloc
