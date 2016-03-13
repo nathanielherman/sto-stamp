@@ -73,7 +73,7 @@
 #ifndef RESERVATION_H
 #define RESERVATION_H 1
 
-#if defined(STO) && !defined(GTM)
+#if defined(STO) || defined(BOOSTING)
 #define reservation2
 #endif
 #include "tm.h"
@@ -94,7 +94,7 @@ typedef struct reservation_info {
     reservation_type_t type; long id; int price; /* holds price at time reservation was made */
 } reservation_info_t;
 
-#ifdef reservation2
+#if defined(reservation2) && defined(STO)
 typedef struct reservation {
     long id;
     int numUsed;
@@ -375,27 +375,61 @@ public:
         return box_.nontrans_read();
     }
 
+#ifdef BOOSTING
+#define STRUCT_OFFSET(start, field) ((uintptr_t*)&(field) - (uintptr_t*)&(start))
+#define RES_UNDO(_res, field) ON_ABORT(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res, field), (void*)(field))
+    // XXX: because the fields can all be ints (32 bits), we could cheat and store all of the data in two words
+    // and then only need one undo per change (seems unlikely to make a big difference though)
+    static void _undoField(void *self, void *c1, void *c2) {
+      uintptr_t offset = (uintptr_t)c1;
+      uintptr_t field = (uintptr_t)c2;
+      _reservation_t *res = &(((reservation_t*)self)->box_.nontrans_access());
+      ((uintptr_t*)res)[offset] = field;
+    }
+#endif
+
     int total() const {
+#ifndef BOOSTING
         _reservation_t r = box_;
+#else
+	transReadLock((RWLock*)&reslock_);
+	_reservation_t r = box_.nontrans_read();
+#endif
         return r.numTotal;
     }
 
     int free() const {
+#ifndef BOOSTING
         _reservation_t r = box_;
+#else
+	transReadLock((RWLock*)&reslock_);
+	_reservation_t r = box_.nontrans_read();
+#endif
         return r.numFree;
     }
 
     int used() const {
+#ifndef BOOSTING
         _reservation_t r = box_;
+#else
+        transReadLock((RWLock*)&reslock_);
+        _reservation_t r = box_.nontrans_read();
+#endif
         return r.numUsed;
     }
 
     int price() const {
+#ifndef BOOSTING
         _reservation_t r = box_;
+#else
+	transReadLock((RWLock*)&reslock_);
+	_reservation_t r = box_.nontrans_read();
+#endif
         return r.price;
     }
 
     bool_t reservation_addToTotal(TM_ARGDECL int num){
+#ifndef BOOSTING
         _reservation_t _reservation = box_;
         if (_reservation.numFree < -num){
             return FALSE;
@@ -406,6 +440,19 @@ public:
         box_ = _reservation;
         checkReservation(TM_ARG_ALONE);
         return TRUE;
+#else
+	transWriteLock(&reslock_);
+	_reservation_t& _reservation = box_.nontrans_access();
+        if (_reservation.numFree < -num) {
+            return FALSE;
+        }
+	RES_UNDO(_reservation, _reservation.numTotal);
+	RES_UNDO(_reservation, _reservation.numFree);
+
+        _reservation.numTotal += num;
+        _reservation.numFree += num;
+        checkReservation_seq();
+#endif
     }
 
     bool_t reservation_addToTotal_seq(int num){
@@ -422,6 +469,7 @@ public:
     }
 
     bool_t reservation_make(TM_ARGDECL_ALONE){
+#ifndef BOOSTING
         _reservation_t _reservation = box_;
         if (_reservation.numFree < 1) {
             return FALSE;
@@ -432,6 +480,19 @@ public:
         box_ = _reservation;
         checkReservation(TM_ARG_ALONE);
         return TRUE;
+#else
+	transWriteLock(&reslock_);
+	_reservation_t& _reservation = box_.nontrans_access();
+        if (_reservation.numFree < 1) {
+            return FALSE;
+        }
+	RES_UNDO(_reservation, _reservation.numFree);
+	RES_UNDO(_reservation, _reservation.numUsed);
+
+        _reservation.numFree--;
+        _reservation.numUsed++;
+        checkReservation_seq();
+#endif
     }
 
     bool_t reservation_make_seq(){
@@ -448,6 +509,7 @@ public:
     }
 
     bool_t reservation_cancel (TM_ARGDECL_ALONE){
+#ifndef BOOSTING
         _reservation_t _reservation = box_;
         if (_reservation.numUsed < 1) {
             return FALSE;
@@ -458,6 +520,20 @@ public:
         box_ = _reservation;
         checkReservation(TM_ARG_ALONE);
         return TRUE;
+#else
+	// assuming the cancel will most likely happen
+	transWriteLock(&reslock_);
+	_reservation_t& _reservation = box_.nontrans_access();
+	if (_reservation.numUsed < 1) {
+	  return FALSE;
+	}
+	RES_UNDO(_reservation, _reservation.numFree);
+	RES_UNDO(_reservation, _reservation.numUsed);
+	_reservation.numFree++;
+	_reservation.numUsed--;
+	checkReservation_seq();
+	return TRUE;
+#endif
     }
 
     bool_t reservation_cancel_seq (){
@@ -478,11 +554,19 @@ public:
             return FALSE;
         }
 
+#ifndef BOOSTING
         _reservation_t _reservation = box_;
         _reservation.price = newPrice;
         box_ = _reservation;
         checkReservation(TM_ARG_ALONE);
         return TRUE;
+#else
+	transWriteLock(&reslock_);
+	_reservation_t& _reservation = box_.nontrans_access();
+	RES_UNDO(_reservation, _reservation.price);
+	_reservation.price = newPrice;
+	checkReservation_seq();
+#endif
     }
 
     bool_t reservation_update_price_seq (int newPrice){
@@ -496,12 +580,18 @@ public:
         checkReservation_seq();
         return TRUE;
     }
+
 private:
     TBox<_reservation_t> box_;
+
+#ifdef BOOSTING
+    RWLock reslock_;
+#endif
 
     inline void checkReservation (TM_ARGDECL_ALONE){
         _reservation_t _reservation = box_;
 
+	// XXX: this is basically just a redundant opacity check.
         if(_reservation.numUsed < 0 ||
            _reservation.numFree < 0 ||
            _reservation.numTotal < 0 ||
@@ -527,9 +617,16 @@ private:
 
 #ifdef reservation2
 /* alloc and free */
+#ifndef BOOSTING
 #define SEQ_RESERVATION_ALLOC(_reservationPtr) (new reservation_t(_reservationPtr))
 #define TM_RESERVATION_ALLOC(_reservationPtr) __talloc.transNew<reservation_t>(_reservationPtr)
 #define TM_RESERVATION_FREE(reservationPtr) __talloc.transDelete(reservationPtr)
+#else
+#define SEQ_RESERVATION_ALLOC(_reservationPtr) ({ auto *ret = (reservation_t*)malloc(sizeof(reservation_t)); new (ret) reservation_t(_reservationPtr); ret; })
+// destructor isn't trivial but we'll just leak it because mehh
+#define TM_RESERVATION_ALLOC(_reservationPtr) ({ auto *ret = (reservation_t*)TM_MALLOC(sizeof(reservation_t)); new (ret) reservation_t(_reservationPtr); ret; })
+#define TM_RESERVATION_FREE(reservationPtr) TM_FREE(reservationPtr)
+#endif
 
 #define TM_RESERVATION_SHARED_READ_TOTAL(reservationPtr) \
     reservationPtr->total()

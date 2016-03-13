@@ -207,6 +207,7 @@ struct _Thread {
     long TxLD;
 #endif /* TL2_STATS */
 #ifdef TL2_COMMIT_HOOKS
+    // XXX: this should almost certainly be a local vec
     _CallbackVector commitCallbacks;
     _CallbackVector abortCallbacks;
 #endif

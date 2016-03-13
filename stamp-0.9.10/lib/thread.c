@@ -79,7 +79,6 @@
 #include "sto/TGeneric.hh"
 #include "sto/Transaction.hh"
 #include "sto/TransAlloc.hh"
-#include "sto/Packer.cc"
 
 #include "tm.h"
 #ifdef STO
@@ -87,6 +86,7 @@
 #endif
 #include "sto/Transaction.cc"
 #include "sto/TRcu.cc"
+#include "sto/Packer.cc"
 #include "sto/MassTrans.cc"
 TGeneric __genstm;
 TransAlloc __talloc;
@@ -125,8 +125,9 @@ void reportPerf(){
 #if defined(STO) || defined(BOOSTING)
 #ifdef BOOSTING
 #include "list2.hh"
-// eh, not really used but need it to be linked.
-__thread int TThread::the_id;
+#include "sto/Transaction.cc"
+#include "sto/TRcu.cc"
+#include "sto/Packer.cc"
 #endif
 void TMlist_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->transIter();
