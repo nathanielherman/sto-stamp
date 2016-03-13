@@ -454,6 +454,7 @@ public:
         _reservation.numTotal += num;
         _reservation.numFree += num;
         checkReservation_seq();
+        return TRUE;
 #endif
     }
 
@@ -494,6 +495,7 @@ public:
         _reservation.numFree--;
         _reservation.numUsed++;
         checkReservation_seq();
+        return TRUE;
 #endif
     }
 
@@ -534,7 +536,7 @@ public:
 	_reservation.numFree++;
 	_reservation.numUsed--;
 	checkReservation_seq();
-	return TRUE;
+        return TRUE;
 #endif
     }
 
@@ -568,6 +570,7 @@ public:
 	RES_UNDO(_reservation, _reservation.price);
 	_reservation.price = newPrice;
 	checkReservation_seq();
+        return TRUE;
 #endif
     }
 
