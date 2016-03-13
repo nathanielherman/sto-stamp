@@ -2374,6 +2374,15 @@ TxCommit (Thread* Self)
             Self->wrSet.numLog--;
         }
 #  endif
+#ifdef TL2_COMMIT_HOOKS
+	int i;
+        for (i = 0; i < Self->commitCallbacks.size; i++) {
+          _Callback cb = Self->commitCallbacks.callbacks[i];
+          cb.callback(cb.context1, cb.context2, cb.context3);
+        }
+        callback_vector_empty(&Self->commitCallbacks);
+        callback_vector_empty(&Self->abortCallbacks);
+#endif
         PROF_STM_COMMIT_END();
         PROF_STM_SUCCESS();
         return 1;
@@ -2401,8 +2410,6 @@ TxCommit (Thread* Self)
           _Callback cb = Self->commitCallbacks.callbacks[i];
           cb.callback(cb.context1, cb.context2, cb.context3);
         }
-#endif
-#ifdef TL2_COMMIT_HOOKS
         callback_vector_empty(&Self->commitCallbacks);
         callback_vector_empty(&Self->abortCallbacks);
 #endif
