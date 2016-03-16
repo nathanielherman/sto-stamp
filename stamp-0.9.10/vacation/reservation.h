@@ -94,7 +94,8 @@ typedef struct reservation_info {
     reservation_type_t type; long id; int price; /* holds price at time reservation was made */
 } reservation_info_t;
 
-#if defined(reservation2) && defined(STO)
+#if defined(reservation2) 
+//&& defined(STO)
 typedef struct reservation {
     long id;
     int numUsed;
@@ -378,15 +379,17 @@ public:
     }
 
 #ifdef BOOSTING
-#define STRUCT_OFFSET(start, field) ((uintptr_t*)&(field) - (uintptr_t*)&(start))
-#define RES_UNDO(_res, field) ON_ABORT(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res, field), (void*)(field))
+#define STRUCT_OFFSET(start, field) ((int*)&(field) - (int*)&(start))
+#define RES_UNDO(_res, field) ON_ABORT(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res.numUsed, field), (void*)(uintptr_t)(field))
     // XXX: because the fields can all be ints (32 bits), we could cheat and store all of the data in two words
     // and then only need one undo per change (seems unlikely to make a big difference though)
     static void _undoField(void *self, void *c1, void *c2) {
       uintptr_t offset = (uintptr_t)c1;
-      uintptr_t field = (uintptr_t)c2;
+      int field = (int)(uintptr_t)c2;
+      auto *me =  ((reservation_t*)self);
+      assert(me->reslock_.isWriteLocked());
       _reservation_t *res = &(((reservation_t*)self)->box_.nontrans_access());
-      ((uintptr_t*)res)[offset] = field;
+      ((int*)&res->numUsed)[offset] = field;
     }
 #endif
 
