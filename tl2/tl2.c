@@ -1844,12 +1844,11 @@ TxAbort (Thread* Self)
 
 #ifdef TL2_COMMIT_HOOKS
     int i;
-    for (i = 0; i < Self->abortCallbacks.size; i++) {
+    // iterate in reverse; undos should happen in reverse order.
+    for (i = Self->abortCallbacks.size - 1; i >= 0; i--) {
       _Callback cb = Self->abortCallbacks.callbacks[i];
       cb.callback(cb.context1, cb.context2, cb.context3);
     }
-#endif
-#ifdef TL2_COMMIT_HOOKS
     callback_vector_empty(&Self->commitCallbacks);
     callback_vector_empty(&Self->abortCallbacks);
 #endif
