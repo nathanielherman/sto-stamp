@@ -43,6 +43,7 @@
 #include <stdint.h>
 #include "tmalloc.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 #  include <setjmp.h>
 
