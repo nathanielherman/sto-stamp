@@ -13,8 +13,6 @@
 #include "sto/List.hh"
 #endif
 
-#define LIST_OPACITY 1
-
 static inline long default_comparator(const void* a, const void* b) {
   return a < b ? -1 : a == b ? 0 : 1;
 }
@@ -36,19 +34,15 @@ typedef list_t::inner_list_t::ListIter list_iter_t;
 typedef TransList<pair_t, true, __ListCompare, true> list_t;
 typedef list_t::inner_list_t::ListIter list_iter_t;
 #elif LIST_NO_DUPLICATES
-typedef List<pair_t, false, __ListCompare, true, LIST_OPACITY> list_t;
+typedef List<pair_t, false, __ListCompare, true, true> list_t;
 typedef typename list_t::ListIter list_iter_t;
 #else
-typedef List<pair_t, true, __ListCompare, true, LIST_OPACITY> list_t;
+typedef List<pair_t, true, __ListCompare, true, true> list_t;
 typedef typename list_t::ListIter list_iter_t;
 #endif
 
 
-#if LIST_OPACITY && defined(STO)
-#define OPACITY_CHECK(list) ((list)->opacity_check(TM_ARG_ALONE))
-#else
-#define OPACITY_CHECK(list) 
-#endif
+#define OPACITY_CHECK(list) // opacity is now built-in 
 
 #ifdef BOOSTING
 #define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset((it), (list)); OPACITY_CHECK(list); })
@@ -80,8 +74,8 @@ typedef typename list_t::ListIter list_iter_t;
 #define list_insert(list, data) ((list)->insert(((pair_t){data, NULL})))
 #define list_iter_hasNext(it, list) ((it)->hasNext())
 #define list_iter_next(it, list) (((it)->next())->firstPtr)
-#define list_getSize(list) ((list)->size())
-#define list_isEmpty(list) (((list)->size()) == 0)
+#define list_getSize(list) ((list)->nontrans_size())
+#define list_isEmpty(list) (((list)->nontrans_size()) == 0)
 #define list_find(list, data) ({ auto ret = (list)->find((pair_t){(data), NULL}); ret ? ret->firstPtr : NULL; })
 #define list_remove(list, data) ((list)->remove<false>((pair_t){(data), NULL}))
 #define list_clear(list) ((list)->clear())

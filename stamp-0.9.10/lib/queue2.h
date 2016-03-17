@@ -9,12 +9,12 @@
 
 #define queue_alloc(c) (new queue_t)
 #define queue_free(q) (delete q)
-#define queue_push(q, d) ({ (q)->push((d)); true; })
-#define queue_pop(q) (q)->pop()
-#define queue_clear(q) (q)->clear()
+#define queue_push(q, d) ({ (q)->nontrans_push((d)); true; })
+#define queue_pop(q) (q)->nontrans_pop()
+#define queue_clear(q) (q)->nontrans_clear()
 // TODO: seed
-#define queue_shuffle(q, r) ({ (q)->shuffle(std::default_random_engine(1)); })
-#define queue_isEmpty(q) (q)->empty()
+#define queue_shuffle(q, r) ({ (q)->nontrans_shuffle(std::default_random_engine(1)); })
+#define queue_isEmpty(q) (q)->nontrans_empty()
 
 #define TMQUEUE_ALLOC(c) queue_alloc(c)
 #define TMQUEUE_FREE(q) /*TODO*/

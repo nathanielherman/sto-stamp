@@ -24,12 +24,16 @@ def run_experiment(cmd, t):
     file.write(" ".join(cmd) + "\n")
     time = []
     for i in range(t):
-        out = timeout_command(cmd, 120)
-  	if out == None:
-    	    return 0.0
-        out = re.search("(?<=Time =  )[0-9]*\.[0-9]*", out).group(0)
-        time.append(float(out))
-        file.write(out + " ")
+        while True:
+            out = timeout_command(cmd, 120)
+            g = re.search("(?<=Time =  )[0-9]*\.[0-9]*", out)
+            if g == None:
+                print "retry " + str(cmd)
+                continue
+            out = g.group(0)
+            time.append(float(out))
+            file.write(out + " ")
+            break
     file.write("\n")
     file.write("Std dev = " + "%.3f" % (numpy.std(time)))
     file.write("\n")
@@ -59,6 +63,8 @@ def printfmt_double(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}.{precision}}".format(a, precision=precision, width=width)
+
+    print string
     return string
 
 def printfmt_int(header, out, precision, width):
@@ -66,7 +72,10 @@ def printfmt_int(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}}".format(a, width=width)
+
+    print string
     return string
+
 def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, gen_time, gen_min, gen_max):
     string = ""
     string += "{'seq' : "
@@ -97,6 +106,8 @@ def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, gen_time, 
     string += "{0:{width}.{precision}}".format(gen_max[i], precision=precision, width=width)
     string += "}"
     string += "\n"
+
+    print string
     return string
 
 

@@ -21,13 +21,18 @@ def timeout_command(cmd, timeout):
             return None
     return process.stdout.read()
 
-def run_experiment(cmd, t):
+def run_experiment(mode, cmd, t):
     file.write(" ".join(cmd) + "\n")
     time = []
+    timeout = 600
+    if mode == 'STO' and cmd[1] != '-t1':
+        timeout = 40
     for i in range(t):
-        out = timeout_command(cmd, 700)
-  	if out == None:
-    	    return 0.0
+        while True:
+            out = timeout_command(cmd, timeout)
+            if out == None:
+                continue
+            break
         out = re.search("(?<=Elapsed time    = )[0-9]*\.[0-9]*", out).group(0)
         time.append(float(out))
         file.write(out + " ")
@@ -48,10 +53,10 @@ def run_benchmark(cmd, mode, nthreads):
     max_list = []
     for n in nthreads:
         cmd[1] = '-t' + str(n)
-        time, min, max = run_experiment(cmd,t)
+        time, min_t, max_t = run_experiment(mode, cmd,t)
         time_list.append(time)
-        min_list.append(min)
-        max_list.append(max)
+        min_list.append(min_t)
+        max_list.append(max_t)
         
     return (time_list, min_list, max_list)
        
@@ -121,11 +126,15 @@ if __name__ == "__main__":
         out_file.write(printfmt_int('n', nthreads, 2, 8) + "\n")
         seq_time, seq_min, seq_max = run_benchmark(cmd, 'seq', [1])
         out_file.write(printfmt_double('seq', seq_time, 4, 8) + "\n")
+        print "%s %s %s" % (seq_time, seq_min, seq_max)
         stm_time, stm_min, stm_max = run_benchmark(cmd, 'stm', nthreads)
         out_file.write(printfmt_double('stm', stm_time, 4, 8) + "\n")
+        print "%s %s %s" % (stm_time, stm_min, stm_max)
         sto_time, sto_min, sto_max = run_benchmark(cmd, 'STO', nthreads)
+        print "%s %s %s" % (sto_time, sto_min, sto_max)
         out_file.write(printfmt_double('sto', sto_time, 4, 8) + "\n")
         gen_time, gen_min, gen_max = run_benchmark(cmd, 'gen', nthreads)
         out_file.write(printfmt_double('genSTM', gen_time, 4, 8) + "\n")
+        print "%s %s %s" % (gen_time, gen_min, gen_max)
         out_file.write(print_(4, 8, 0, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))
         out_file.write(print_(4, 8, 1, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max))

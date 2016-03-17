@@ -61,6 +61,8 @@ def printfmt_double(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}.{precision}}".format(a, precision=precision, width=width)
+
+    print string
     return string
 
 def printfmt_int(header, out, precision, width):
@@ -68,7 +70,10 @@ def printfmt_int(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}}".format(a, width=width)
+
+    print string
     return string
+
 def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, sto_time, sto_min, sto_max, gen_time, gen_min, gen_max):
     string = ""
     string += "{'seq' : "
@@ -105,6 +110,8 @@ def print_(precision, width, i, seq_time, stm_time, stm_min, stm_max, sto_time, 
     string += "{0:{width}.{precision}}".format(gen_max[i], precision=precision, width=width)
     string += "}"
     string += "\n"
+
+    print string
     return string
 
 
