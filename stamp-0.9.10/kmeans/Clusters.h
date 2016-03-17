@@ -14,7 +14,7 @@ typedef struct _Cluster{
 } _Cluster;
 
 inline unsigned get_cluster_size(int nfeatures) {
-    return (sizeof(_Cluster) + (nfeatures - 1) * sizeof(float) + CACHE_LINE_SIZE - 1) & ~size_t(CACHE_LINE_SIZE - 1);
+    return (sizeof(_Cluster) + (nfeatures - 1) * sizeof(float) + CACHE_LINE_SIZE - 1) & ~(size_t)(CACHE_LINE_SIZE - 1);
 }
 
 #ifdef D
