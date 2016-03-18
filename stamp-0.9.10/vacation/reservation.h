@@ -261,12 +261,11 @@ public:
     }
 
 
-    bool lock(TransItem& item, Transaction&) {
+    bool lock(TransItem& item, Transaction& txn) {
         if (item.key<int>() == price_key)
-            price_vers_.lock();
+            return txn.try_lock(item, price_vers_);
         else
-            d_vers_.lock();
-        return true;
+            return txn.try_lock(item, d_vers_);
     }
 
     void unlock(TransItem& item) {
