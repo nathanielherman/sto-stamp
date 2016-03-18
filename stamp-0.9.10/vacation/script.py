@@ -22,17 +22,22 @@ def timeout_command(cmd, timeout):
             return None
 
     return process.stdout.read()
-def run_experiment(cmd, t):
+
+def run_experiment(mode, cmd, t):
     file.write(" ".join(cmd) + "\n")
     time = []
+    timeout = 120
+    if mode == "stm" or mode == "gen":
+        timeout = 1200
     for i in range(t):
         while (True) :
-            out = timeout_command(cmd, 120)
+            out = timeout_command(cmd, timeout)
             if out == None:
                 print "Timed out ", cmd
                 continue
             r = re.search("(?<=Time = )[0-9]*\.[0-9]*", out)
             if r == None:
+                print "retry ", cmd
                 continue
             out = r.group(0);
             break
@@ -55,7 +60,7 @@ def run_benchmark(cmd, mode, nthreads):
     max_list = []
     for n in nthreads:
         cmd[1] = '-c' + str(n)
-        time, min, max = run_experiment(cmd,t)
+        time, min, max = run_experiment(mode,cmd,t)
         time_list.append(time)
         min_list.append(min)
         max_list.append(max)
@@ -67,6 +72,7 @@ def printfmt_double(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}.{precision}}".format(a, precision=precision, width=width)
+    print string
     return string
 
 def printfmt_int(header, out, precision, width):
@@ -74,6 +80,7 @@ def printfmt_int(header, out, precision, width):
     string += "{0:{width}}".format(header, width=width)
     for a in out:
         string += "{0:{width}}".format(a, width=width)
+    print string
     return string
 
 def print_(precision, width, i, seq_time, tuples, types):
@@ -95,19 +102,20 @@ def print_(precision, width, i, seq_time, tuples, types):
         string += "},"
         string += "\n"
 
+    print string
     return string
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == 'high':
-        cmds = [['./vacation', '-c1', '-n8', '-q1', '-u60', '-r104857', '-t4194304']] #high
+        cmds = [['./vacation', '-c1', '-n4', '-q1', '-u90', '-r184857', '-t12194304']] #high
     else:
         #cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']]
         cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r1048576', '-t4194304']] #low
     name = ""
     if len(sys.argv) > 2 and sys.argv[2] == 'boosting':
         name = "-boosting"
-    types = ['seq', 'stm', 'STO', 'boosting'] if name == '-boosting' else ['seq', 'stm', 'STO'] 
+    types = ['seq', 'stm', 'STO', 'gen', 'boosting']# if name == '-boosting' else ['seq', 'stm', 'STO'] 
     file = open("tmp%s.txt" % name, 'w')
     out_file = open("results.txt", 'w')
     nthreads = [4, 16]
