@@ -223,6 +223,7 @@ void callback_vector_grow(_CallbackVector *vec) {
 void callback_vector_init(_CallbackVector *vec) {
   vec->size = 0;
   vec->capacity = 2;
+  vec->callbacks = NULL;
   // ends up with capacity of 4
   callback_vector_grow(vec);
 }
@@ -2273,6 +2274,8 @@ txSterilize (void* Base, size_t Length)
     PROF_STM_STERILIZE_BEGIN();
 
     intptr_t* Addr = (intptr_t*)Base;
+    // XXX(nate): this is overly aggressive: Length is in units of bytes, but
+    // Addr is an intptr_t*, so this will invalidate 8x the needed memory.
     intptr_t* End = Addr + Length;
     ASSERT(Addr <= End);
     while (Addr < End) {
@@ -2360,6 +2363,15 @@ TxCommit (Thread* Self)
     if (Self->wrSet.put == Self->wrSet.List)
 #  endif /* !TL2_OPTIM_HASHLOG*/
     {
+#ifdef TL2_COMMIT_HOOKS
+	int i;
+        for (i = 0; i < Self->commitCallbacks.size; i++) {
+          _Callback cb = Self->commitCallbacks.callbacks[i];
+          cb.callback(cb.context1, cb.context2, cb.context3);
+        }
+        callback_vector_empty(&Self->commitCallbacks);
+        callback_vector_empty(&Self->abortCallbacks);
+#endif
         /* Given TL2 the read-set is already known to be coherent. */
         txCommitReset(Self);
         tmalloc_clear(Self->allocPtr);
@@ -2373,6 +2385,12 @@ TxCommit (Thread* Self)
             Self->wrSet.numLog--;
         }
 #  endif
+        PROF_STM_COMMIT_END();
+        PROF_STM_SUCCESS();
+        return 1;
+    }
+
+    if (TryFastUpdate(Self)) {
 #ifdef TL2_COMMIT_HOOKS
 	int i;
         for (i = 0; i < Self->commitCallbacks.size; i++) {
@@ -2382,12 +2400,6 @@ TxCommit (Thread* Self)
         callback_vector_empty(&Self->commitCallbacks);
         callback_vector_empty(&Self->abortCallbacks);
 #endif
-        PROF_STM_COMMIT_END();
-        PROF_STM_SUCCESS();
-        return 1;
-    }
-
-    if (TryFastUpdate(Self)) {
         txCommitReset(Self);
         tmalloc_clear(Self->allocPtr);
         tmalloc_releaseAllForward(Self->freePtr, &txSterilize);
@@ -2401,16 +2413,6 @@ TxCommit (Thread* Self)
              */
             Self->wrSet.numLog--;
         }
-#endif
-
-#ifdef TL2_COMMIT_HOOKS
-	int i;
-        for (i = 0; i < Self->commitCallbacks.size; i++) {
-          _Callback cb = Self->commitCallbacks.callbacks[i];
-          cb.callback(cb.context1, cb.context2, cb.context3);
-        }
-        callback_vector_empty(&Self->commitCallbacks);
-        callback_vector_empty(&Self->abortCallbacks);
 #endif
         PROF_STM_COMMIT_END();
         PROF_STM_SUCCESS();
@@ -2477,7 +2479,7 @@ TxFree (Thread* Self, void* ptr)
 #    else /* !TL2_OPTIM_HASHLOG */
     Log* wr = &Self->wrSet;
 #    endif /* !TL2_OPTIM_HASHLOG */
-    RecordStore(wr, (volatile intptr_t*)ptr, 0, 0, LockFor);
+    RecordStore(wr, (volatile intptr_t*)ptr, 0, false, LockFor);
 #  endif /* !TL2_EAGER */
 }
 

@@ -370,7 +370,11 @@ private:
 class reservation_t {
 public:
     reservation_t(_reservation_t* _reservationPtr)
-        : box_(*_reservationPtr) {
+        : box_(*_reservationPtr) 
+#ifdef BOOSTING
+    , reslock_()
+#endif
+{
     }
 
     _reservation_t nontrans_read() const {
@@ -378,17 +382,18 @@ public:
     }
 
 #ifdef BOOSTING
-#define STRUCT_OFFSET(start, field) ((int*)&(field) - (int*)&(start))
+#define STRUCT_OFFSET(start, field) (&(field) - &(start))
 #define RES_UNDO(_res, field) ADD_UNDO(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res.numUsed, field), (void*)(uintptr_t)(field))
     // XXX: because the fields can all be ints (32 bits), we could cheat and store all of the data in two words
     // and then only need one undo per change (seems unlikely to make a big difference though)
     static void _undoField(void *self, void *c1, void *c2) {
       uintptr_t offset = (uintptr_t)c1;
+      assert(offset < 4);
       int field = (int)(uintptr_t)c2;
-      auto *me =  ((reservation_t*)self);
+      auto *me =  (reservation_t*)self;
       assert(me->reslock_.isWriteLocked());
-      _reservation_t *res = &(((reservation_t*)self)->box_.nontrans_access());
-      ((int*)&res->numUsed)[offset] = field;
+      _reservation_t &res = me->box_.nontrans_access();
+      (&res.numUsed)[offset] = field;
     }
 #endif
 
