@@ -379,7 +379,7 @@ public:
 
 #ifdef BOOSTING
 #define STRUCT_OFFSET(start, field) ((int*)&(field) - (int*)&(start))
-#define RES_UNDO(_res, field) ON_ABORT(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res.numUsed, field), (void*)(uintptr_t)(field))
+#define RES_UNDO(_res, field) ADD_UNDO(reservation_t::_undoField, this, (void*)STRUCT_OFFSET(_res.numUsed, field), (void*)(uintptr_t)(field))
     // XXX: because the fields can all be ints (32 bits), we could cheat and store all of the data in two words
     // and then only need one undo per change (seems unlikely to make a big difference though)
     static void _undoField(void *self, void *c1, void *c2) {
@@ -396,7 +396,7 @@ public:
 #ifndef BOOSTING
         _reservation_t r = box_;
 #else
-	transReadLock((RWLock*)&reslock_);
+	TRANS_READ_LOCK((RWLock*)&reslock_);
 	_reservation_t r = box_.nontrans_read();
 #endif
         return r.numTotal;
@@ -406,7 +406,7 @@ public:
 #ifndef BOOSTING
         _reservation_t r = box_;
 #else
-	transReadLock((RWLock*)&reslock_);
+	TRANS_READ_LOCK((RWLock*)&reslock_);
 	_reservation_t r = box_.nontrans_read();
 #endif
         return r.numFree;
@@ -416,7 +416,7 @@ public:
 #ifndef BOOSTING
         _reservation_t r = box_;
 #else
-        transReadLock((RWLock*)&reslock_);
+        TRANS_READ_LOCK((RWLock*)&reslock_);
         _reservation_t r = box_.nontrans_read();
 #endif
         return r.numUsed;
@@ -426,7 +426,7 @@ public:
 #ifndef BOOSTING
         _reservation_t r = box_;
 #else
-	transReadLock((RWLock*)&reslock_);
+	TRANS_READ_LOCK((RWLock*)&reslock_);
 	_reservation_t r = box_.nontrans_read();
 #endif
         return r.price;
@@ -445,7 +445,7 @@ public:
         checkReservation(TM_ARG_ALONE);
         return TRUE;
 #else
-	transWriteLock(&reslock_);
+	TRANS_WRITE_LOCK(&reslock_);
 	_reservation_t& _reservation = box_.nontrans_access();
         if (_reservation.numFree < -num) {
             return FALSE;
@@ -486,7 +486,7 @@ public:
         checkReservation(TM_ARG_ALONE);
         return TRUE;
 #else
-	transWriteLock(&reslock_);
+	TRANS_WRITE_LOCK(&reslock_);
 	_reservation_t& _reservation = box_.nontrans_access();
         if (_reservation.numFree < 1) {
             return FALSE;
@@ -528,7 +528,7 @@ public:
         return TRUE;
 #else
 	// assuming the cancel will most likely happen
-	transWriteLock(&reslock_);
+	TRANS_WRITE_LOCK(&reslock_);
 	_reservation_t& _reservation = box_.nontrans_access();
 	if (_reservation.numUsed < 1) {
 	  return FALSE;
@@ -567,7 +567,7 @@ public:
         checkReservation(TM_ARG_ALONE);
         return TRUE;
 #else
-	transWriteLock(&reslock_);
+	TRANS_WRITE_LOCK(&reslock_);
 	_reservation_t& _reservation = box_.nontrans_access();
 	RES_UNDO(_reservation, _reservation.price);
 	_reservation.price = newPrice;
@@ -624,7 +624,7 @@ private:
 
 #ifdef reservation2
 /* alloc and free */
-#ifndef BOOSTING
+#if defined(STO)
 #define SEQ_RESERVATION_ALLOC(_reservationPtr) (new reservation_t(_reservationPtr))
 #define TM_RESERVATION_ALLOC(_reservationPtr) __talloc.transNew<reservation_t>(_reservationPtr)
 #define TM_RESERVATION_FREE(reservationPtr) __talloc.transDelete(reservationPtr)

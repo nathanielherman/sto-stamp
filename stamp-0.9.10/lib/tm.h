@@ -78,8 +78,8 @@
 # include "STAMP_config.h"
 #endif
 
-#ifdef BOOSTING
-#include "sto/Boosting.hh"
+#if defined(BOOSTING) && defined(STM)
+#include "sto/Boosting_tl2.hh"
 #endif
 
 /* =============================================================================
@@ -424,7 +424,7 @@
 #      define TM_STARTUP(numThread)     STM_STARTUP()
 #      define TM_SHUTDOWN()             STM_SHUTDOWN()
 
-#      ifdef BOOSTING
+#      if defined(BOOSTING) && defined(STM)
 #        define TM_THREAD_ENTER()         TM_ARGDECL_ALONE = STM_NEW_THREAD(); \
     STM_INIT_THREAD(TM_ARG_ALONE, thread_getId()); boosting_setThreadID(thread_getId());
 #      else
@@ -453,7 +453,7 @@
 
 #  else /* !OTM */
 
-#    ifdef BOOSTING
+#    if defined(BOOSTING) && defined(STM)
 #      define TM_BEGIN()                  STM_BEGIN_WR(); boosting_txStartHook()
 #      define TM_BEGIN_RO()               STM_BEGIN_RD(); boosting_txStartHook()
 #    else
