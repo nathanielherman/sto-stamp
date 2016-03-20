@@ -75,21 +75,25 @@
 #include "types.h"
 
 // HAX HAX HAX
-#if defined(STO) || defined(GEN)
-#include "sto/TGeneric.hh"
-#include "sto/Transaction.hh"
-#include "sto/TransAlloc.hh"
-
-#include "tm.h"
-#ifdef STO
+#if defined(STO) || defined(GEN) || defined(BOOSTING)
 #include "list2.hh"
-#endif
 #include "sto/Transaction.cc"
 #include "sto/TRcu.cc"
 #include "sto/Packer.cc"
+#endif
+
+#if defined(STO) || defined(GEN)
+#include "tm.h"
+#include "sto/Transaction.hh"
+#include "sto/TGeneric.hh"
+#include "sto/TransAlloc.hh"
+
 #include "sto/MassTrans.cc"
 TGeneric __genstm;
 TransAlloc __talloc;
+#ifdef BOOSTING
+TransPessimisticLocking __pessimistLocking;
+#endif
 
 #if STO_PROFILE_COUNTERS
 void reportPerf(){
@@ -123,12 +127,6 @@ void reportPerf(){
 #endif /* STO || GEN */
 
 #if defined(STO) || defined(BOOSTING)
-#ifdef BOOSTING
-#include "list2.hh"
-#include "sto/Transaction.cc"
-#include "sto/TRcu.cc"
-#include "sto/Packer.cc"
-#endif
 void TMlist_iter_reset(list_iter_t* it, list_t* l) {
     *it = l->transIter();
 }

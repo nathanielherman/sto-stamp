@@ -1,0 +1,68 @@
+# ==============================================================================
+#
+# Makefile.STO
+#
+# ==============================================================================
+
+
+# ==============================================================================
+# Variables
+# ==============================================================================
+
+CFLAGS   += -DSTO -DBOOSTING -I../lib/sto/masstree-beta
+CXXFLAGS := $(CFLAGS)
+#LDFLAGS  += -L$(STM)
+#LIBS     += -ltl2
+
+
+# ==============================================================================
+# Rules
+# ==============================================================================
+
+.PHONY: default
+default: $(PROG)
+
+
+MASSTREE_SRCS = str.cc straccum.cc string.cc json.cc msgpack.cc clp.c compiler.cc kvrandom.cc
+
+ifneq ($(NEED_MASSTREE),)
+MASSTREE_SRCS += \
+        string_slice.cc \
+        kvio.cc misc.cc checkpoint.cc kvthread.cc
+endif
+
+MASSTREE_OBJS = $(patsubst %,$(OBJDIR)/%.o,$(basename $(notdir $(MASSTREE_SRCS))))
+
+MASSTREE_CPPFLAGS = -I../lib/sto/masstree-beta -include ../lib/sto/masstree-beta/config.h
+
+../lib/sto/masstree-beta/config.h: ../lib/sto/masstree-beta/configure ../lib/sto/masstree-beta/configure.ac
+	$(MAKE) -C ../lib/sto/masstree-beta
+
+$(patsubst %.c,$(OBJDIR)/%.o,$(filter %.c,$(MASSTREE_SRCS))): \
+$(OBJDIR)/%.o: ../lib/sto/masstree-beta/%.c $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(MASSTREE_CPPFLAGS) $(DEPCFLAGS) -c $< -o $@
+
+$(patsubst %.cc,$(OBJDIR)/%.o,$(filter %.cc,$(MASSTREE_SRCS))): \
+$(OBJDIR)/%.o: ../lib/sto/masstree-beta/%.cc $(BUILDSTAMP)
+	$(CXX) $(CXXFLAGS) $(MASSTREE_CPPFLAGS) $(DEPCFLAGS) -c $< -o $@
+
+
+ALWAYSCXX = 1
+include ../common/Makefile.common
+
+
+$(PROG): $(OBJS) $(MASSTREE_OBJS)
+	$(LD) $(LDFLAGS) $^ $(LIBS) -o $(PROG)
+
+
+.PHONY: clean
+clean:
+	$(RM) $(OBJS) $(PROG) $(OUTPUT)
+	-$(RM) -rf $(DEPSDIR) $(OBJDIR)
+
+
+# ==============================================================================
+#
+# End of Makefile.STO
+#
+# ==============================================================================

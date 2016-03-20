@@ -367,7 +367,11 @@ private:
     }
 };
 #elif defined(reservation2)
-class reservation_t {
+class reservation_t 
+#if defined(BOOSTING) && defined(STO)
+: public TransUndoable
+#endif
+{
 public:
     reservation_t(_reservation_t* _reservationPtr)
         : box_(*_reservationPtr) 

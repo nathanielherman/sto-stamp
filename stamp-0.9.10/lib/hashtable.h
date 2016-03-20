@@ -84,7 +84,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H 1
 
-#ifdef STO
+#if defined(STO) && !defined(BOOSTING)
 #include "list2.hh"
 #else
 #include "list.h"

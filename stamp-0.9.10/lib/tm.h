@@ -78,8 +78,12 @@
 # include "STAMP_config.h"
 #endif
 
-#if defined(BOOSTING) && defined(STM)
+#if defined(BOOSTING)
+#if defined(STM)
 #include "sto/Boosting_tl2.hh"
+#elif defined(STO)
+#include "sto/Boosting_sto.hh"
+#endif
 #endif
 
 /* =============================================================================

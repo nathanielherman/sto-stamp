@@ -53,6 +53,7 @@ typedef typename list_t::ListIter list_iter_t;
 #define TMLIST_ITER_HASNEXT(it, list) ({ bool ret = (it)->transHasNext(); OPACITY_CHECK(list); ret; })
 #define TMLIST_ITER_NEXT(it, list) ({ auto ret = ((it)->transNext())->firstPtr; OPACITY_CHECK(list); ret; })
 #endif
+
 #define TMLIST_ALLOC(cmp) (new list_t(__ListCompare(cmp)))
 #define TMLIST_FREE(list) /*TODO: (delete (list))*/
 #define TMLIST_GETSIZE(list) ({ auto ret = (list)->size(); OPACITY_CHECK(list); ret; })
