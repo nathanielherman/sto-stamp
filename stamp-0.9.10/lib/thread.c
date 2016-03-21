@@ -87,6 +87,9 @@
 #if defined(STO) || defined(GEN)
 #include "tm.h"
 #include "sto/Transaction.hh"
+#include "sto/Transaction.cc"
+#include "sto/TRcu.cc"
+#include "sto/Packer.cc"
 #include "sto/TGeneric.hh"
 #include "sto/TransAlloc.hh"
 
