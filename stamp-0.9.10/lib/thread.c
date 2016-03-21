@@ -76,7 +76,9 @@
 
 // HAX HAX HAX
 #if defined(STO) || defined(GEN) || defined(BOOSTING)
+#if !defined(GEN)
 #include "list2.hh"
+#endif
 #include "sto/Transaction.cc"
 #include "sto/TRcu.cc"
 #include "sto/Packer.cc"
