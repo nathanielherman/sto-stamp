@@ -113,9 +113,10 @@ if __name__ == "__main__":
         #cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r4194304', '-t16777216']]
         cmds = [['./vacation', '-c1', '-n2', '-q90', '-u98', '-r1048576', '-t4194304']] #low
     name = ""
-    if len(sys.argv) > 2 and sys.argv[2] == 'boosting':
-        name = "-boosting"
-    types = ['seq', 'stm', 'STO', 'gen', 'boosting']# if name == '-boosting' else ['seq', 'stm', 'STO'] 
+
+    types = ['seq', 'stm', 'STO', 'STOplus', 'gen', 'boosting'] 
+    if len(sys.argv) > 2:
+        types = [sys.argv[2]]
     file = open("tmp%s.txt" % name, 'w')
     out_file = open("results.txt", 'w')
     nthreads = [4, 16]
