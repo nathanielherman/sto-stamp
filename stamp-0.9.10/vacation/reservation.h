@@ -261,14 +261,14 @@ public:
     }
 
 
-    bool lock(TransItem& item, Transaction& txn) {
+    bool lock(TransItem& item, Transaction& txn) override {
         if (item.key<int>() == price_key)
             return txn.try_lock(item, price_vers_);
         else
             return txn.try_lock(item, d_vers_);
     }
 
-    void unlock(TransItem& item) {
+    void unlock(TransItem& item) override {
         if (item.key<int>() == price_key)
             price_vers_.unlock();
         else {
@@ -277,7 +277,7 @@ public:
         }
     }
 
-    bool check_predicate(TransItem& item, Transaction& txn, bool committing) {
+    bool check_predicate(TransItem& item, Transaction& txn, bool committing) override {
         TransProxy p(txn, item);
         rpred rp = item.predicate_value<rpred>();
         rdata rd = d_.wait_snapshot(p, d_vers_, committing);
@@ -289,14 +289,14 @@ public:
             return false;
      }
 
-    bool check(const TransItem& item, const Transaction&) {
+    bool check(const TransItem& item, const Transaction&) override {
         if (item.key<int>() == price_key)
             return item.check_version(price_vers_);
         else
             return item.check_version(d_vers_);
     }
 
-    void install(TransItem& item, const Transaction& txn) {
+    void install(TransItem& item, const Transaction& txn) override {
         int key = item.key<int>();
         if (key == price_key) {
             price_.write(item.write_value<count_type>());
@@ -310,7 +310,7 @@ public:
         }
     }
 
-    void print(std::ostream& w, const TransItem& item) const {
+    void print(std::ostream& w, const TransItem& item) const override {
         w << "{Reservation " << (void*) this;
         int key = item.key<int>();
         if (key == price_key) {
