@@ -2,6 +2,7 @@
 
 import subprocess
 import numpy
+import time as timelib
 import re
 
 def timeout_command(cmd, timeout):
@@ -34,6 +35,7 @@ def run_experiment(cmd, t):
             out = g.group(0)
             time.append(float(out))
             file.write(out + " ")
+            timelib.sleep(1.0);
             break
     file.write("\n")
     file.write("Std dev = " + "%.3f" % (numpy.std(time)))
@@ -43,11 +45,8 @@ def run_experiment(cmd, t):
     return (numpy.median(time), numpy.amin(time), numpy.amax(time))
 
 def run_benchmark(cmd, mode, nthreads):
-    if mode == 'stm':
-        cmd[0] = './kmeans-tl2'
-    else:
-        subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
-        subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
+    subprocess.check_output(['make', '-f', 'Makefile.seq', 'clean'], stderr=subprocess.STDOUT)
+    subprocess.check_output(['make', '-f', 'Makefile.'+mode], stderr=subprocess.STDOUT)
     file.write(mode)
     file.write("\n")
     time_list = []
@@ -59,7 +58,6 @@ def run_benchmark(cmd, mode, nthreads):
         time_list.append(time)
         min_list.append(min)
         max_list.append(max)
-    cmd[0] = './kmeans'
     return (time_list, min_list, max_list )
        
 def printfmt_double(header, out, precision, width):
