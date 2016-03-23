@@ -43,7 +43,7 @@ void reset_cluster_seq(Cluster* cluster, float* center){
 
 void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature, _Cluster* _temp){
 #ifdef D
-		_Cluster *_cluster = *cluster;
+		_Cluster *_cluster = cluster->read();
 		int j;
 		for (j = 0; j < _cluster->nfeatures; j++){
 				_temp->centers[j] = _cluster->centers[j] + feature[j];
@@ -65,6 +65,7 @@ void cluster_add_center(TM_ARGDECL Cluster *cluster, float* feature, _Cluster* _
 void free_cluster_seq(Cluster *cluster){
 #ifdef D
 		free(cluster->nontrans_read());
+		delete (AlignedCluster*)cluster;
 #else
 		free(cluster);
 #endif
