@@ -42,7 +42,7 @@ typedef typename list_t::ListIter list_iter_t;
 #endif
 
 
-#define OPACITY_CHECK(list) // opacity is now built-in 
+#define OPACITY_CHECK(list) /* opacity is now built-in */
 
 #ifdef BOOSTING
 #define TMLIST_ITER_RESET(it, list) ({ TMlist_iter_reset((it), (list)); OPACITY_CHECK(list); })
