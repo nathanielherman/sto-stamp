@@ -289,14 +289,14 @@ public:
             return false;
      }
 
-    bool check(const TransItem& item, const Transaction&) override {
+    bool check(TransItem& item, Transaction&) override {
         if (item.key<int>() == price_key)
             return item.check_version(price_vers_);
         else
             return item.check_version(d_vers_);
     }
 
-    void install(TransItem& item, const Transaction& txn) override {
+    void install(TransItem& item, Transaction& txn) override {
         int key = item.key<int>();
         if (key == price_key) {
             price_.write(item.write_value<count_type>());
