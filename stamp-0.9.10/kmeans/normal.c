@@ -94,28 +94,34 @@
 #include "timer.h"
 #include "tm.h"
 #include "util.h"
+#ifdef STO
 #include "Clusters.h"
+#endif
 
 double global_time = 0.0;
 
 typedef struct args {
-    float** feature;
-    int     nfeatures;
-    int     npoints;
-    int     nclusters;
-    int*    membership;
-    float** clusters;
-    Cluster** new_clusters;
+    float**  feature;
+    int      nfeatures;
+    int      npoints;
+    int      nclusters;
+    int*     membership;
+    float**  clusters;
+#ifdef D
+    Cluster* new_clusters;
+#else
+    int**    new_centers_len;
+    float**  new_centers;
+#endif
 } args_t;
 
-#if !defined(STO)
-float global_delta;
-long global_i;
-#else
+#ifdef D
 Single<float> global_delta;
-Single<long> global_i; /* index into task queue */
+Single<long> global_i;
+#else
+float global_delta;
+long global_i; /* index into task queue */
 #endif
-
 
 #define CHUNK 3
 
@@ -130,22 +136,33 @@ work (void* argPtr)
     TM_THREAD_ENTER();
 
     args_t* args = (args_t*)argPtr;
-    float** feature         = args->feature;
-    int     nfeatures       = args->nfeatures;
-    int     npoints         = args->npoints;
-    int     nclusters       = args->nclusters;
-    int*    membership      = args->membership;
-    float** clusters        = args->clusters;
-		Cluster** new_clusters = args->new_clusters;
+    float**    feature      = args->feature;
+    int        nfeatures    = args->nfeatures;
+    int        npoints      = args->npoints;
+    int        nclusters    = args->nclusters;
+    int*       membership   = args->membership;
+    float**    clusters     = args->clusters;
+#ifdef D
+    Cluster*   new_clusters = args->new_clusters;
+#else
+    int**   new_centers_len = args->new_centers_len;
+    float** new_centers     = args->new_centers;
+#endif
     float delta = 0.0;
     int index;
     int i;
+    int j;
     int start;
     int stop;
-		int myId;
-		myId = thread_getId();
+    int myId;
+
+    myId = thread_getId();
 
     start = myId * CHUNK;
+
+#ifdef D
+    _Cluster *_temp = _alloc_cluster(nfeatures);
+#endif
 
     while (start < npoints) {
         stop = (((start + CHUNK) < npoints) ? (start + CHUNK) : npoints);
@@ -167,14 +184,26 @@ work (void* argPtr)
             /* membership[i] can't be changed by other thread */
             membership[i] = index;
 
-		// a temporary hack to solve the malloc problem
-		//  should get rid of it in the future
-		_Cluster *_temp= _alloc_cluster(nfeatures);
-
             /* Update new cluster centers : sum of objects located within */
-						TM_BEGIN();
-						TM_CLUSTER_UPDATE_CENTER(new_clusters[index], feature[i], _temp);
-						TM_END();
+            TM_BEGIN();
+#ifdef D
+            _Cluster *_cluster = new_clusters[index].read();
+            for (j = 0; j < _cluster->nfeatures; j++){
+                _temp->centers[j] = _cluster->centers[j] + feature[i][j];
+            }
+            _temp->centers_len = _cluster->centers_len + 1;
+            new_clusters[index].write(_temp);
+#else
+            TM_SHARED_WRITE(*new_centers_len[index],
+                            TM_SHARED_READ(*new_centers_len[index]) + 1);
+            for (j = 0; j < nfeatures; j++) {
+                TM_SHARED_WRITE_F(
+                    new_centers[index][j],
+                    (TM_SHARED_READ_F(new_centers[index][j]) + feature[i][j])
+                );
+            }
+#endif
+            TM_END();
         }
 
         /* Update task queue */
@@ -187,6 +216,10 @@ work (void* argPtr)
             break;
         }
     }
+
+#ifdef D
+    free(_temp);
+#endif
 
     TM_BEGIN();
     TM_SINGLE_TRANS_WRITE_F(global_delta, TM_SINGLE_TRANS_READ_F(global_delta) + delta);
@@ -215,7 +248,13 @@ normal_exec (int       nthreads,
     int loop = 0;
     float delta;
     float** clusters;      /* out: [nclusters][nfeatures] */
-		Cluster** new_clusters;
+#ifdef D
+    Cluster* new_clusters;
+#else
+    int** new_centers_len; /* [nclusters]: no. of points in each cluster */
+    float** new_centers;   /* [nclusters][nfeatures] */
+#endif
+    void* alloc_memory = NULL;
     args_t args;
     TIMER_T start;
     TIMER_T stop;
@@ -241,13 +280,34 @@ normal_exec (int       nthreads,
         membership[i] = -1;
     }
 
-		{
-				int i;
-				new_clusters = (Cluster **) malloc(nclusters * sizeof(Cluster*));
-				for (i = 0; i < nclusters; i++){
-						new_clusters[i] = TM_CLUSTER_ALLOC(nfeatures);
-				}
-		}
+    /*
+     * Need to initialize new_centers_len and new_centers[0] to all 0.
+     * Allocate clusters on different cache lines to reduce false sharing.
+     */
+    {
+#ifdef D
+        new_clusters = new Cluster[nclusters];
+        unsigned cluster_size = get_cluster_size(nfeatures);
+        alloc_memory = calloc(nclusters, cluster_size);
+        for (i = 0; i < nclusters; i++) {
+            _Cluster* ptr = (_Cluster*)((char*)alloc_memory + cluster_size * i);
+            ptr->nfeatures = nfeatures;
+            new_clusters[i].nontrans_write(ptr);
+        }
+#else
+        int cluster_size = sizeof(int) + sizeof(float) * nfeatures;
+        const int cacheLineSize = 32;
+        cluster_size += (cacheLineSize-1) - ((cluster_size-1) % cacheLineSize);
+        alloc_memory = calloc(nclusters, cluster_size);
+        new_centers_len = (int**) malloc(nclusters * sizeof(int*));
+        new_centers = (float**) malloc(nclusters * sizeof(float*));
+        assert(alloc_memory && new_centers && new_centers_len);
+        for (i = 0; i < nclusters; i++) {
+            new_centers_len[i] = (int*)((char*)alloc_memory + cluster_size * i);
+            new_centers[i] = (float*)((char*)alloc_memory + cluster_size * i + sizeof(int));
+        }
+#endif
+    }
 
     TIMER_READ(start);
 
@@ -262,14 +322,16 @@ normal_exec (int       nthreads,
         args.nclusters       = nclusters;
         args.membership      = membership;
         args.clusters        = clusters;
+#ifdef D
         args.new_clusters    = new_clusters;
+#else
+        args.new_centers_len = new_centers_len;
+        args.new_centers     = new_centers;
+#endif
 
         TM_SINGLE_SIMPLE_WRITE(global_i, nthreads * CHUNK);
         TM_SINGLE_SIMPLE_WRITE(global_delta, delta);
-    	
-				TIMER_T start;
-				TIMER_T stop;
-    	TIMER_READ(start);
+
 #ifdef OTM
 #pragma omp parallel
         {
@@ -278,17 +340,34 @@ normal_exec (int       nthreads,
 #else
         thread_start(work, &args);
 #endif
-    	TIMER_READ(stop);
 
         delta = TM_SINGLE_SIMPLE_READ(global_delta);
 
         /* Replace old cluster centers with new_centers */
         for (i = 0; i < nclusters; i++) {
-						TM_CLUSTER_RESET(new_clusters[i], clusters[i]);
+#ifdef D
+            _Cluster *_cluster = new_clusters[i].nontrans_read();
+            for (j = 0; j < _cluster->nfeatures; j++) {
+                if (_cluster->centers_len > 0){
+                    clusters[i][j] = _cluster->centers[j] / _cluster->centers_len;
+                }
+                _cluster->centers[j] = 0.0;
+            }
+            _cluster->centers_len = 0;
+            //cluster->nontrans_write(_cluster); XXX this is unneeded right?
+#else
+            for (j = 0; j < nfeatures; j++) {
+                if (new_centers_len[i] > 0) {
+                    clusters[i][j] = new_centers[i][j] / *new_centers_len[i];
+                }
+                new_centers[i][j] = 0.0;   /* set back to 0 */
+            }
+            *new_centers_len[i] = 0;   /* set back to 0 */
+#endif
         }
 
         delta /= npoints;
-			
+
     } while ((delta > threshold) && (loop++ < 500));
 
     GOTO_REAL();
@@ -296,12 +375,13 @@ normal_exec (int       nthreads,
     TIMER_READ(stop);
     global_time += TIMER_DIFF_SECONDS(start, stop);
 
-	
-		for (i = 0; i < nclusters; i++){
-			TM_CLUSTER_FREE(new_clusters[i]);
-		}
-
-    free(new_clusters);
+    free(alloc_memory);
+#ifdef D
+    delete[] new_clusters;
+#else
+    free(new_centers);
+    free(new_centers_len);
+#endif
 
     return clusters;
 }
