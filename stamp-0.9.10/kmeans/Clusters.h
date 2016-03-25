@@ -1,6 +1,6 @@
 #include "tm.h"
 
-#if defined(STO) && !defined(GTM)
+#ifdef STO
 #define D
 #include "single.h"
 #endif
@@ -33,7 +33,8 @@ class Cluster: public Single<_Cluster*> {
 #endif 
 
 _Cluster *_alloc_cluster(int nfeatures);
-#ifndef D 
+
+#ifndef D
 #define TM_SINGLE_TRANS_READ(var) TM_SHARED_READ(var)
 #define TM_SINGLE_TRANS_READ_F(var) TM_SHARED_READ_F(var)
 #define TM_SINGLE_TRANS_WRITE(var, val) TM_SHARED_WRITE(var, val)

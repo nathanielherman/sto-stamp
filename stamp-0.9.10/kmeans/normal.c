@@ -94,9 +94,7 @@
 #include "timer.h"
 #include "tm.h"
 #include "util.h"
-#ifdef STO
 #include "Clusters.h"
-#endif
 
 double global_time = 0.0;
 
